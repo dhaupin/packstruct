@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://packstruct.creadev.org/sitemap.xml

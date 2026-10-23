@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy | packstruct</title>
+  <meta name="description" content="Privacy policy for packstruct.creadev.org - what this static site collects (nothing) and how the tool treats your filesystem.">
+  <link rel="canonical" href="https://packstruct.creadev.org/privacy">
+  <meta property="og:title" content="Privacy | packstruct">
+  <meta property="og:description" content="Privacy policy for packstruct.creadev.org - what this static site collects (nothing) and how the tool treats your filesystem.">
+  <meta property="og:url" content="https://packstruct.creadev.org/privacy">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="site-head">
+    <a class="brand" href="/">packstruct</a>
+    <button class="burger" aria-label="Toggle menu" aria-expanded="false">☰</button>
+    <nav class="site-nav">
+      <a href="/">Home</a>
+      <a href="https://docs.creadev.org/packstruct">Docs</a>
+      <a href="/terms">Terms</a>
+      <a href="/privacy">Privacy</a>
+    </nav>
+  </header>
+  <main>
+    <h1>Privacy</h1>
+    <p>Last updated: 2026-10-23</p>
+    <h2>The site</h2>
+    <p>This is a static site. It ships no analytics, no cookies, no trackers, no forms. Your visit is yours.</p>
+    <h2>The tool</h2>
+    <p>packstruct lint reads only the paths you hand it under packs/ and writes nothing outside its process. No telemetry, no network calls, no phone-home - the CLI is zero-dependency and offline by construction.</p>
+    <h2>Contact</h2>
+    <p>Questions: hello [at] creadev [dot] org.</p>
+  </main>
+  <footer>© 2026 Creadev.org · packstruct - the shared /packs spec · made by <a href="https://creadev.org" target="_blank" rel="dofollow noopener">Creadev.org</a> · part of the struct family</footer>
+  <script>document.querySelector('.burger').addEventListener('click',()=>{const n=document.querySelector('.site-nav');n.classList.toggle('open');document.querySelector('.burger').setAttribute('aria-expanded',n.classList.contains('open'))})</script>
+</body>
+</html>

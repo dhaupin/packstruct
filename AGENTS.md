@@ -12,6 +12,7 @@
 - The linter is STRICT against spec norms and only those norms. If a check
   would flag something spec says is fine, fix the spec or the check — never
   ship a check the SPEC doesn't promise.
+- Crashtest dogfood: `crashtest.config.js` + `packs/public/packstruct-lint-shapes` attack the lint contract with hostile manifest corpora via an in-process double. `npx crashtest run` before merges that touch `src/` or the pack. Cross-repo pack doctrine: no imports from crashtest internals; verdict records inline.
 - Fixtures under `test/fixtures/` carry both sides: a clean sample pack +
   a broken pack manifest pointing at a missing entry. `npm test` before
   touching anything in `src/`.

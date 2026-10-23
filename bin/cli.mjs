@@ -1,8 +1,12 @@
 #!/usr/bin/env node
 // bin/cli.mjs - packstruct lint <packs-dir> [--json]
+// Accepts either `packstruct lint <dir>` or `packstruct <dir>` (the lint
+// subcommand token is stripped when present; a target dir genuinely named
+// 'lint' must not break the parser either way).
 import { lintPacks } from '../src/lint.mjs'
 
-const args = process.argv.slice(2)
+let args = process.argv.slice(2)
+if (args[0] === 'lint') args = args.slice(1)
 const dir = args.find(a => !a.startsWith('-'))
 if (!dir) {
   console.error('Usage: packstruct lint <packs-dir> [--json]')

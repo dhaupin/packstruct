@@ -51,3 +51,11 @@ trusted publishing, and the workflow refuses 0.x versions at the gate.
 
 - [crashtest](https://github.com/dhaupin/crashtest) — scenario-profile host
 - [poststruct](https://github.com/dhaupin/poststruct) — check-profile host
+
+## Landing & docs
+
+Landing: `packstruct.creadev.org` (Cloudflare Pages, static `site/`, functions under `functions/`). Docs: `docs.creadev.org/packstruct` (Jekyll + Pagefind + Freestruct via GitHub Actions — see `.github/workflows/docs.yml` and `docs/`).
+
+## Crashtest dogfood
+
+`crashtest run` from the repo root drives `packs/public/packstruct-lint-shapes`: hostile pack.json corpora through an in-process lint double (the same CLI wire CI uses), asserting the SPEC v1 section 5 contract - instant nameable refusal, no crashes, no deep stacks, and strict tolerance for spec-allowed shapes. Pinned to dhaupin/crashtest v1.0.0.

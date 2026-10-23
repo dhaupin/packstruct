@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>packstruct - one /packs system, many hosts</title>
+  <meta name="description" content="The shared packs spec for the struct family: one manifest, entry, and lifecycle contract for crashtest and poststruct packs, plus a zero-dependency lint CLI.">
+  <meta property="og:title" content="packstruct - the shared /packs spec">
+  <meta property="og:description" content="One manifest, entry, and lifecycle contract for crashtest and poststruct packs, plus a zero-dependency lint CLI.">
+  <meta name="twitter:card" content="summary">
+  <!-- freestruct note: can be post-processed if this page joins a freestruct pipeline -->
+  <link rel="canonical" href="https://packstruct.creadev.org/">
+  <meta property="og:url" content="https://packstruct.creadev.org/">
+  <meta property="og:type" content="website">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="site-head">
+    <a class="brand" href="/">packstruct</a>
+    <button class="burger" aria-label="Toggle menu" aria-expanded="false">☰</button>
+    <nav class="site-nav">
+      <a href="/">Home</a>
+      <a href="https://docs.creadev.org/packstruct">Docs</a>
+      <a href="/terms">Terms</a>
+      <a href="/privacy">Privacy</a>
+    </nav>
+  </header>
+  <main>
+    <p class="kicker">THE SHARED /PACKS SPEC</p>
+    <h1>One manifest. Many hosts.</h1>
+    <p class="lede">packstruct defines how a <code>/packs</code> directory works - manifest, entry contract,
+    lifecycle, refusals - so an author who writes one pack knows how packs work everywhere.
+    Currently hosted by <a href="https://github.com/dhaupin/crashtest">crashtest</a> (scenario
+    profile) and <a href="https://github.com/dhaupin/poststruct">poststruct</a> (check profile).</p>
+
+    <div class="grid">
+      <div class="card">
+        <h2>The contract</h2>
+        <p><code>packs/public/&lt;name&gt;/</code> carries a frozen <code>pack.json</code>
+        (schemaVersion 1, name matches directory, entry must exist) plus its entry module.
+        A manifest declaring a file that doesn't ship is an instant, nameable refusal -
+        never a deep import stack trace.</p>
+      </div>
+      <div class="card">
+        <h2>The linter</h2>
+        <p><code>npx packstruct lint packs/</code> - zero dependencies, kills the
+        missing-entry class at author time, in any fleet repo. Machine-readable
+        with <code>--json</code>.</p>
+        <pre>npx packstruct lint packs/</pre>
+      </div>
+      <div class="card">
+        <h2>Profiles</h2>
+        <p>The manifest surface never forks; execution semantics are declared as
+        profiles: <strong>scenario</strong> (crashtest: hostile scenarios against a
+        transport, isolated) and <strong>check</strong> (poststruct: pure-reading
+        verifiers over files on disk).</p>
+      </div>
+      <div class="card">
+        <h2>Docs</h2>
+        <p>The full spec, conformance rules, and versioning live in the docs site:
+        <a href="https://docs.creadev.org/packstruct">docs.creadev.org/packstruct</a>
+        (Jekyll + Pagefind + freestruct - the triple dogfood).</p>
+      </div>
+    </div>
+
+    <p class="cta"><a class="btn" href="https://github.com/dhaupin/packstruct">Source on GitHub</a>
+    <a class="btn ghost" href="https://docs.creadev.org/packstruct">Read the spec</a></p>
+  </main>
+  <footer>© 2026 Creadev.org · packstruct - the shared /packs spec · made by <a href="https://creadev.org" target="_blank" rel="dofollow noopener">Creadev.org</a> · part of the struct family</footer>
+  <script>document.querySelector('.burger').addEventListener('click',()=>{const n=document.querySelector('.site-nav');n.classList.toggle('open');document.querySelector('.burger').setAttribute('aria-expanded',n.classList.contains('open'))})</script>
+</body>
+</html>

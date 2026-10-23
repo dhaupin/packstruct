@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   entry-existence check, `--json` output, exit-code contract.
 - Self-audit fixtures: conforming sample pack + broken pack manifest
   (crashtest#16 class), with exact expected-lint norm asserts.
+- Crashtest dogfood lane: `crashtest.config.js` + `pack lint-shapes`
+  scenario pack (hostile manifest corpus via in-process lint double,
+  entry-containment, over-strict-drift canary, clean-pack canary);
+  `crashtest.yml` CI job pinned to dhaupin/crashtest v1.0.0.
 
 ### Notes
 - Versioning: 0.9.x is the manual npm release ladder.

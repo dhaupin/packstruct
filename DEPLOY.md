@@ -26,3 +26,26 @@ exactly:
   so spec + CLI ship together and `npx packstruct lint` works from a fresh
   install.
 - `engines.node: ">=20"` runtime floor.
+
+## Landing site — Cloudflare Pages (packstruct.creadev.org)
+
+- The lean branded landing deploys as a **Cloudflare Pages project** named
+  `packstruct` with the production custom domain `packstruct.creadev.org`.
+- `wrangler.toml` pins the contract: `pages_build_output_dir = "site"` — the
+  landing is static files in `site/`, no build step required; serving is
+  Pages' job.
+- **Functions:** `functions/api/health.js` — `GET /api/health` returns honest
+  JSON including the spec pin. Pages Functions are the only worker surface
+  this repo runs.
+- Docs site: `docs.creadev.org/packstruct` — **GitHub Pages via Actions**
+  (`.github/workflows/docs.yml`): docs-truth gates first (ported house
+  checkers: frontmatter 5-field law, resolvable links, style law incl.
+  no-dashes-in-prose, English-only prose), then Jekyll, then
+  `freestruct --strict` (basePath-aware: /packstruct; broken links fail
+  the build), then `pagefind --site _site` from the proven musl tarball
+  (the npx path DIED in CI once - measured in dhaupin/freestruct's docs
+  workflow), then the official Pages artifact deploy. Verified against
+  the house examples: dhaupin/prestruct + dhaupin/freestruct; node
+  stages executed locally with real versions (freestruct 1.0.0,
+  pagefind 1.5.2). First run needs the Pages source flipped to "GitHub
+  Actions" in repo settings (Settings → Pages).
