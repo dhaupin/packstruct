@@ -1,0 +1,36 @@
+{
+  "name": "packstruct",
+  "version": "0.9.0",
+  "description": "The shared /packs spec: one manifest, entry, and lifecycle contract for crashtest and poststruct packs - plus a zero-dependency lint CLI that kills broken pack manifests at author time.",
+  "type": "module",
+  "license": "SEE LICENSE IN LICENSE",
+  "bin": {
+    "packstruct": "bin/cli.mjs"
+  },
+  "exports": {
+    ".": "./src/lint.mjs",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "spec/",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node test/run.mjs"
+  },
+  "engines": { "node": ">=20" },
+  "keywords": [
+    "packs",
+    "spec",
+    "validation",
+    "crashtest",
+    "poststruct",
+    "ci",
+    "manifest"
+  ],
+  "repository": { "type": "git", "url": "git+https://github.com/dhaupin/packstruct.git" },
+  "bugs": { "url": "https://github.com/dhaupin/packstruct/issues" },
+  "homepage": "https://github.com/dhaupin/packstruct#readme"
+}
