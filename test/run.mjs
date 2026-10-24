@@ -79,17 +79,17 @@ if (!libBad.violations.some(v => v.norm === 'id-library-collision')) {
 // audit loudly.
 mark('edge probe isolation: start')
 const conformingLoader = `${process.execPath} bin/cli.mjs lint {packs}`
-const auditGood = await auditConformance({ loader: conformingLoader })
+const auditGood = await auditConformance({ loader: `${process.execPath} test/fixtures/audit/loader-ok.mjs {packs}` })
 if (auditGood.caseCount !== 8 || auditGood.honored !== 8 || auditGood.violations.length) {
   console.error(`FAIL audit-conformance: our own loader should honor all 8 bundled cases\ngot: honored=${auditGood.honored}/${auditGood.caseCount}\n${JSON.stringify(auditGood.violations, null, 2)}`)
   process.exit(1)
 }
-const auditAllAccept = await auditConformance({ loader: `${process.execPath} -e "void '{packs}'; process.exit(0)"` })
+const auditAllAccept = await auditConformance({ loader: `${process.execPath} test/fixtures/audit/loader-always-ok.mjs {packs}` })
 if (auditAllAccept.honored !== 1 || auditAllAccept.violations.length !== 7) {
   console.error(`FAIL audit-conformance accept-all loader should fail 7 refuse-cases: honored=${auditAllAccept.honored} violations=${auditAllAccept.violations.length}\n${JSON.stringify(auditAllAccept.violations, null, 2)}`)
   process.exit(1)
 }
-const auditNoName = await auditConformance({ loader: `${process.execPath} -e "void '{packs}'; process.exit(1)"` })
+const auditNoName = await auditConformance({ loader: `${process.execPath} test/fixtures/audit/loader-no-name.mjs {packs}` })
 if (auditNoName.honored !== 0 || auditNoName.violations.length !== 8) {
   console.error(`FAIL audit-conformance silent-refuser should fail all 8 (refusals must NAME the pack): honored=${auditNoName.honored}\n${JSON.stringify(auditNoName.violations, null, 2)}`)
   process.exit(1)
@@ -121,7 +121,7 @@ if (!(edgeSpin.violations.length === 1 && edgeSpin.violations[0].norm === 'entry
 // flood above the 1MB spawn buffer is a no-verdict violation (never a
 // harness crash), and a hung loader is killed at the audit timeout (a
 // refusal is instant - hangs are neither accept nor refuse). ---
-const auditFlood = await auditConformance({ loader: `${process.execPath} -e "void '{packs}'; for (;;) console.log('x'.repeat(8192))"` })
+const auditFlood = await auditConformance({ loader: `${process.execPath} test/fixtures/audit/loader-flood.mjs {packs}` })
 if (!(auditFlood.violations.length === 8 && auditFlood.violations.every(v => v.message.includes('audit buffer')))) {
   console.error(`FAIL audit output-flood should fail all 8 cases with the buffer cap named:\n${JSON.stringify(auditFlood.violations, null, 2)}`)
   process.exit(1)
