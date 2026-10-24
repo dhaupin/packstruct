@@ -12,7 +12,7 @@ export default function Spec() {
   return (
     <section className="section" style={{ paddingTop: 56 }}>
       <div className="wrap legal">
-        <p className="eyebrow">Normative, frozen at schemaVersion 1</p>
+        <p className="eyebrow">Normative, frozen at schema version 1</p>
         <h2>The spec</h2>
         <p className="sub">
           The long-form normative text is <a href="https://github.com/dhaupin/packstruct/blob/main/spec/SPEC.md">spec/SPEC.md</a>{' '}
