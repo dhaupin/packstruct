@@ -1,0 +1,29 @@
+# Packstruct docs nav (freestruct menu layer format - same as crashtest's).
+# Internal URLs are /packstruct/<permalink> (the site baseurl).
+
+- title: Guide
+  items:
+  - title: Overview
+    url: /packstruct/
+  - title: SPEC v1
+    url: /packstruct/spec
+  - title: The Linter
+    url: /packstruct/linter
+  - title: Search
+    url: /packstruct/search
+
+- title: Surfaces
+  items:
+  - title: Landing Site
+    url: https://packstruct.creadev.org/
+  - title: GitHub Repo
+    url: https://github.com/dhaupin/packstruct
+  - title: SPEC.md Source
+    url: https://github.com/dhaupin/packstruct/blob/main/spec/SPEC.md
+
+- title: About
+  items:
+  - title: Site Terms
+    url: https://packstruct.creadev.org/terms
+  - title: Site Privacy
+    url: https://packstruct.creadev.org/privacy

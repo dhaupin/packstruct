@@ -32,10 +32,18 @@
   <link rel="manifest" href="/site.webmanifest" />
   <meta name="theme-color" content="#0b1418" />
 
-  <!--
-    Fonts -- add your font imports here if needed.
-    Use <link rel="preconnect"> to warm the connection before the stylesheet.
-  -->
+  <script>
+    // Theme bootstrap: apply a persisted light theme before the stylesheet
+    // paints (the default tokens are dark). Non-critical: wrapped in try in
+    // case storage is unavailable (private mode). Keep in sync with
+    // src/components/ThemeSwitch.jsx (the key name and the meta color values).
+    try {
+      if (localStorage.getItem('packstruct-theme') === 'light') {
+        document.documentElement.dataset.theme = 'light'
+        document.currentScript.previousElementSibling.setAttribute('content', '#f0f6f3')
+      }
+    } catch (e) {}
+  </script>
 </head>
 <body>
   <div id="root"></div>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <rect width="64" height="64" rx="14" fill="#0b1418"/>
+  <!-- three stacked packs: the /packs tree as boxes -->
+  <rect x="14" y="34" width="36" height="16" rx="3" fill="#4fd6c2" opacity="0.28"/>
+  <rect x="19" y="22" width="26" height="12" rx="3" fill="#4fd6c2" opacity="0.55"/>
+  <rect x="24" y="10" width="16" height="10" rx="3" fill="#4fd6c2"/>
+  <rect x="14" y="32" width="36" height="2" fill="#33b39e" opacity="0.9"/>
+</svg>
