@@ -1,0 +1,39 @@
+name: corpus
+# Reciprocal corpus lane (dhaupin/packstruct#3): run OUR linter over the
+# crashtest repo's shipped packs at a pinned rev - the live corpus, not
+# synthetic fixtures. Receipt for this lane ships in the same commit
+# (labs/corpus-receipt.md), per the house law.
+#
+# Zero runtime dependencies: pinned-clone via actions/checkout, zero-dep CLI,
+# nothing imported from the crashtest codebase.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  corpus:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+
+      # The audited corpus tree: crashtest fc93ca6e2c213ee296c65ed95c19d929148ff665,
+      # the loader revision the SPEC receipts (spec/SPEC.md section 2) cite.
+      # Bump pin + labs/corpus-receipt.md together, never silently.
+      - name: Check out the crashtest corpus at the audited pin
+        uses: actions/checkout@v4
+        with:
+          repository: dhaupin/crashtest
+          ref: fc93ca6e2c213ee296c65ed95c19d929148ff665
+          path: corpus-crashtest
+
+      - name: Lint the corpus manifests (8 packs, expect clean)
+        run: node bin/cli.mjs lint corpus-crashtest/packs

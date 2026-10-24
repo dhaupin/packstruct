@@ -52,6 +52,38 @@ Extra manifest keys and extra files beside the entry are allowed as
 minimum-spec (the loader assigns no shared meaning to undeclared keys; e.g.
 crashtest's cve-feed ships a snapshot.json beside its entry, which is fine).
 
+**Receipts per frozen row** (added per dhaupin/packstruct#4: every row cites
+the engine evidence it mirrors, so "conforming to spec" and "what this one
+repo does" never blur). Engine rows are from crashtest `fc93ca6`,
+`src/packs/loader.js` - the packstruct#19-audited tree:
+
+- `schemaVersion` MUST be `1` — enforced: `loader.js:77-78` (unsupported
+  schemaVersion throws, "have: 1").
+- `name` kebab-case — enforced: `loader.js:98` throws on non-kebab names.
+- `name` MUST match its directory — the engine's narrower shape: packs are
+  loaded FROM their directories and the shared `seen` map keys identity by
+  manifest name (`loader.js:372, :389-391`), so a name/dir disagreement
+  surfaces as a loud collision or misattribution, never silent success. The
+  linter deliberately enforces the stricter contract (name == dir) at author
+  time; engine parity is tracked in dhaupin/packstruct#2.
+- `entry` MUST exist — the engine admits a default entry (`loader.js:101`)
+  and a declared file that doesn't ship fails at import with a one-line,
+  nameable error naming the pack (`loader.js:394-396`) — the crashtest#16
+  class, a norm either way. The linter runs the detection at author time via
+  file existence, so a broken manifest refuses before any host loads it.
+- `version` dotted semver-ish — pack-owned semver; the manifest reality is
+  the 8/8 #19 audit (every pack ships it), and the version is decoupled from
+  every host's and from packstruct's own release cadence (see section 6).
+- `description` non-empty — enforced: `loader.js:59, :71-73`
+  (REQUIRED_KEYS throws on missing fields).
+- `armedByKey` optional — engine shape contract: absent = unarmed-but-loadable
+  (crashtest#19 ruling folded into the table).
+- Host-owned `env`/`plugins`/`package` — acknowledged and shape-validated:
+  `loader.js:24-35` (comment block), `:110` (validateEnvClaims),
+  `:398-401` (bundled plugin imports), `:363-364` (seed passthrough).
+- Id collisions refuse at load — enforced: `loader.js:389-391` (shared
+  `seen` across surfaces: one loud error naming both origins).
+
 ## 3. Entry profiles (per host, declared here)
 
 An entry is an ES module with a default export. The manifest/dir/entry surface
@@ -98,6 +130,18 @@ never silent success.
 - Additive-first: v2 adds optional manifest fields; removing/renaming is a
   major spec bump requiring a migration note.
 - Hosts pin the spec they implement (`implements: packstruct@1` in host docs).
+- **Pack version is the pack's own semver, decoupled from every other release
+  cadence.** A `pack.json` `version` bumps only when that pack's own surface
+  changes - not when packstruct ships a new linter, not when a consumer ships
+  a new CLI or spec revision. House policy verbatim from crashtest's
+  AGENTS.md (where it is enforced by the governance suite): pack manifests
+  carry their own semver - never bump those for CLI-level releases. The
+  shipped-stable pack keeps its shape: a consumer adopting a newer linter or
+  a newer consumer build does not re-roll packs it already froze.
+- **Spec ↔ tool decoupling is the mirror image:** packstruct's own version
+  (0.9.x manual, 1.0.0 OIDC per its DEPLOY.md) tracks the linter and harness
+  surface only. A lint release that adds checks under the same frozen schema
+  is a TOOL semver bump that leaves this document's v1 number alone.
 
 ## 7. Conformance tooling
 

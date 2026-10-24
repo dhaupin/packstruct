@@ -7,7 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Reciprocal corpus lane (#3).** `corpus.yml` runs `packstruct lint` over
+  crashtest's 8 shipped packs at the audited pin (`fc93ca6`) on every main
+  push; local receipt in `labs/corpus-receipt.md` (8/8 clean, zero
+  violations). Zero runtime dependencies on the corpus repo - pinned clone,
+  zero-dep CLI. The refusal-matrix half of #3 stays open.
+
 ### Changed
+- **SPEC.md: frozen-table receipts + pack-semver decoupling (#4).** Every
+  frozen row now cites its engine evidence (`src/packs/loader.js` line
+  numbers at crashtest `fc93ca6`), marking which norms the engine enforces
+  and which are pack-reality norms the linter deliberately enforces more
+  strictly (name == dir); parity tracked in #2. Section 6 carries the pack
+  semver ↔ CLI/spec release-decoupling law (verbatim house policy from
+  crashtest's AGENTS.md) plus the mirror-image rule for packstruct's own
+  version ladder.
 - The landing moved from static `site/` files to a real Vite + React app
   under `web/`, prerendered by `prestruct build` (the same npm engine
   crashtest's site rides - dogfooding the family's own SEO layer).
