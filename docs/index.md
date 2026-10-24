@@ -4,7 +4,7 @@ description: "The shared spec for /packs directories: one normative document plu
 author: "Creadev.org"
 lang: "en"
 date: 2026-10-23
-last_modified_at: 2026-10-23
+last_modified_at: 2026-10-24
 nav_order: 1
 permalink: /
 layout: default
@@ -15,6 +15,9 @@ version: 0.9.0
 The shared spec for `/packs` directories. One small normative document plus a
 zero-dependency lint CLI, so **crashtest** (scenario profile) and
 **poststruct** (check profile) ship the same pack system from their own repos.
+
+The branded landing lives at <https://packstruct.creadev.org/>; these docs
+carry the normative detail.
 
 ```bash
 npx packstruct lint packs/          # exit 0 clean / 1 violations / 2 usage
