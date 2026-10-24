@@ -72,11 +72,11 @@
         .search-key { border: 1px solid var(--line); border-radius: 4px;
             padding: 0 5px; font-size: 10.5px; line-height: 16px; }
         .theme-switch svg { width: 18px; height: 18px; display: block; }
-        /* Moon shows in dark mode (click = go light); sun in light mode.
+        /* Sun shows in dark mode (click = go light); moon shows in light mode.
            Both icons always render - CSS decides, markup stays constant. */
-        .theme-switch .icon-sun { display: none; }
-        html[data-theme="light"] .theme-switch .icon-moon { display: none; }
-        html[data-theme="light"] .theme-switch .icon-sun { display: block; }
+        .theme-switch .icon-moon { display: none; }
+        html[data-theme="light"] .theme-switch .icon-sun { display: none; }
+        html[data-theme="light"] .theme-switch .icon-moon { display: block; }
         .hamburger { display: none; border: none; }
 
         /* Sidebar (engine shape: fixed under header, burger-toggled on mobile) */
@@ -119,6 +119,18 @@
         th { text-align: left; background: var(--raised); padding: 8px 12px;
             border-bottom: 1px solid var(--line); }
         td { padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+
+        /* Syntax highlighting palette - Rouge's token vocabulary, every color
+           on the theme tokens so both modes re-tune for free (port of the
+           shared block from crashtest@6033d27, filed as packstruct#6).
+           keyword = accent, string = moss, tag/warning = err,
+           comment = ink-soft italic, literal = accent-deep. */
+        .highlight .k, .highlight .kd, .highlight .kr, .highlight .kc, .highlight .kn { color: var(--accent); }
+        .highlight .s, .highlight .s1, .highlight .s2 { color: var(--moss); }
+        .highlight .no, .highlight .mi, .highlight .mf, .highlight .mh { color: var(--accent-deep); }
+        .highlight .nt, .highlight .ge { color: var(--err); }
+        .highlight .gp, .highlight .gh { color: var(--ink-soft); font-weight: 600; }
+        .highlight .c, .highlight .c1, .highlight .cm, .highlight .cd { color: var(--ink-soft); font-style: italic; }
 
         .doc-footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--line);
             color: var(--ink-light); font-size: 13px; }

@@ -79,12 +79,12 @@ body {
 }
 .theme-switch:hover { color: var(--accent); }
 .theme-switch svg { width: 18px; height: 18px; display: block; }
-/* Moon shows in dark mode (click = go light); sun shows in light mode.
-   Both icons always render in the markup - CSS picks, which keeps the
-   prerendered output and the hydrated output identical. */
-.theme-switch .icon-sun { display: none; }
-html[data-theme="light"] .theme-switch .icon-moon { display: none; }
-html[data-theme="light"] .theme-switch .icon-sun { display: block; }
+/* Sun shows in dark mode (click = go light); moon shows in light mode
+   (click = go dark). Both icons always render in the markup - CSS picks,
+   which keeps the prerendered output and the hydrated output identical. */
+.theme-switch .icon-moon { display: none; }
+html[data-theme="light"] .theme-switch .icon-sun { display: none; }
+html[data-theme="light"] .theme-switch .icon-moon { display: block; }
 .nav-burger {
   display: none; background: none; border: 1px solid var(--line); border-radius: 6px;
   color: var(--ink); cursor: pointer; padding: 7px; align-items: center; justify-content: center;
@@ -154,10 +154,26 @@ html[data-theme="light"] .theme-switch .icon-sun { display: block; }
   margin: 0 0 34px;
   color: var(--ink);
 }
-.code .dim { color: var(--ink-soft); }
-.code .ok { color: var(--moss); }
-.code .bad { color: var(--err); }
-.code .kw { color: var(--accent); }
+/* --- syntax tokens: shared vocabulary (crashtest@6033d27, packstruct#6) ---
+
+   keyword = accent, string/ok = moss, tag/bad = err, comment/dim =
+   ink-soft (italic for Rouge comments), literal = accent-deep. The hand
+   spans (.dim/.ok/.bad/.kw inside .code) and Rouge's output (.k/.s/.c1/...
+   inside .highlight) map onto the same words so the two surfaces cannot
+   drift, and every color rides the theme tokens - the light/dark switch
+   re-tunes highlighting for free, no per-theme override block. */
+.code .dim,
+.highlight .c, .highlight .c1, .highlight .cm, .highlight .cd {
+  color: var(--ink-soft);
+}
+.highlight .c, .highlight .c1, .highlight .cm, .highlight .cd { font-style: italic; }
+.code .ok, .highlight .s, .highlight .s1, .highlight .s2 { color: var(--moss); }
+.code .bad, .highlight .nt, .highlight .ge { color: var(--err); }
+.code .kw, .highlight .k, .highlight .kd, .highlight .kr, .highlight .kc, .highlight .kn {
+  color: var(--accent);
+}
+.highlight .no, .highlight .mi, .highlight .mf, .highlight .mh { color: var(--accent-deep); }
+.highlight .gp, .highlight .gh { color: var(--ink-soft); font-weight: 600; }
 
 /* --- sections / cards --- */
 .section { padding: 34px 0; }

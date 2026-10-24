@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **Syntax-highlighting parity (#6, ported from crashtest@6033d27).** The
+  docs' Rouge output (`.highlight` token spans) was colorless; both
+  stylesheets now carry the shared token palette - keyword = accent,
+  string/success = moss, tag/warning = err, comment = ink-soft italic,
+  literal = accent-deep - every color on the theme tokens, so the
+  light/dark switch re-tunes highlighting with no per-theme block. The web
+  hand-span vocabulary (.dim/.ok/.bad/.kw) and Rouge's (.k/.s/.c1/...)
+  map onto the same words, so the surfaces cannot drift.
+- **Theme-switch icon direction** (both surfaces): dark mode shows the
+  SUN (the action = go light), light mode shows the MOON (go dark).
 - **The golden refusal matrix folded (#3).** `labs/refusal-matrix.golden.json`
   (+ readable `.md`) joins both observed columns - ours from the
   self-verifying battery, crashtest's from the #25 fold run over the same
