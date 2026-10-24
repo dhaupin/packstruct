@@ -4,7 +4,7 @@ description: "The normative packstruct spec, version 1: directory contract, froz
 author: "Creadev.org"
 lang: "en"
 date: 2026-10-23
-last_modified_at: 2026-10-23
+last_modified_at: 2026-10-24
 nav_order: 2
 layout: default
 version: 0.9.0
@@ -18,7 +18,8 @@ The normative document lives in the repo at
 this page mirrors its frame:
 
 1. Directory contract: `packs/public/<name>/` = `pack.json` + entry file
-2. Manifest fields (frozen for v1) - exactly crashtest's production reality
+2. Manifest fields (frozen for v1) - crashtest's production reality,
+   plus the three host-owned acknowledged keys (`env`, `plugins`, `package`)
 3. Entry profiles: `scenario` (crashtest) / `check` (poststruct), declared by the host
 4. Lifecycle norms: explicit loads, slug-namespaced ids, self-audit fixtures
 5. Errors: instant, nameable, never a deep stack trace

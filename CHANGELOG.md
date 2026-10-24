@@ -5,6 +5,17 @@ All notable changes to packstruct will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- SPEC v1 folds the crashtest#19 ruling: three host-owned acknowledged keys
+  (`env`, `plugins`, `package`) named alongside the shared-facts column, so
+  the frozen table matches what crashtest's loader already shape-validates
+  and the linter never refuses a pack for carrying them; baseline receipts
+  updated (2026-10-24 audit: 8/8 conform, 44 ids, zero collisions);
+  `profiles/scenario.md` will link crashtest's `reference/scenario-contract`
+  rather than copy it.
+
 ## [0.9.0] - 2026-10-23
 
 ### Added

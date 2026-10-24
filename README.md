@@ -30,8 +30,10 @@ npx packstruct lint packs/ --json   # machine-readable: {schema, packsChecked, v
 The linter validates `schemaVersion === 1`, kebab-case name matching its
 directory, dotted versions, non-empty description, relative entry paths, and
 that the entry file physically exists under the pack dir. Optional
-`armedByKey` string. Everything else — extra manifest keys, snapshot files
-beside the entry — is minimum-spec and left alone.
+`armedByKey` string. Host-owned keys the engine also recognizes (`env`,
+`plugins`, `package`) are acknowledged by name and never refused. Everything
+else — extra manifest keys, snapshot files beside the entry — is
+minimum-spec and left alone.
 
 ## How the schema version was chosen
 

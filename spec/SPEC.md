@@ -3,11 +3,15 @@
 One `/packs` system, many hosts. This document is normative for any app that
 loads packs from a `packs/` directory and for anyone authoring a pack.
 
-**Schema base (verified 2026-10-23):** every crashtest production pack already
-ships schemaVersion 1 with exactly the shared field set. v1 formalizes that
-reality; hosts either already conform (crashtest) or adopt it fresh
-(poststruct). Baseline watch: if a host fleet bumps its manifests, the spec
-formalizes the new number - the spec tags whatever the fleet ships.
+**Schema base (verified 2026-10-24, crashtest#19 receipts):** every crashtest
+production pack ships schemaVersion 1 with exactly the shared field set (8/8
+conform, nothing drifted since the 2026-10-23 audit). The id space is clean:
+44 pack ids across the 8 packs, zero collisions pack-vs-pack and
+pack-vs-library. v1 formalizes that reality; hosts either already conform
+(crashtest) or adopt it fresh (poststruct). Baseline watch: if a host fleet
+bumps its manifests, the spec formalizes the new number - the spec tags
+whatever the fleet ships. Ordering ruled on crashtest#19: code first, spec
+formalizes after; nothing schema-changing is hidden on the engine side.
 
 ## 1. Directory contract (all hosts)
 
@@ -28,6 +32,22 @@ packs/public/<pack-name>/
 | `entry` | relative path inside the pack dir, MUST exist (missing entry = instant, nameable refusal - the crashtest#16 lesson is a norm now) |
 | `armedByKey` | OPTIONAL string. Present: the host MAY require an arming key before activation. Absent: the host's own default lifecycle governs |
 
+**Host-owned acknowledged keys.** The table above is the shared-facts column:
+fields every conforming loader assigns meaning to. Some hosts additionally
+carry their own optional manifest keys with host-side shape validation. For
+v1, three are acknowledged by name because crashtest's loader already
+validates them (ruled on crashtest#19):
+
+- `env` - the env-claims block (`d1`/`kv`/`routes`, plus optional `env.seed`)
+- `plugins` - bundled plugin imports, resolved against the pack dir
+- `package` - optional npm name for the pack
+
+These are **acknowledged, not shared facts**: the spec documents that they
+may appear and that the HOST owns their semantics and shape rules. Their
+presence is never a spec violation, `packstruct lint` must never refuse a
+pack for carrying them, and a future host naming a fourth host-owned key
+extends this list in a patch revision, not a schemaVersion bump.
+
 Extra manifest keys and extra files beside the entry are allowed as
 minimum-spec (the loader assigns no shared meaning to undeclared keys; e.g.
 crashtest's cve-feed ships a snapshot.json beside its entry, which is fine).
@@ -40,7 +60,10 @@ never forks between hosts; execution semantics are declared as profiles:
 - **`scenario` profile (crashtest):** default export = `register(ctx)`.
   Contains hostile scenarios executed against a transport; hosts of this
   profile provide isolation (fake transport, opt-out postures) and support
-  the `armedByKey` ceremony.
+  the `armedByKey` ceremony. The execution-semantics contract lives with the
+  host (crashtest's `reference/scenario-contract`); `profiles/scenario.md`
+  links to it rather than copying it - doc drift is worse than indirection
+  (ruled on crashtest#19).
 - **`check` profile (poststruct):** default export = `{ checks: [Check] }`.
   Declarative pure-reading verifiers over files on disk. No transport, no
   network by default. Arming defaults to config enumeration: being listed in
