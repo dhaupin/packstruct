@@ -1,4 +1,4 @@
-/* packstruct docs theme — the fleet stone look, dark. */
+/* packstruct docs theme: the fleet stone look, dark. */
 :root { --bg: #0c0f0a; --fg: #e6e8dd; --accent: #a8c000; --muted: #9aa38f; --card: #14180f; }
 body { background: var(--bg); color: var(--fg); max-width: 42rem; margin: 0 auto; padding: 2rem 1.25rem 4rem; font: 16px/1.65 system-ui, sans-serif }
 nav a, a { color: var(--accent) }

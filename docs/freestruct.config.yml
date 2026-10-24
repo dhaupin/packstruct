@@ -3,5 +3,5 @@
 site:
   name: packstruct docs
   url: https://docs.creadev.org
-  description: The shared /packs SPEC — manifest contract, entry profiles, lifecycle, and the lint CLI.
+  description: The shared /packs SPEC: manifest contract, entry profiles, lifecycle, and the lint CLI.
 basePath: /packstruct

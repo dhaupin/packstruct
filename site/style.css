@@ -1,4 +1,4 @@
-/* packstruct landing — fleet stone look, dark, no framework */
+/* packstruct landing: fleet stone look, dark, no framework */
 :root { --bg:#0c0f0a; --fg:#e6e8dd; --accent:#a8c000; --accent2:#d14030; --muted:#9aa38f; --card:#14180f; --border:#232a18 }
 * { box-sizing:border-box }
 body { background:var(--bg); color:var(--fg); margin:0; font:16px/1.65 system-ui,-apple-system,sans-serif }
