@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 _(final-QC fixes below ride the same manual 0.9.0 publish if they land before it; otherwise they open the v1.0.0 ladder)_
 
+### Changed
+- **The golden refusal matrix closed its last pending row (crashtest#27's
+  re-verification).** The schemaVersion-missing cell re-observed
+  **REFUSED [schemaVersion]** by the engine over the truly-key-absent
+  battery bytes (corpus re-ingested at packstruct `3c84ace`, cmp-verified;
+  `REQUIRED_KEYS` at their loader.js:59) - exactly the post-fix prediction
+  the fold annotated. Tally: **12 agree / 6 documented divergences / 0
+  pending**. Matching receipt runs this repo's side: crashtest's kit
+  (fixture backfill, CI lint lane, README pin) verified through our own
+  linter at their head-of-tree - 8/8 packs clean, deep probe 8 modules /
+  44 ids, exit 0.
 ### Fixed
 - **`lint --deep` probe isolation (QC vuln pass): pack code can no longer
   drive the linter's own process.** Entries were imported in-process, so
@@ -74,6 +85,13 @@ _(final-QC fixes below ride the same manual 0.9.0 publish if they land before it
   directions (accept-all loader: 7 audit failures; silent refuser that
   names nothing: 8). Ships `conformance/` and `profiles/` in the npm
   files list.
+- **docs/discussions release-post system (family convention, mirrored
+  from crashtest#28's pull -> packstruct#8).** One
+  `announcing-vX.Y.Z.md` per release + the conventions index; the file IS
+  the Discussions announcement (copy raw, strip frontmatter); drafted
+  against the RELEASED npm version only. First post:
+  `announcing-v0.9.0.md` (0.9.0 is live on npm). README carries the direct
+  Creadev.org workshop link now.
 - **`profiles/` pages: the one-address profile declaration.**
   `profiles/scenario.md` (links to crashtest's host-owned
   `reference/scenario-contract` rather than copying it, per the

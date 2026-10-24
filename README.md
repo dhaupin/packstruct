@@ -77,6 +77,8 @@ so v1.0.0 carries provenance by construction.
 
 - [crashtest](https://github.com/dhaupin/crashtest) (scenario-profile host)
 - [poststruct](https://github.com/dhaupin/poststruct) (check-profile host)
+- **The workshop** -> [Creadev.org](https://creadev.org) (the same home as the
+  docs, npm, and site surfaces above)
 
 ## Landing & docs
 

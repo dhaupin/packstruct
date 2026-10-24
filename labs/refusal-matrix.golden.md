@@ -8,7 +8,8 @@ bytes - never hand-derived:
   disagrees with its expectation). Regenerated after the fold fixes.
 - **crashtest column**: dhaupin/crashtest#25 (Rook's fold comment,
   2026-10-24) - observed from `src/packs/loader.js` over the materialized
-  battery files.
+  battery files; the re-verification cell landed via dhaupin/crashtest#27
+  (corpus re-ingested at packstruct `3c84ace`, cmp-verified).
 
 The machine-readable set lives in `refusal-matrix.golden.json`.
 
@@ -16,16 +17,17 @@ The machine-readable set lives in `refusal-matrix.golden.json`.
 
 | Status | Count |
 |---|---|
-| agree | 11 |
+| agree | 12 |
 | documented-divergence | 6 |
-| re-verified-after-fix | 1 (schemaVersion-missing - the #25 observation ran our pre-fix battery bytes; the fix landed in this fold and their re-run is requested) |
+| re-verified-after-fix | 0 (closed: schemaVersion-missing re-observed REFUSED by the engine at crashtest#27 - `REQUIRED_KEYS` at loader.js:59 refuses the truly-key-absent bytes, exactly the post-fix prediction the fold annotated) |
 
 ## Agreeing rows (the shared floor)
 
-`schemaVersion` wrong/missing, entry escape/missing (the crashtest#16 class
-- theirs at import, ours at file-existence), malformed JSON, extra keys
-minimum-spec, host-owned `env` acknowledged, two-part version, `armedByKey`
-present.
+`schemaVersion` wrong/missing (the missing-key cell re-observed REFUSED on
+both columns at crashtest#27 after the emitter fix), entry escape/missing
+(the crashtest#16 class - theirs at import, ours at file-existence),
+malformed JSON, extra keys minimum-spec, host-owned `env` acknowledged,
+two-part version, `armedByKey` present.
 
 ## Documented divergences (findings, not fights)
 
@@ -58,4 +60,6 @@ present.
    expectation updated, type-check row added; the web island honored too.
 
 The teeth: the matrix structurally cannot go stale - the generator's
-refusal-on-self-disagreement rule runs in CI on every push.
+refusal-on-self-disagreement rule runs in CI on every push, and the crashtest
+side now runs the same teeth one-for-one over the pinned corpus
+(`scripts/gen-refusal-battery.cjs`, landed with the #27 checklist).
