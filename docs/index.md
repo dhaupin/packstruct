@@ -8,7 +8,7 @@ last_modified_at: 2026-10-24
 nav_order: 1
 permalink: /
 layout: default
-version: 0.9.0
+version: 1.0.0
 ---
 # packstruct
 

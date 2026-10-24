@@ -11,7 +11,6 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    if: ${{ !startsWith(github.ref_name, 'v0.') }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -20,13 +19,31 @@ jobs:
           registry-url: https://registry.npmjs.org
       - run: npm install --no-fund --no-audit
       - run: npm test
-      - name: already published check
+      # The gate replaces two footguns: the old job-level `!startsWith(ref,'v0.')`
+      # check (blind to workflow_dispatch, where ref_name='main') and an
+      # "already published" step that ECHOED 'skipping' and published anyway.
+      # Gate rules, in order: the ref must BE the version tag (so a dispatch on
+      # main can never leak-publish), 0.x versions refuse here hard (the
+      # DEPLOY.md ladder publishes 0.9.x manually only, per prestruct's
+      # convention), and an already-published version is a genuine skip.
+      - id: gate
         run: |
           VERSION=$(node -p "require('./package.json').version")
+          if [ "${GITHUB_REF_NAME#v}" != "$VERSION" ]; then
+            echo "ref '$GITHUB_REF_NAME' does not carry package version $VERSION (need v$VERSION) - refusing"
+            exit 1
+          fi
+          if [ "$(echo "$VERSION" | cut -d. -f1)" = "0" ]; then
+            echo "0.x versions publish manually per DEPLOY.md - refusing"
+            exit 1
+          fi
           if npm view packstruct@$VERSION >/dev/null 2>&1; then
             echo "packstruct@$VERSION already on npm - skipping"
-            exit 0
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
       - run: npm publish --provenance
+        if: steps.gate.outputs.skip != 'true'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

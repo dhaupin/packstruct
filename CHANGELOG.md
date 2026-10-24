@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+_(nothing staged yet)_
+
+## [1.0.0] - 2026-10-24
+
 ### Changed
 - **Syntax-highlighting parity (#6, ported from crashtest@6033d27).** The
   docs' Rouge output (`.highlight` token spans) was colorless; both
@@ -91,7 +95,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   crashtest's 8 shipped packs at the audited pin (`fc93ca6`) on every main
   push; local receipt in `labs/corpus-receipt.md` (8/8 clean, zero
   violations). Zero runtime dependencies on the corpus repo - pinned clone,
-  zero-dep CLI. The refusal-matrix half of #3 stays open.
+  zero-dep CLI. (The refusal-matrix half folded at the #3 close - see the Changed block above).
 
 ### Changed
 - **SPEC.md: frozen-table receipts + pack-semver decoupling (#4).** Every
