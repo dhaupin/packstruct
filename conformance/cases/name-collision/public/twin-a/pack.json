@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "twin-pack",
+  "description": "refuses (with twin-b): two packs claiming one name",
+  "version": "1.0.0",
+  "entry": "entry.js"
+}

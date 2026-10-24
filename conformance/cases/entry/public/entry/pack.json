@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "entry",
+  "description": "refuses: declared entry file does not ship (the crashtest#16 class)",
+  "version": "1.0.0",
+  "entry": "missing.js"
+}

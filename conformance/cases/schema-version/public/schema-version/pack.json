@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 2,
+  "name": "schema-version",
+  "description": "refuses: schemaVersion 2 is not the frozen v1",
+  "version": "1.0.0",
+  "entry": "entry.js"
+}

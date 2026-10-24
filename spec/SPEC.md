@@ -99,7 +99,9 @@ never forks between hosts; execution semantics are declared as profiles:
   `profiles/scenario.md` links to it rather than copying it - doc drift is
   worse than indirection (ruled on crashtest#19; the `register(ctx)` shape
   in earlier drafts of this section was stale, deleted against the engine
-  truth at `fc93ca6` per the engine-first rule).
+  truth at `fc93ca6` per the engine-first rule). The canonical profile
+  pages live with the spec (one address, same ruling):
+  `profiles/scenario.md` and `profiles/check.md`.
 - **`check` profile (poststruct):** default export = `{ checks: [Check] }`.
   Declarative pure-reading verifiers over files on disk. No transport, no
   network by default. Arming defaults to config enumeration: being listed in
@@ -152,4 +154,11 @@ never silent success.
 - `packstruct lint <packs-dir>`: manifest validation + entry existence +
   name/dir match (section 2, plus directory-contract checks from section 1).
   Exit 0 conforming / 1 violations / 2 usage error.
-- Conformance harness (M2): fixture packs a loader must pass/fail as promised.
+- `packstruct audit-conformance <repo-dir> --loader "<cmd> {packs}"`: the
+  conformance harness. Bundled verdict-claiming cases (one clean bundle,
+  one per section-5 refusal norm, plus a name-collision pair) are
+  materialized into scratch roots and the HOST's own loader command runs
+  over each. A conforming loader exits 0 on the clean bundle and exits
+  non-zero AND names the offending pack on every violation bundle (section
+  5: nameable refusals; identity matches, refusal wording stays host-owned).
+  Same exit ladder: 0 all cases honored / 1 any case failed / 2 usage.

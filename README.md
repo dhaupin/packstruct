@@ -29,6 +29,9 @@ npx packstruct lint packs/ --json   # machine-readable: {schema, packsChecked, v
 npx packstruct lint packs/ --deep   # + entry import, default-export check, id census
 npx packstruct lint packs/ --deep --json   # adds mode, modulesProbed, idsCensused, libraryIds
 npx packstruct lint packs/ --deep --against lib/   # + host-library id census (id-library-collision)
+
+npx packstruct audit-conformance . \
+    --loader "node bin/load-packs.js {packs}"   # audit a HOST loader (SPEC section 7)
 ```
 
 The linter validates `schemaVersion === 1`, kebab-case name matching its
@@ -38,6 +41,21 @@ that the entry file physically exists under the pack dir. Optional
 `plugins`, `package`) are acknowledged by name and never refused. Everything
 else (extra manifest keys, snapshot files beside the entry) is
 minimum-spec and left alone.
+
+`audit-conformance` is the next half of conformance (SPEC section 7): it
+materializes bundled verdict-claiming fixture packs (one clean bundle, one
+per refusal norm, a name-collision pair) into scratch roots and runs YOUR
+loader command over each - a conforming loader exits 0 on clean and exits
+non-zero naming the pack on every violation (identity match, refusal wording
+stays host-owned). The `implements: packstruct@1` pin becomes verifiable,
+not honorary.
+
+## Profiles
+
+The two entry profiles are declared once, with the spec (one address per
+the crashtest#19 ruling): [profiles/scenario.md](profiles/scenario.md)
+(crashtest - links to the host-owned contract instead of copying it) and
+[profiles/check.md](profiles/check.md) (poststruct).
 
 ## How the schema version was chosen
 

@@ -1,10 +1,14 @@
 #!/usr/bin/env node
-// bin/cli.mjs - packstruct lint <packs-dir> [--json] [--deep] [--against <path>]
-// Accepts either `packstruct lint <dir>` or `packstruct <dir>` (the lint
-// subcommand token is stripped when present; a target dir genuinely named
-// 'lint' must not break the parser either way).
+// bin/cli.mjs - the packstruct CLI, zero dependencies.
 //
-// --deep (packstruct#2): after the manifest pass, imports each declared
+//   packstruct lint <packs-dir> [--json] [--deep] [--against <path>]
+//   packstruct audit-conformance [<repo-dir>] --loader "<cmd> {packs}" [--json]
+//
+// The lint subcommand token is stripped when present, and a bare
+// `packstruct <dir>` keeps working (the dir positionally implies lint; a
+// target dir genuinely named 'lint' must not break the parser either way).
+//
+// lint --deep (packstruct#2): after the manifest pass, imports each declared
 // entry once in-process, checks the default export exists, and censuses
 // ids (module/attack/check/step names across the corpus) - mirrors the
 // engine's shared-`seen` collision refusal (crashtest fc93ca6
@@ -13,24 +17,68 @@
 // top-level code; data modules are inert, and hostile modules are the
 // host's isolation domain, not the linter's.
 //
-// --against <file-or-dir> (packstruct#2, requires --deep): seed the census
-// with the HOST LIBRARY ids so pack-vs-library collisions refuse at author
-// time (`id-library-collision`). Accepts a JSON file or an ESM module /
-// directory of modules whose default exports carry ids (any house profile
-// shape, generically probed).
+// lint --against <file-or-dir> (packstruct#2, requires --deep): seed the
+// census with the HOST LIBRARY ids so pack-vs-library collisions refuse at
+// author time (`id-library-collision`). Accepts a JSON file or an ESM
+// module / directory of modules whose default exports carry ids (any house
+// profile shape, generically probed).
+//
+// audit-conformance (M2, SPEC section 7): materializes the bundled
+// verdict-claiming fixture cases into scratch roots and runs the HOST's own
+// loader command over each. A conforming loader accepts the clean case
+// (exit 0) and refuses every violation case with a non-zero exit that NAMES
+// the offending pack (SPEC section 5, identity match - the host may word
+// its refusal however it likes). Exit contract: 0 all cases honored,
+// 1 any case failed, 2 usage error - same ladder as lint.
 import { lintPacks, deepLintPacks } from '../src/lint.mjs'
+import { auditConformance } from '../src/audit.mjs'
 
 let args = process.argv.slice(2)
-if (args[0] === 'lint') args = args.slice(1)
+const verb = args[0] === 'audit-conformance' ? 'audit-conformance' : 'lint'
+if (args[0] === 'lint' || verb === 'audit-conformance') args = args.slice(1)
 
-// --against consumes the next arg as its value; strip both from the dir scan.
+const exitUsage = (msg, usage) => {
+  if (msg) console.error(msg)
+  console.error(`Usage: ${usage}`)
+  process.exit(2)
+}
+
+if (verb === 'audit-conformance') {
+  const loaderIdx = args.indexOf('--loader')
+  let loader
+  if (loaderIdx !== -1) {
+    loader = args[loaderIdx + 1]
+    if (loader === undefined || loader.startsWith('-')) {
+      exitUsage('--loader needs a value: --loader "<cmd> {packs}"', 'packstruct audit-conformance [<repo-dir>] --loader "<cmd> {packs}" [--json]')
+    }
+  }
+  const positional = []
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--loader') { i++; continue }
+    if (!args[i].startsWith('-')) positional.push(args[i])
+  }
+  if (loader === undefined) {
+    exitUsage(undefined, 'packstruct audit-conformance [<repo-dir>] --loader "<cmd> {packs}" [--json]')
+  }
+  const repo = positional[0] ?? '.'
+  const json = args.includes('--json')
+  const r = auditConformance({ loader, repo, json })
+  if (json) {
+    console.log(JSON.stringify({ schema: 1, mode: 'audit', repo, cases: r.caseCount, honored: r.honored, violations: r.violations }, null, 2))
+  } else {
+    console.log(`packstruct audit-conformance: ${r.honored}/${r.caseCount} case(s) honored by the loader over ${repo}`)
+    for (const v of r.violations) console.log(`  AUDIT ${v.pack} [${v.norm}]: ${v.message}`)
+  }
+  process.exit(r.violations.length ? 1 : 0)
+}
+
+// --- lint verb (below unchanged contract) ---
 const againstIdx = args.indexOf('--against')
 let against
 if (againstIdx !== -1) {
   against = args[againstIdx + 1]
   if (against === undefined || against.startsWith('-')) {
-    console.error('Usage: packstruct lint <packs-dir> [--json] [--deep] [--against <library-path>]')
-    process.exit(2)
+    exitUsage(undefined, 'packstruct lint <packs-dir> [--json] [--deep] [--against <library-path>]')
   }
 }
 const dirArgs = []
@@ -40,14 +88,10 @@ for (let i = 0; i < args.length; i++) {
 }
 
 const dir = dirArgs.find(a => !a.startsWith('-'))
-if (!dir) {
-  console.error('Usage: packstruct lint <packs-dir> [--json] [--deep] [--against <library-path>]')
-  process.exit(2)
-}
+if (!dir) exitUsage(undefined, 'packstruct lint <packs-dir> [--json] [--deep] [--against <library-path>]')
 const deep = dirArgs.includes('--deep') || args.includes('--deep')
 if (against !== undefined && !deep) {
-  console.error('--against requires --deep (the host-library census runs on the deep pass)')
-  process.exit(2)
+  exitUsage('--against requires --deep (the host-library census runs on the deep pass)', 'packstruct lint <packs-dir> [--json] [--deep] [--against <library-path>]')
 }
 
 const r = deep

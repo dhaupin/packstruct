@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "description",
+  "description": "",
+  "version": "1.0.0",
+  "entry": "entry.js"
+}

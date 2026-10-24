@@ -74,5 +74,6 @@ hand-rolled manifest checks, don't fork the contract).
 <p><strong>More in these docs:</strong>
 <a href="{{ '/' | relative_url }}">home</a> ·
 <a href="{{ '/spec' | relative_url }}">SPEC v1</a> ·
+<a href="{{ '/conformance' | relative_url }}">conformance harness</a> ·
 <a href="{{ '/search' | relative_url }}">search</a></p>
 </div>

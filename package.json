@@ -9,12 +9,15 @@
   },
   "exports": {
     ".": "./src/lint.mjs",
+    "./audit": "./src/audit.mjs",
     "./package.json": "./package.json"
   },
   "files": [
     "bin/",
     "src/",
     "spec/",
+    "profiles/",
+    "conformance/",
     "LICENSE"
   ],
   "scripts": {

@@ -9,6 +9,10 @@
     url: /packstruct/spec
   - title: The Linter
     url: /packstruct/linter
+  - title: Entry Profiles
+    url: /packstruct/profiles
+  - title: Conformance Harness
+    url: /packstruct/conformance
   - title: Search
     url: /packstruct/search
 
@@ -20,6 +24,8 @@
     url: https://github.com/dhaupin/packstruct
   - title: SPEC.md Source
     url: https://github.com/dhaupin/packstruct/blob/main/spec/SPEC.md
+  - title: profiles/ Source
+    url: https://github.com/dhaupin/packstruct/tree/main/profiles
 
 - title: About
   items:

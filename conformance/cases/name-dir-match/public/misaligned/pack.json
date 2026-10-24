@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "aligned-name",
+  "description": "refuses: manifest name does not match its directory (dir: misaligned)",
+  "version": "1.0.0",
+  "entry": "entry.js"
+}

@@ -4,6 +4,7 @@
 // id census - fixtures both ways, per the house rule "adding a rule = cases
 // both sides".
 import { lintPacks, deepLintPacks } from '../src/lint.mjs'
+import { auditConformance } from '../src/audit.mjs'
 import { spawnSync } from 'node:child_process'
 const GOOD = 'test/fixtures/good/packs'
 const BAD = 'test/fixtures/bad/packs'
@@ -56,6 +57,28 @@ if (!libBad.violations.some(v => v.norm === 'id-library-collision')) {
   console.error(`FAIL colliding library should yield id-library-collision:\n${JSON.stringify(libBad.violations, null, 2)}`); process.exit(1)
 }
 
+// --- audit-conformance (M2, SPEC section 7): the bundled verdict-claiming
+// cases against the loader, tested both ways per the house rule. Our own
+// CLI stands in as the conforming loader (dogfood); a loader that accepts
+// everything and one that refuses (and names) nothing must both fail the
+// audit loudly.
+const conformingLoader = `${process.execPath} bin/cli.mjs lint {packs}`
+const auditGood = auditConformance({ loader: conformingLoader })
+if (auditGood.caseCount !== 8 || auditGood.honored !== 8 || auditGood.violations.length) {
+  console.error(`FAIL audit-conformance: our own loader should honor all 8 bundled cases\ngot: honored=${auditGood.honored}/${auditGood.caseCount}\n${JSON.stringify(auditGood.violations, null, 2)}`)
+  process.exit(1)
+}
+const auditAllAccept = auditConformance({ loader: `${process.execPath} -e "void '{packs}'; process.exit(0)"` })
+if (auditAllAccept.honored !== 1 || auditAllAccept.violations.length !== 7) {
+  console.error(`FAIL audit-conformance accept-all loader should fail 7 refuse-cases: honored=${auditAllAccept.honored} violations=${auditAllAccept.violations.length}\n${JSON.stringify(auditAllAccept.violations, null, 2)}`)
+  process.exit(1)
+}
+const auditNoName = auditConformance({ loader: `${process.execPath} -e "void '{packs}'; process.exit(1)"` })
+if (auditNoName.honored !== 0 || auditNoName.violations.length !== 8) {
+  console.error(`FAIL audit-conformance silent-refuser should fail all 8 (refusals must NAME the pack): honored=${auditNoName.honored}\n${JSON.stringify(auditNoName.violations, null, 2)}`)
+  process.exit(1)
+}
+
 // --- wire-level checks (the honest bin invocation, as docs/CI write it) ---
 const wire = spawnSync(process.execPath, ['bin/cli.mjs', 'lint', GOOD, '--json'], { encoding: 'utf8' })
 if (wire.status !== 0 || JSON.parse(wire.stdout).violations.length !== 0) {
@@ -81,4 +104,19 @@ if (wireAgainst.status !== 0 || againstJson.libraryIds !== 2) {
   console.error(`FAIL wire-level --against: exit ${wireAgainst.status}\n${wireAgainst.stdout}\n${wireAgainst.stderr}`)
   process.exit(1)
 }
-console.log(`packstruct self-test: good pack clean, bad pack caught (${bad.violations.length} violations), wire subcommand OK, deep pass/bad both ways (${deepGood.idsCensused} ids censused good-side, ${deepBad.violations.length} deep violations bad-side), --against both ways (${libGood.libraryIds} seeded clean, ${libBad.violations.filter(v => v.norm === 'id-library-collision').length} library collisions) - PASS`)
+
+// --- wire-level audit-conformance: honored run + the usage gate ---
+const wireAudit = spawnSync(process.execPath, ['bin/cli.mjs', 'audit-conformance', '--loader', conformingLoader, '--json'], { encoding: 'utf8' })
+let auditJson
+try { auditJson = JSON.parse(wireAudit.stdout) } catch { auditJson = null }
+if (wireAudit.status !== 0 || !auditJson || auditJson.mode !== 'audit' || auditJson.honored !== auditJson.cases || auditJson.violations.length !== 0) {
+  console.error(`FAIL wire-level audit-conformance: exit ${wireAudit.status}\n${wireAudit.stdout}\n${wireAudit.stderr}`)
+  process.exit(1)
+}
+const wireAuditUsage = spawnSync(process.execPath, ['bin/cli.mjs', 'audit-conformance'], { encoding: 'utf8' })
+if (wireAuditUsage.status !== 2) {
+  console.error(`FAIL audit-conformance without --loader should exit 2 (got ${wireAuditUsage.status})\n${wireAuditUsage.stderr}`)
+  process.exit(1)
+}
+
+console.log(`packstruct self-test: good pack clean, bad pack caught (${bad.violations.length} violations), wire subcommand OK, deep pass/bad both ways (${deepGood.idsCensused} ids censused good-side, ${deepBad.violations.length} deep violations bad-side), --against both ways (${libGood.libraryIds} seeded clean, ${libBad.violations.filter(v => v.norm === 'id-library-collision').length} library collisions), audit-conformance both ways (${auditGood.honored}/${auditGood.caseCount} honored by our own loader, accept-all loader ${auditAllAccept.violations.length} audit failures, silent refuser ${auditNoName.violations.length}) - PASS`)

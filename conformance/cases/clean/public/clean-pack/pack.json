@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "clean-pack",
+  "description": "SPEC v1 clean pack - the accept case",
+  "version": "1.0.0",
+  "entry": "entry.js"
+}

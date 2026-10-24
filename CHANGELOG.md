@@ -35,6 +35,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   non-string row added instead. Matrix: 18 rows, all honest.
 
 ### Added
+- **`packstruct audit-conformance` (M2, SPEC section 7): the conformance
+  harness.** Bundled verdict-claiming fixture cases (`conformance/cases/`:
+  one clean bundle, one per section-5 refusal norm, plus a name-collision
+  pair - 8 cases) are materialized into scratch roots and the HOST's own
+  loader command (`--loader "<cmd> {packs}"`, shell-quoted placeholder)
+  runs over each. A conforming loader exits 0 on the clean bundle and exits
+  non-zero AND names the offending pack on every violation (identity
+  match, refusal wording stays host-owned). Same exit ladder as lint.
+  Makes the `implements: packstruct@1` pin verifiable, not honorary.
+  Receipt in the same commit: `npm test` runs all 8 cases through our own
+  CLI as the stand-in loader (8/8 honored) and asserts both failure
+  directions (accept-all loader: 7 audit failures; silent refuser that
+  names nothing: 8). Ships `conformance/` and `profiles/` in the npm
+  files list.
+- **`profiles/` pages: the one-address profile declaration.**
+  `profiles/scenario.md` (links to crashtest's host-owned
+  `reference/scenario-contract` rather than copying it, per the
+  crashtest#19 ruling) and `profiles/check.md` (honest about poststruct
+  not shipping yet - engine-first: their loader wins, SPEC updates first).
+  SPEC section 3 names the canonical pages; README links; docs site gains
+  /profiles + /conformance pages and nav entries.
 - **Refusal-matrix packstruct column (#3).** `scripts/gen-refusal-matrix.mjs`
   runs a 17-row hostile-manifest battery (shapes + allowed corners) against
   the ACTUAL linter bytes-on-disk and refuses the run if any row's observed
