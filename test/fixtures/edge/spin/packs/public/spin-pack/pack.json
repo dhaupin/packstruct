@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "spin-pack",
+  "description": "infinite top-level loop - must become an entry-import refusal at the probe timeout, never a hung CLI",
+  "version": "1.0.0",
+  "entry": "entry.js"
+}

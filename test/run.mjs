@@ -79,6 +79,43 @@ if (auditNoName.honored !== 0 || auditNoName.violations.length !== 8) {
   process.exit(1)
 }
 
+// --- QC edge/vuln pass: the probe crash classes. Pack code must never
+// drive the linter's own process - a top-level exit() hijacked the wire
+// exit (deep used to die with the ENTRY's code, output-less) and a
+// spin-lock entry hung the CLI forever. Child isolation + timeout must
+// turn both into honest entry-import refusals with the 0/1 contract. ---
+const edgeKill = await deepLintPacks('test/fixtures/edge/exit/packs')
+if (!(edgeKill.violations.length === 1 && edgeKill.violations[0].norm === 'entry-import' && edgeKill.violations[0].message.includes('terminated the probe process'))) {
+  console.error(`FAIL edge exit-hijack should be ONE honest entry-import refusal:\n${JSON.stringify(edgeKill.violations, null, 2)}`)
+  process.exit(1)
+}
+const edgeKillWire = spawnSync(process.execPath, ['bin/cli.mjs', 'lint', 'test/fixtures/edge/exit/packs', '--deep', '--json'], { encoding: 'utf8' })
+if (edgeKillWire.status !== 1) {
+  console.error(`FAIL edge exit-hijack wire exit must be 1 (the CLI's own contract, never the ENTRY's exit code 7): got ${edgeKillWire.status}\n${edgeKillWire.stdout}${edgeKillWire.stderr}`)
+  process.exit(1)
+}
+const edgeSpin = await deepLintPacks('test/fixtures/edge/spin/packs', { probeTimeoutMs: 800 })
+if (!(edgeSpin.violations.length === 1 && edgeSpin.violations[0].norm === 'entry-import' && edgeSpin.violations[0].message.includes('timeout'))) {
+  console.error(`FAIL edge spin-lock should be one entry-import timeout refusal:\n${JSON.stringify(edgeSpin.violations, null, 2)}`)
+  process.exit(1)
+}
+
+// --- QC vuln pass: the audit loader caps. A HOST loader is arbitrary code
+// in its own shell, so the audit caps what can surprise it: an output
+// flood above the 1MB spawn buffer is a no-verdict violation (never a
+// harness crash), and a hung loader is killed at the audit timeout (a
+// refusal is instant - hangs are neither accept nor refuse). ---
+const auditFlood = auditConformance({ loader: `${process.execPath} -e "void '{packs}'; for (;;) console.log('x'.repeat(8192))"` })
+if (!(auditFlood.violations.length === 8 && auditFlood.violations.every(v => v.message.includes('audit buffer')))) {
+  console.error(`FAIL audit output-flood should fail all 8 cases with the buffer cap named:\n${JSON.stringify(auditFlood.violations, null, 2)}`)
+  process.exit(1)
+}
+const auditHung = auditConformance({ loader: "sleep 9999 # {packs}", auditTimeoutMs: 400 })
+if (!(auditHung.violations.length === 8 && auditHung.violations.every(v => v.message.includes('audit timeout')))) {
+  console.error(`FAIL audit hung loader should fail all 8 cases with the timeout named:\n${JSON.stringify(auditHung.violations, null, 2)}`)
+  process.exit(1)
+}
+
 // --- wire-level checks (the honest bin invocation, as docs/CI write it) ---
 const wire = spawnSync(process.execPath, ['bin/cli.mjs', 'lint', GOOD, '--json'], { encoding: 'utf8' })
 if (wire.status !== 0 || JSON.parse(wire.stdout).violations.length !== 0) {
@@ -119,4 +156,4 @@ if (wireAuditUsage.status !== 2) {
   process.exit(1)
 }
 
-console.log(`packstruct self-test: good pack clean, bad pack caught (${bad.violations.length} violations), wire subcommand OK, deep pass/bad both ways (${deepGood.idsCensused} ids censused good-side, ${deepBad.violations.length} deep violations bad-side), --against both ways (${libGood.libraryIds} seeded clean, ${libBad.violations.filter(v => v.norm === 'id-library-collision').length} library collisions), audit-conformance both ways (${auditGood.honored}/${auditGood.caseCount} honored by our own loader, accept-all loader ${auditAllAccept.violations.length} audit failures, silent refuser ${auditNoName.violations.length}) - PASS`)
+console.log(`packstruct self-test: good pack clean, bad pack caught (${bad.violations.length} violations), wire subcommand OK, deep pass/bad both ways (${deepGood.idsCensused} ids censused good-side, ${deepBad.violations.length} deep violations bad-side), --against both ways (${libGood.libraryIds} seeded clean, ${libBad.violations.filter(v => v.norm === 'id-library-collision').length} library collisions), audit-conformance both ways (${auditGood.honored}/${auditGood.caseCount} honored by our own loader, accept-all loader ${auditAllAccept.violations.length} audit failures, silent refuser ${auditNoName.violations.length}), edge probe isolation (exit-hijack and spin-lock refuse honestly, wire exit 1), audit caps (output flood ${auditFlood.violations.length}/8, hung loader ${auditHung.violations.length}/8) - PASS`)

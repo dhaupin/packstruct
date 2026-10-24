@@ -10,11 +10,21 @@
 // refusal its own way, so the audit matches identity, not jargon). Any other
 // outcome is an audit violation naming the case - the harness refuses to
 // grade, it only reports what the loader actually did.
+//
+// Loader caps (QC hardening): a HOST loader is arbitrary code in a shell it
+// owns, and a refusal is instant - so a loader that hangs gets killed at the
+// 120s audit timeout (neither verdict), and output above the 1MB spawn
+// buffer counts as no-verdict rather than a harness crash. Both surface as
+// audit violations naming the case, same as any other betrayal of the
+// verdict contract.
 import { cpSync, existsSync, mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
 import { spawnSync } from 'node:child_process'
+
+export const AUDIT_TIMEOUT_MS = 120000
+export const AUDIT_MAXBUFFER_BYTES = 1024 * 1024
 
 export const CASES_DIR = fileURLToPath(new URL('../conformance/cases/', import.meta.url))
 
@@ -58,22 +68,39 @@ export function auditConformance(opts = {}) {
       cpSync(join(CASES_DIR, c), tmp, { recursive: true })
       const ids = casePackIdentities(tmp)
       const cmd = opts.loader.split('{packs}').join(`"${tmp}"`)
-      const r = spawnSync(cmd, { shell: true, cwd: repo, encoding: 'utf8' })
+      const auditTimeoutMs = Number.isFinite(opts.auditTimeoutMs) ? opts.auditTimeoutMs : AUDIT_TIMEOUT_MS
+      const r = spawnSync(cmd, { shell: true, cwd: repo, encoding: 'utf8', timeout: auditTimeoutMs, killSignal: 'SIGKILL', maxBuffer: AUDIT_MAXBUFFER_BYTES })
       const out = `${r.stdout ?? ''}\n${r.stderr ?? ''}`
-      const claimed = r.status === 0
-      let ok = expect === 'accept' ? claimed : !claimed
+      let ok
       let why = ''
-      if (ok && expect === 'refuse' && ![...ids].some(id => out.includes(id))) {
+      if (r.error?.code === 'ENOBUFS') {
         ok = false
-        why = 'refused but did not name the pack (SPEC section 5: nameable refusals)'
+        why = `loader output exceeded the audit buffer (${AUDIT_MAXBUFFER_BYTES} bytes) - no verdict was observable, so the case carries no claim`
+      } else if (r.status === null && r.signal) {
+        // The kill path: a loader that hangs is neither an acceptance nor a
+        // refusal (SPEC section 5 makes refusal INSTANT). Not honored either way.
+        ok = false
+        why = `loader hung past the audit timeout (${auditTimeoutMs}ms, killed with ${r.signal}) - sets no verdict observable`
+      } else {
+        const claimed = r.status === 0
+        if (expect === 'accept') {
+          ok = claimed
+        } else {
+          ok = !claimed
+          if (!ok) why = '' // exit 0 on a refuse case: message covers it below
+          else if (![...ids].some(id => out.includes(id))) {
+            ok = false
+            why = 'refused but did not name the pack (SPEC section 5: nameable refusals)'
+          }
+        }
       }
       if (ok) honored++
       else {
-        const got = claimed ? 'exit 0 (loader accepted)' : `exit ${r.status}`
+        const got = r.status === null && r.signal ? `killed on signal ${r.signal}` : r.status === 0 ? 'exit 0 (loader accepted)' : `exit ${r.status}`
         violations.push({
           pack: c,
           norm: `audit-${expect}`,
-          message: `loader ${got} on case "${c}" - the spec verdict is ${expect === 'accept' ? 'accept' : 'refuse'}${why ? ` - ${why}` : ''}`,
+          message: `loader ${got} on case "${c}" - the spec verdict is ${expect}${why ? ` - ${why}` : ''}`,
         })
       }
     } finally {

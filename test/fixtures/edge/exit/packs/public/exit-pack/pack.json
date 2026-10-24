@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "exit-pack",
+  "description": "top-level process.exit(7) in the entry - must become an entry-import refusal, never the linter's own exit code",
+  "version": "1.0.0",
+  "entry": "entry.js"
+}

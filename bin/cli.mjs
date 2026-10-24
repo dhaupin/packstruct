@@ -8,14 +8,16 @@
 // `packstruct <dir>` keeps working (the dir positionally implies lint; a
 // target dir genuinely named 'lint' must not break the parser either way).
 //
-// lint --deep (packstruct#2): after the manifest pass, imports each declared
-// entry once in-process, checks the default export exists, and censuses
-// ids (module/attack/check/step names across the corpus) - mirrors the
-// engine's shared-`seen` collision refusal (crashtest fc93ca6
-// src/packs/loader.js :389-391) at author time. Probe only: host contract
-// shapes stay host-owned (SPEC section 3). Importing runs the entry's
-// top-level code; data modules are inert, and hostile modules are the
-// host's isolation domain, not the linter's.
+// lint --deep (packstruct#2): after the manifest pass, probes each declared
+// entry in a DISPOSABLE CHILD PROCESS (pack code runs nowhere near the
+// linter's own process or exit code - the QC finding: a top-level exit()
+// used to hijack the wire exit and a spin-lock entry hung the CLI), checks
+// the default export exists, and censuses ids (module/attack/check/step
+// names across the corpus) - mirrors the engine's shared-`seen` collision
+// refusal (crashtest fc93ca6 src/packs/loader.js :389-391) at author time.
+// Probe only: host contract shapes stay host-owned (SPEC section 3).
+// Probing runs the entry's top-level code - in the child's domain, not
+// the linter's; a 5s probe timeout makes stalls honest refusals.
 //
 // lint --against <file-or-dir> (packstruct#2, requires --deep): seed the
 // census with the HOST LIBRARY ids so pack-vs-library collisions refuse at

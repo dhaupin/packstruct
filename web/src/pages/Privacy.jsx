@@ -25,7 +25,7 @@ export default function Privacy() {
 
         <h3>The tool</h3>
         <p>
-          <code>packstruct lint</code> reads only the paths you hand it under{' '}
+          <code>npx packstruct lint</code> reads only the paths you hand it under{' '}
           <code>packs/</code> and writes nothing outside its process. No telemetry,
           no network calls, no phone-home - the CLI is zero-dependency and offline
           by construction.

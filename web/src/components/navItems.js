@@ -3,9 +3,9 @@
  * and the footer all render from. Group semantics:
  * 'site' = internal route (NavLink-active), 'out' = external surface.
  *
- * npm is intentionally absent until packstruct is actually published
- * (honesty over aspiration - the crashtest nav ships its npm link because
- * the package exists; packstruct's does not yet).
+ * npm joined the surface list the day packstruct@0.9.0 landed on the
+ * registry (honesty over aspiration - the link exists because the package
+ * exists; it never arrived early).
  */
 export const NAV_ITEMS = [
   // primary app routes
@@ -15,6 +15,7 @@ export const NAV_ITEMS = [
   // outbound surfaces
   { label: 'Docs', href: 'https://docs.creadev.org/packstruct/', group: 'out' },
   { label: 'GitHub', href: 'https://github.com/dhaupin/packstruct', group: 'out' },
+  { label: 'npm', href: 'https://www.npmjs.com/package/packstruct', group: 'out' },
 ]
 
 /** Footer-only extras (legal). Terms/Privacy are site-internal routes. */

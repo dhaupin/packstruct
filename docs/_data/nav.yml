@@ -20,6 +20,8 @@
   items:
   - title: Landing Site
     url: https://packstruct.creadev.org/
+  - title: npm Package
+    url: https://www.npmjs.com/package/packstruct
   - title: GitHub Repo
     url: https://github.com/dhaupin/packstruct
   - title: SPEC.md Source

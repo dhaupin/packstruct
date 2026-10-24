@@ -7,7 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-_(nothing staged yet - the next release is the v1.0.0 tag with provenance; everything below ships manually as 0.9.0 today)_
+_(final-QC fixes below ride the same manual 0.9.0 publish if they land before it; otherwise they open the v1.0.0 ladder)_
+
+### Fixed
+- **`lint --deep` probe isolation (QC vuln pass): pack code can no longer
+  drive the linter's own process.** Entries were imported in-process, so
+  pack.json cargo with top-level code could hijack the CLI's exit code
+  (`process.exit(7)` in an entry made `packstruct lint --deep` wire-exit 7
+  with zero output) or hang it forever (`for(;;){}` at top level). Probes
+  now run in a disposable child with a 5s SIGKILL timeout; both crash
+  classes became honest `entry-import` refusals naming the entry and the
+  reason. Fixtures both ways (`test/fixtures/edge/exit|spin`), wire-level
+  asserts: exit stays 1 - the CLI's own contract, never the entry's.
+- **`audit-conformance` loader caps (QC vuln pass):** a HOST loader is
+  arbitrary code in the shell it owns, but a refusal is instant - a loader
+  that hangs is killed at the 120s audit timeout (neither accept nor
+  refuse), and output above the 1MB spawn buffer counts as no-verdict.
+  Both surface as audit violations naming the case; loaders can no longer
+  surprise the harness with a hang or an output flood. Tests both ways.
+- Site/docs npm-style sweep: consumer examples speak `npx packstruct`
+  consistently, the npm package is linked from the landing (CTA row + nav),
+  docs (nav + footer + index), and the stale web example claiming
+  `armedByKey` must be non-empty (fixed by the crashtest#25 fold) is gone;
 
 ## [0.9.0] - 2026-10-24
 

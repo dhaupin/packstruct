@@ -9,9 +9,10 @@
 // (crashtest `fc93ca6` src/packs/loader.js:389-391) at author time.
 // PROBE ONLY: host module-shape norms stay host-owned (SPEC section 3) -
 // deep censes ids, it does not police the host's contract shapes.
-import { readFileSync, existsSync, readdirSync } from 'node:fs'
+import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
+import { spawnSync } from 'node:child_process'
 
 export function lintPacks(dir) {
   const violations = []
@@ -61,9 +62,12 @@ export function lintPacks(dir) {
   return { packsChecked, violations }
 }
 
-// Ids a deep probe extracts from ONE default export (generic over the two
-// house profiles: scenario `attacks[]/steps[]`, check `checks[]` - host
-// shapes stay host-owned, this never assigns shared meaning to them).
+// Ids ONE default export carries (generic over the two house profiles:
+// scenario `attacks[]/steps[]`, check `checks[]` - host shapes stay
+// host-owned, this never assigns shared meaning to them). Runs in-process
+// ONLY on inert data (JSON libraries); code modules are probed in a child
+// process via childProbe below - their top-level code must never run inside
+// the linter (it could exit() the CLI or spin it forever).
 function probeIds(def, pack) {
   const out = []
   const push = (id, at) => { if (typeof id === 'string' && id) out.push({ id, pack, at }) }
@@ -89,38 +93,106 @@ function probeIds(def, pack) {
 
 const DEEP_LIB_TAG = '(host-library)'
 
-// Load the host-library census reference (--against, packstruct#2 ask: the
-// id-vs-host-library census). Accepts a file or a directory: .json parses
-// directly, code modules import in-process and default-export ids in one of
-// the house profile shapes (generically probed - the library's internal
-// shapes stay the host's business).
-async function loadLibraryAgainst(ref) {
-  if (ref.endsWith('.json')) return JSON.parse(readFileSync(ref, 'utf8'))
-  if (existsSync(ref) && (await import('node:fs')).statSync(ref).isDirectory()) {
-    const entries = readdirSync(ref).filter(f => f.endsWith('.js') || f.endsWith('.mjs')).sort()
-    let merged = null
-    for (const f of entries) {
-      const mod = (await import(pathToFileURL(resolve(ref, f)).href)).default
-      merged = { parts: (merged?.parts ?? []).concat([{ file: f, mod }]) }
+// QC finding (crash class, fixed): deep used to import entries in-process,
+// so an entry and its own top-level code could drive the probe's process -
+// process.exit(7) made the CLI wire-exit 7 with no output, and an infinite
+// top-level loop hung it forever. Probes now run in a disposable child
+// (no shared module cache/no shared process). Kill on the timeout: a
+// refusal is instant, and a pack that stalls the exit-code contract is an
+// entry-import violation, not a hint.
+export const PROBE_TIMEOUT_MS = 5000
+const PROBE_MARKER = 'PROBE::'
+
+function childProbeScript(fileUrl) {
+  return `
+try {
+  const m = await import(${JSON.stringify(fileUrl)});
+  const d = m && m.default;
+  const out = { defaultExport: d !== undefined && d !== null, ids: [] };
+  const push = (id, at) => { if (typeof id === 'string' && id) out.ids.push({ id, at }) };
+  if (d && typeof d === 'object') {
+    push(d.name, 'module name');
+    for (const key of ['attacks', 'checks', 'scenarios']) {
+      const arr = d[key];
+      if (!Array.isArray(arr)) continue;
+      for (const item of arr) {
+        if (!item || typeof item !== 'object') continue;
+        push(item.id ?? item.name, key + '[]');
+        for (const sub of ['steps', 'phases']) {
+          if (!Array.isArray(item[sub])) continue;
+          for (const s of item[sub]) {
+            if (!s || typeof s !== 'object') continue;
+            push(s.id ?? s.name, key + '[].' + sub + '[]');
+          }
+        }
+      }
     }
-    return merged
   }
-  return (await import(pathToFileURL(resolve(ref)).href)).default
+  process.stdout.write(${JSON.stringify(PROBE_MARKER)} + JSON.stringify(out));
+} catch (e) {
+  process.stdout.write(${JSON.stringify(PROBE_MARKER)} + JSON.stringify({ importError: String((e && e.message) || e) }));
+}
+`
 }
 
-// Merge a dir-shaped library into one probeUnits list: [{id, at, from}].
-function libraryProbeUnits(lib, ref) {
-  if (lib?.parts) {
-    const out = []
-    for (const { file, mod } of lib.parts) {
-      for (const u of probeIds(mod, DEEP_LIB_TAG)) out.push({ ...u, at: `${file}: ${u.at}` })
-    }
-    return out
+// Probe one code module in the child. Returns the probe report or throws a
+// plain Error carrying the reason the probe could not report.
+function childProbe(absPath, timeoutMs = PROBE_TIMEOUT_MS) {
+  const fileUrl = pathToFileURL(absPath).href
+  const r = spawnSync(
+    process.execPath,
+    ['--input-type=module', '--no-warnings', '-e', childProbeScript(fileUrl)],
+    { encoding: 'utf8', timeout: timeoutMs, killSignal: 'SIGKILL' },
+  )
+  if (r.error && r.error.code === 'ENOENT') throw new Error(`no node runtime to probe with`)
+  const out = r.stdout ?? ''
+  const idx = out.lastIndexOf(PROBE_MARKER)
+  if (idx === -1) {
+    if (r.signal) throw new Error(`probe killed after the ${timeoutMs}ms timeout (signal ${r.signal}) - a pack stalling the probe is refusing the exit-code contract, and a refusal is instant`)
+    throw new Error(`entry terminated the probe process (exit ${r.status ?? 'null'}) before the probe could report`)
   }
-  return probeIds(lib, DEEP_LIB_TAG).map(u => ({ ...u, at: `ref: ${u.at}` }))
+  let report
+  try {
+    report = JSON.parse(out.slice(idx + PROBE_MARKER.length).trim())
+  } catch {
+    throw new Error('probe output was not parseable as a probe report')
+  }
+  return report
+}
+
+// Load the host-library census reference (--against, packstruct#2 ask: the
+// id-vs-host-library census). Accepts a file or a directory: .json parses
+// in-process (inert data - no code execution needed); code modules are
+// child-probed one by one, same as pack entries. The library's internal
+// shapes stay the host's business.
+async function collectLibraryUnits(ref, timeoutMs) {
+  const units = []
+  if (ref.endsWith('.json')) {
+    const obj = JSON.parse(readFileSync(ref, 'utf8'))
+    for (const u of probeIds(obj, DEEP_LIB_TAG)) units.push({ id: u.id, at: `json ref: ${u.at}` })
+    return units
+  }
+  let files
+  if (existsSync(ref) && statSync(ref).isDirectory()) {
+    files = readdirSync(ref).filter(f => f.endsWith('.js') || f.endsWith('.mjs')).sort().map(f => join(ref, f))
+  } else {
+    files = [resolve(ref)]
+  }
+  for (const file of files) {
+    let report
+    try {
+      report = childProbe(file, timeoutMs)
+    } catch (err) {
+      throw new Error(`${file}: ${err.message}`)
+    }
+    if (report.importError !== undefined) throw new Error(`${file}: failed to import: ${report.importError}`)
+    for (const { id, at } of report.ids) units.push({ id, at: `${file}: ${at}` })
+  }
+  return units
 }
 
 export async function deepLintPacks(dir, opts = {}) {
+  const timeoutMs = Number.isFinite(opts.probeTimeoutMs) ? opts.probeTimeoutMs : PROBE_TIMEOUT_MS
   const shallow = lintPacks(dir)
   const violations = [...shallow.violations]
   const publicDir = join(dir, 'public')
@@ -140,14 +212,14 @@ export async function deepLintPacks(dir, opts = {}) {
   // namespaced-ids norm, engine side: the #19 44-vs-49 zero-collision claim).
   if (opts.against !== undefined) {
     try {
-      const lib = await loadLibraryAgainst(opts.against)
-      for (const { id, at } of libraryProbeUnits(lib, opts.against)) {
+      const lib = await collectLibraryUnits(opts.against, timeoutMs)
+      for (const { id, at } of lib) {
         if (idSeen.has(id)) continue // the library's own internals: not ours to judge
         idSeen.set(id, { pack: DEEP_LIB_TAG, at: `--against (${at})` })
         libraryIds++
       }
     } catch (err) {
-      violations.push({ pack: DEEP_LIB_TAG, norm: 'library-ref', message: `--against "${opts.against}": failed to load the host library: ${err.message}` })
+      violations.push({ pack: DEEP_LIB_TAG, norm: 'library-ref', message: `--against "${opts.against}": ${err.message}` })
     }
   }
   for (const name of readdirSync(publicDir).sort()) {
@@ -171,21 +243,25 @@ export async function deepLintPacks(dir, opts = {}) {
     // Entry probe (packstruct#2 ask 1): import once, in-process.
     if (flagged === 'entry') continue // missing/invalid entry: shallow already refused
     if (typeof m.entry !== 'string' || !existsSync(join(packDir, m.entry))) continue
-    let mod = null
+    let report
     try {
-      mod = await import(pathToFileURL(resolve(packDir, m.entry)).href)
+      report = childProbe(resolve(packDir, m.entry), timeoutMs)
     } catch (err) {
-      violations.push({ pack: name, norm: 'entry-import', message: `entry "${m.entry}" failed to import: ${err.message}` })
+      violations.push({ pack: name, norm: 'entry-import', message: `entry "${m.entry}": ${err.message}` })
       continue
     }
-    if (mod === null || typeof mod !== 'object' || mod.default === undefined) {
+    if (report.importError !== undefined) {
+      violations.push({ pack: name, norm: 'entry-import', message: `entry "${m.entry}" failed to import: ${report.importError}` })
+      continue
+    }
+    if (!report.defaultExport) {
       violations.push({ pack: name, norm: 'entry-default-export', message: `entry "${m.entry}" has no default export - the loader would report it as an entry failure (SPEC section 3)` })
       continue
     }
     modulesProbed++
     // Census (packstruct#2 ask 2): raw ids across the pack corpus, plus
     // within-pack duplicates - engine parity before the host ever loads.
-    for (const { id, at } of probeIds(mod.default, name)) {
+    for (const { id, at } of report.ids) {
       idsCensused++
       if (idsCensused > MAX_IDS) {
         violations.push({ pack: name, norm: 'deep-floor', message: `census floor exceeded (>${MAX_IDS} ids) - refusing to walk further rather than pretending` })

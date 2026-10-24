@@ -34,8 +34,13 @@ npx packstruct lint packs/ --deep --against lib/   # + host-library id census
 The manifest pass stops at file existence. `--deep` goes as far as the
 linter can go without becoming a host:
 
-1. **Import** each declared entry once, in-process, and name the failure if
-   the host's loader would have hit it (`entry "..." failed to import`).
+1. **Probe** each declared entry in a disposable child process (its
+   top-level code runs there, never inside the linter - a crashing entry
+   cannot take the CLI's exit code with it, and a stalls-at-startup entry
+   is killed at the 5s probe timeout instead of hanging the CLI), and name
+   the failure the host's loader would have hit (`entry "..." failed to
+   import`, or an honest `entry-import` refusal when the entry terminates
+   or stalls the probe itself).
 2. **Check** the default export exists (SPEC section 3: entry is an ES
    module with a default export).
 3. **Census ids** - module names and attack/step names (scenario shape) or

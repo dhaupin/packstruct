@@ -34,6 +34,7 @@ export default function Home() {
             <Link className="btn btn-primary" to="/spec">Read the spec</Link>
             <Link className="btn btn-ghost" to="/lint">Lint your pack.json</Link>
             <a className="btn btn-ghost" href="https://docs.creadev.org/packstruct/">Full docs</a>
+            <a className="btn btn-ghost" href="https://www.npmjs.com/package/packstruct" target="_blank" rel="noreferrer">npm package</a>
             <a className="btn btn-ghost" href="https://github.com/dhaupin/packstruct" target="_blank" rel="noreferrer">View on GitHub</a>
           </div>
           <pre className="code"><span className="dim"># the directory contract</span>{'\n'}packs/{'\n'}  public/{'\n'}    &lt;pack-name&gt;/{'\n'}      pack.json      <span className="dim"># REQUIRED: schemaVersion 1, name matches dir, entry exists</span>{'\n'}      &lt;entry&gt;        <span className="dim"># REQUIRED: created by pack.json "entry"</span>{'\n\n'}<span className="ok">ok</span> tg/data-boundary       <span className="dim">v1.0.0 - entry ships, name matches its dir</span>{'\n'}<span className="bad">ERR</span> tg/broken-ref          <span className="dim">entry "index.js" does not exist - instant nameable refusal (crashtest#16)</span></pre>
@@ -75,7 +76,7 @@ export default function Home() {
             <div className="card"><h3>One address for authors</h3><p>"How do I write a pack?" has one answer: read packstruct, pick your app's declared profile. No archaeology in two repos.</p></div>
             <div className="card"><h3>Frozen from reality</h3><p>v1 is what crashtest's eight production packs already ship, verified pack-by-pack: nothing to migrate, poststruct adopts fresh.</p></div>
             <div className="card"><h3>Cheap future consumers</h3><p>Any struct-family tool that wants a <code>/packs</code> dir adopts the spec instead of inventing a third dialect.</p></div>
-            <div className="card"><h3>Conformance, not vibes</h3><p>The lint CLI is the first artifact; a conformance harness (<code>packstruct audit-conformance</code>) follows at the 1.0.0 ladder rung.</p></div>
+            <div className="card"><h3>Conformance, not vibes</h3><p>The lint CLI is live on npm (<code>packstruct@0.9.0</code>); the conformance harness (<code>packstruct audit-conformance</code>) shipped with it - bundled verdict-claiming packs verify a host loader honors the spec, so the <code>implements: packstruct@1</code> pin is verifiable, not honorary.</p></div>
           </div>
         </div>
       </section>
