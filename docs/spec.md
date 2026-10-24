@@ -24,7 +24,9 @@ this page mirrors its frame:
 4. Lifecycle norms: explicit loads, slug-namespaced ids, self-audit fixtures
 5. Errors: instant, nameable, never a deep stack trace
 6. Versioning: additive-first; removals are major bumps with migration notes
-7. Conformance tooling: `packstruct lint` now, the audit-conformance harness in M2
+7. Conformance tooling: `packstruct lint` + the `audit-conformance` harness
+   (bundled verdict-claiming cases verify a HOST loader honors the spec -
+   see [the harness page](https://docs.creadev.org/packstruct/conformance))
 
 <div class="crosslinks">
 <p><strong>More in these docs:</strong>
