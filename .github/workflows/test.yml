@@ -2,6 +2,9 @@ name: test
 on:
   push: { branches: [main] }
   pull_request: { branches: [main] }
+  # Re-run surface: canceled-by-external-agent runs should be re-triggerable
+  # without a noise commit on the fold trail.
+  workflow_dispatch:
 jobs:
   test:
     # Bounded: the QC hang class showed up as an invisible forever-run; a
