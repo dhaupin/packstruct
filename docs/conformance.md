@@ -43,7 +43,7 @@ non-dotted version), and a name-collision pair. For each case the harness:
 
 Any other outcome is an audit violation naming the case:
 
-```
+```text
 packstruct audit-conformance: 5/8 case(s) honored by the loader over .
   AUDIT schema-version [audit-refuse]: loader exit 0 (loader accepted) on case "schema-version" - the spec verdict is refuse
   AUDIT clean [audit-accept]: loader exit 1 on case "clean" - the spec verdict is accept
