@@ -19,3 +19,8 @@ jobs:
           fi
           # dogfood: the repo's own packs tree (the crashtest scenario pack) is itself SPEC-v1 shaped
           node bin/cli.mjs lint packs
+      # The refusal matrix must stay honest: any linter change that flips a
+      # battery row's verdict fails here loudly (scripts/gen-refusal-matrix.mjs
+      # refuses to write a lying matrix).
+      - name: Verify the refusal matrix stays honest (packstruct#3)
+        run: node scripts/gen-refusal-matrix.mjs

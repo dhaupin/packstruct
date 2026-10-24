@@ -37,3 +37,10 @@ jobs:
 
       - name: Lint the corpus manifests (8 packs, expect clean)
         run: node bin/cli.mjs lint corpus-crashtest/packs
+
+      # Deep probe over the SAME pinned tree: entries imported once
+      # in-process, ids censused. Receipt (labs/corpus-receipt.md deep run,
+      # 2026-10-24): 8/8 modules probed, 44 ids, zero violations - the #19
+      # audit's id space independently reproduced through our own linter.
+      - name: Deep-probe the corpus (entry import + id census, expect clean)
+        run: node bin/cli.mjs lint corpus-crashtest/packs --deep

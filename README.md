@@ -25,6 +25,9 @@ packs/
 ```bash
 npx packstruct lint packs/          # human, exit 0 clean / 1 violations / 2 usage
 npx packstruct lint packs/ --json   # machine-readable: {schema, packsChecked, violations}
+
+npx packstruct lint packs/ --deep   # + entry import, default-export check, id census
+npx packstruct lint packs/ --deep --json   # adds mode, modulesProbed, idsCensused
 ```
 
 The linter validates `schemaVersion === 1`, kebab-case name matching its

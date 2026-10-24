@@ -1,0 +1,118 @@
+#!/usr/bin/env node
+/**
+ * scripts/gen-refusal-matrix.mjs - the packstruct column of the shared
+ * refusal matrix (dhaupin/packstruct#3).
+ *
+ * No-fiction rule honored mechanically: every row's refusal verdict is
+ * generated from the ACTUAL linter run over the actual bytes on disk, never
+ * from what the code reads like it would do. A row whose observed verdict
+ * disagrees with its expectation REFUSES THE RUN (exit 1) - the matrix can
+ * never silently go stale or lie.
+ *
+ * Outputs, written only when every row proves honest:
+ *   labs/refusal-matrix.packstruct.json  - the packstruct column
+ *   labs/refusal-battery/<id>.json       - portable shape files: hosts run
+ *     the same battery through THEIR loader and give back their column
+ *     (dhaupin/packstruct#3's third column; crashtest ask filed from here).
+ */
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { lintPacks } from '../src/lint.mjs'
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
+const PKG_VERSION = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')).version
+
+const base = { schemaVersion: 1, name: 'shape-pack', version: '1.0.0', entry: 'probes-entry.js', description: 'battery base - clean otherwise' }
+
+const BATTERY = [
+  { id: 'schemaVersion-num-2', mutate: { schemaVersion: 2 }, expect: { refused: true, norms: ['schemaVersion'] } },
+  { id: 'schemaVersion-string-1', mutate: { schemaVersion: '1' }, expect: { refused: true, norms: ['schemaVersion'] } },
+  { id: 'schemaVersion-missing', drop: ['schemaVersion'], expect: { refused: true, norms: ['schemaVersion'] } },
+  { id: 'name-uppercase', mutate: { name: 'Shape-Pack' }, expect: { refused: true, norms: ['name-kebab-case', 'name-dir-match'] } },
+  { id: 'name-dir-mismatch', mutate: { name: 'other-name' }, expect: { refused: true, norms: ['name-dir-match'] } },
+  { id: 'version-major-only', mutate: { version: '1' }, expect: { refused: true, norms: ['version'] } },
+  { id: 'version-two-part-ok', mutate: { version: '1.0' }, expect: { refused: false } },
+  { id: 'description-empty', mutate: { description: '' }, expect: { refused: true, norms: ['description'] } },
+  { id: 'entry-parent-escape', mutate: { entry: '../escape.js' }, expect: { refused: true, norms: ['entry'] } },
+  { id: 'entry-missing-file', mutate: { entry: 'ghost.js' }, expect: { refused: true, norms: ['entry'] } },
+  { id: 'armedByKey-empty', mutate: { armedByKey: '' }, expect: { refused: true, norms: ['armedByKey'] } },
+  { id: 'armedByKey-ok', mutate: { armedByKey: 'wp-money' }, expect: { refused: false } },
+  { id: 'unknown-key-allowed', mutate: { snapshot: 'host-owned extra' }, expect: { refused: false } },
+  { id: 'host-owned-env-allowed', mutate: { env: { kv: {} } }, expect: { refused: false } },
+  { id: 'manifest-invalid-json', malformed: true, expect: { refused: true, norms: ['manifest-invalid'] } },
+  { id: 'manifest-missing', noManifest: true, expect: { refused: true, norms: ['manifest-missing'] } },
+]
+
+// Materialize one packs-root per shape in a temp dir, run the ACTUAL linter.
+const tmp = mkdtempSync(join(tmpdir(), 'packstruct-matrix-'))
+let failures = 0
+const rows = []
+try {
+  for (const shape of BATTERY) {
+    const packsRoot = join(tmp, shape.id, 'packs')
+    const packDir = join(packsRoot, 'public', 'shape-pack')
+    mkdirSync(packDir, { recursive: true })
+    if (!shape.noManifest) {
+      const manifest = { ...base }
+      for (const k of shape.drop ?? []) delete manifest[k]
+      Object.assign(manifest, shape.mutate ?? {})
+      writeFileSync(join(packDir, 'pack.json'), shape.malformed ? '{"schemaVersion":1,' : `${JSON.stringify(manifest, null, 2)}\n`)
+    }
+    // The entry file: present unless the shape points somewhere else.
+    if (shape.mutate?.entry === undefined && !shape.drop?.includes('entry')) {
+      writeFileSync(join(packDir, 'probes-entry.js'), 'export default { name: "battery", description: "probe", attacks: [] }\n')
+    }
+    const r = lintPacks(packsRoot)
+    // ALL pack-level violations form the verdict (a shape can break
+    // multiple norms at once - name-uppercase breaks kebab AND dir-match).
+    const shapeViolations = r.violations.filter(v => !['usage', 'directory-contract'].includes(v.norm))
+    const observed = shapeViolations.length
+      ? { refused: true, norms: shapeViolations.map(v => v.norm) }
+      : { refused: false, norms: [] }
+    const honest = observed.refused === shape.expect.refused
+      && (shape.expect.norms ?? []).every(n => observed.norms.includes(n))
+    if (!honest) {
+      failures++
+      console.error(`MATRIX DISAGREES! shape ${shape.id}:\n  expected ${JSON.stringify(shape.expect)}\n  observed ${JSON.stringify(observed)}\n  raw: ${JSON.stringify(r.violations)}`)
+    }
+    rows.push({
+      id: shape.id,
+      manifest: shape.noManifest ? '(no pack.json)' : (shape.malformed ? '(malformed JSON)' : { ...base, ...(shape.mutate ?? {}) }),
+      packstruct: observed,
+      expected: shape.expect,
+      honest,
+    })
+  }
+  // The missing-public shape (root-level contract): separate tiny root.
+  const noPublicRoot = join(tmp, 'missing-public', 'packs')
+  mkdirSync(noPublicRoot, { recursive: true })
+  const r = lintPacks(noPublicRoot)
+  const obs = r.violations.some(v => v.norm === 'directory-contract')
+  rows.push({ id: 'missing-public-dir', packstruct: { refused: obs, norms: obs ? ['directory-contract'] : [] }, expected: { refused: true, norms: ['directory-contract'] }, honest: obs })
+  if (!obs) { failures++; console.error('MATRIX DISAGREES! missing-public-dir not refused') }
+
+  if (failures) {
+    console.error(`refusal matrix: ${failures} row(s) dishonest - refusing to write the matrix (fix the linter or the expectation, never the check)`)
+    process.exit(1)
+  }
+  // Portable battery for host columns (crashtest next; poststruct when online).
+  const batteryDir = join(ROOT, 'labs', 'refusal-battery')
+  mkdirSync(batteryDir, { recursive: true })
+  for (const shape of BATTERY) {
+    writeFileSync(join(batteryDir, `${shape.id}.json`), JSON.stringify({
+      id: shape.id,
+      dirName: 'shape-pack',
+      manifest: shape.noManifest ? null : (shape.malformed ? 'INVALID JSON PLACEHOLDER - see gen-refusal-matrix.mjs' : { ...base, ...(shape.mutate ?? {}) }),
+      writeEntryFile: !(shape.mutate?.entry ?? '').includes('..') && shape.mutate?.entry !== 'ghost.js' && !shape.noManifest && !shape.malformed,
+      expect: { refused: shape.expect.refused, norms: shape.expect.norms },
+      note: 'Hosts: materialize dirName/pack.json (create pack.json only when manifest is non-null; substitute the placeholder bytes for malformed), run YOUR validator over it, return { id, host: refused, norms }. Column 3 of the golden matrix (dhaupin/packstruct#3).',
+    }, null, 2) + '\n')
+  }
+  writeFileSync(join(batteryDir, 'missing-public-dir.json'), JSON.stringify({ id: 'missing-public-dir', note: 'empty packs root (no public/) - expect a directory-contract refusal' }, null, 2) + '\n')
+  writeFileSync(join(ROOT, 'labs', 'refusal-matrix.packstruct.json'), JSON.stringify({ schema: 1, tool: 'packstruct lint', version: PKG_VERSION, rows }, null, 2) + '\n')
+  console.log(`refusal matrix: ${rows.length} row(s), all honest - labs/refusal-matrix.packstruct.json + labs/refusal-battery/ written`)
+} finally {
+  rmSync(tmp, { recursive: true, force: true })
+}

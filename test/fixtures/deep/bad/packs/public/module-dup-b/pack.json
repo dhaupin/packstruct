@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "module-dup-b",
+  "description": "Deep bad fixture: claims an id its sibling pack already claimed.",
+  "version": "0.1.0",
+  "entry": "index.mjs"
+}

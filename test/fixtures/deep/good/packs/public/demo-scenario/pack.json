@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "demo-scenario",
+  "description": "Deep-mode pass fixture: manifest clean, entry imports, ids censusable.",
+  "version": "0.1.0",
+  "entry": "index.mjs"
+}

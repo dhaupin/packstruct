@@ -27,6 +27,16 @@ the packstruct#-as-shipped linter with no corpus-side changes. The CI lane
 on every `main` push, so any packstruct linter change that would start
 refusing the live corpus becomes visible in lint-CI immediately.
 
+## Deep receipt (packstruct#2 lands on the same lane, 2026-10-24)
+
+- Command: `node bin/cli.mjs lint <crashtest-checkout>/packs --deep --json`
+- Output: `{mode: deep, packsChecked: 8, modulesProbed: 8, idsCensused: 44, violations: []}` - exit 0.
+- Reading: 44 ids censused, zero collisions - the crashtest#19 id-space
+  census independently reproduced through packstruct's own linter (the
+  corpus modules are probed in-process; their relative imports resolve
+  inside the pinned tree, which is why the lane pins the full repo).
+- CI: the corpus lane runs this as its second step.
+
 ## Boundaries (one truth per concern)
 
 - Zero runtime dependencies: the lane clones pin first (`actions/checkout`

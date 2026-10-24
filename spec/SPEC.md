@@ -89,13 +89,17 @@ repo does" never blur). Engine rows are from crashtest `fc93ca6`,
 An entry is an ES module with a default export. The manifest/dir/entry surface
 never forks between hosts; execution semantics are declared as profiles:
 
-- **`scenario` profile (crashtest):** default export = `register(ctx)`.
-  Contains hostile scenarios executed against a transport; hosts of this
-  profile provide isolation (fake transport, opt-out postures) and support
-  the `armedByKey` ceremony. The execution-semantics contract lives with the
-  host (crashtest's `reference/scenario-contract`); `profiles/scenario.md`
-  links to it rather than copying it - doc drift is worse than indirection
-  (ruled on crashtest#19).
+- **`scenario` profile (crashtest):** default export = a module object
+  carrying `name`, `description`, and an `attacks[]` array (attack names
+  kebab-case, each with a `run` function or a `steps` chain). Contains
+  hostile scenarios executed against a transport; hosts of this profile
+  provide isolation (fake transport, opt-out postures) and support the
+  `armedByKey` ceremony. The module-shape contract is HOST-OWNED in full:
+  it lives with the host (crashtest's `reference/scenario-contract`);
+  `profiles/scenario.md` links to it rather than copying it - doc drift is
+  worse than indirection (ruled on crashtest#19; the `register(ctx)` shape
+  in earlier drafts of this section was stale, deleted against the engine
+  truth at `fc93ca6` per the engine-first rule).
 - **`check` profile (poststruct):** default export = `{ checks: [Check] }`.
   Declarative pure-reading verifiers over files on disk. No transport, no
   network by default. Arming defaults to config enumeration: being listed in

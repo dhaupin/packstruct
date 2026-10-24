@@ -8,6 +8,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Refusal-matrix packstruct column (#3).** `scripts/gen-refusal-matrix.mjs`
+  runs a 17-row hostile-manifest battery (shapes + allowed corners) against
+  the ACTUAL linter bytes-on-disk and refuses the run if any row's observed
+  verdict disagrees with its expectation - the matrix cannot go stale or
+  lie. Outputs `labs/refusal-matrix.packstruct.json` (the golden column)
+  and portable `labs/refusal-battery/*.json` for host consumption; wired
+  into the test workflow so a verdict regression fails CI loudly. The
+  host-column asks (crashtest next, poststruct when online) carry their
+  own battery files.
+- **`lint --deep` (#2).** Load-level probe, honest about its floor: imports
+  each declared entry once in-process and names the failure the host's
+  loader would hit; checks the default export exists; censuses ids
+  (module/attack/step/check names, generic over the two house profiles) for
+  within-pack duplicates, cross-pack collisions, and duplicate pack names -
+  the engine's shared-`seen` refusal (crashtest fc93ca6
+  `src/packs/loader.js:389-391`) at author time. JSON output gains
+  `mode`, `modulesProbed`, `idsCensused`. Probe only: host module-shape
+  norms stay host-owned (SPEC section 3); the id-vs-host-library census
+  needs a host library reference and stays open on #2. Fixtures both ways
+  (`test/fixtures/deep/`), self-test extended, corpus lane now deep-probed
+  (receipt: 8/8 packs, 44 ids, zero collisions - the crashtest#19 census
+  reproduced through our own linter).
 - **Reciprocal corpus lane (#3).** `corpus.yml` runs `packstruct lint` over
   crashtest's 8 shipped packs at the audited pin (`fc93ca6`) on every main
   push; local receipt in `labs/corpus-receipt.md` (8/8 clean, zero
