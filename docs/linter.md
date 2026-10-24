@@ -24,7 +24,9 @@ npx packstruct lint packs/ --json   # { schema, packsChecked, violations }
 
 npx packstruct lint packs/ --deep   # + entry import + id census, exit 0/1/2
 npx packstruct lint packs/ --deep --json
-                                    # { schema, mode, packsChecked, modulesProbed, idsCensused, violations }
+                                    # { schema, mode, packsChecked, modulesProbed, idsCensused, libraryIds, violations }
+
+npx packstruct lint packs/ --deep --against lib/   # + host-library id census
 ```
 
 ## --deep: load-level parity (probe only)
@@ -42,15 +44,28 @@ linter can go without becoming a host:
    shared-`seen` refusal (crashtest `loader.js:389-391`) now happens at
    author time.
 
+## --against: the host-library census
+
+Packs collide not only with each other but with the host's own built-in
+library. `--against <path>` seeds the census with the library's ids before
+the pack walk, so a pack id that claims a library id refuses at author
+time (`id-library-collision`) - no host load needed:
+
+- `<path>` is a file (.json parses; ESM imports) or a directory of modules;
+- ids are probed generically (module/attack/step/check names), never
+  shape-judged - the library's internals stay the host's business;
+- a library that fails to load names the failure (`library-ref`) but still
+  lets the pack census run.
+
 Boundaries, spelled out: deep is a PROBE. Host module-shape norms stay
 host-owned (SPEC section 3) - deep censes ids, it does not police the
-host's contract shapes, and the id-vs-host-library census needs a host
-library reference, which is future work (tracked in packstruct#2).
-Importing runs the entry's top-level code; data modules are inert, and
-hostile modules are the host's isolation domain, not the linter's.
+host's contract shapes. Importing runs the entry's top-level code; data
+modules are inert, and hostile modules are the host's isolation domain,
+not the linter's.
 
 Receipt: lints crashtest's 8 shipped packs deep-clean on the pinned corpus
-lane - 44 ids censused, zero collisions (see labs/corpus-receipt.md).
+lane - 44 pack ids `--against` the 63 seeded library ids, zero collisions
+(see labs/corpus-receipt.md).
 
 Runs in both fleet repos' CI the day it works (dogfooding rule: replace
 hand-rolled manifest checks, don't fork the contract).

@@ -30,6 +30,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`test/fixtures/deep/`), self-test extended, corpus lane now deep-probed
   (receipt: 8/8 packs, 44 ids, zero collisions - the crashtest#19 census
   reproduced through our own linter).
+- **`lint --deep --against <path>` (#2): the host-library census.** Seeds
+  the id census with a host library's ids (a JSON file, an ESM module, or a
+  directory of modules - generically probed, shape-neutral) so pack ids
+  claiming library ids refuse at author time (`id-library-collision`); a
+  failing library ref names itself (`library-ref`) without blocking the
+  pack walk. Receipt: 44 pack ids vs 63 library ids across crashtest's
+  built-in scenario library, zero collisions (labs/corpus-receipt.md); CI
+  runs it as the corpus lane's third step. #2's boundary (host library
+  census vs the engine's flat id space) documented in the same close-out.
 - **Reciprocal corpus lane (#3).** `corpus.yml` runs `packstruct lint` over
   crashtest's 8 shipped packs at the audited pin (`fc93ca6`) on every main
   push; local receipt in `labs/corpus-receipt.md` (8/8 clean, zero

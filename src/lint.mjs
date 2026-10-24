@@ -83,12 +83,46 @@ function probeIds(def, pack) {
   return out
 }
 
-export async function deepLintPacks(dir) {
+const DEEP_LIB_TAG = '(host-library)'
+
+// Load the host-library census reference (--against, packstruct#2 ask: the
+// id-vs-host-library census). Accepts a file or a directory: .json parses
+// directly, code modules import in-process and default-export ids in one of
+// the house profile shapes (generically probed - the library's internal
+// shapes stay the host's business).
+async function loadLibraryAgainst(ref) {
+  if (ref.endsWith('.json')) return JSON.parse(readFileSync(ref, 'utf8'))
+  if (existsSync(ref) && (await import('node:fs')).statSync(ref).isDirectory()) {
+    const entries = readdirSync(ref).filter(f => f.endsWith('.js') || f.endsWith('.mjs')).sort()
+    let merged = null
+    for (const f of entries) {
+      const mod = (await import(pathToFileURL(resolve(ref, f)).href)).default
+      merged = { parts: (merged?.parts ?? []).concat([{ file: f, mod }]) }
+    }
+    return merged
+  }
+  return (await import(pathToFileURL(resolve(ref)).href)).default
+}
+
+// Merge a dir-shaped library into one probeUnits list: [{id, at, from}].
+function libraryProbeUnits(lib, ref) {
+  if (lib?.parts) {
+    const out = []
+    for (const { file, mod } of lib.parts) {
+      for (const u of probeIds(mod, DEEP_LIB_TAG)) out.push({ ...u, at: `${file}: ${u.at}` })
+    }
+    return out
+  }
+  return probeIds(lib, DEEP_LIB_TAG).map(u => ({ ...u, at: `ref: ${u.at}` }))
+}
+
+export async function deepLintPacks(dir, opts = {}) {
   const shallow = lintPacks(dir)
   const violations = [...shallow.violations]
   const publicDir = join(dir, 'public')
+  let libraryIds = 0
   if (!existsSync(publicDir)) {
-    return { packsChecked: shallow.packsChecked, violations, modulesProbed: 0, idsCensused: 0 }
+    return { packsChecked: shallow.packsChecked, violations, modulesProbed: 0, idsCensused: 0, libraryIds }
   }
   const shallowFlagged = new Map()
   for (const v of shallow.violations) shallowFlagged.set(v.pack, v.norm)
@@ -97,6 +131,21 @@ export async function deepLintPacks(dir) {
   const MAX_IDS = 100000 // census floor: refuse pathological corpora loudly
   let modulesProbed = 0
   let idsCensused = 0
+  // Seed the census with the host library (--against): pack ids colliding
+  // with library ids refuse as id-library-collision (SPEC section 4's
+  // namespaced-ids norm, engine side: the #19 44-vs-49 zero-collision claim).
+  if (opts.against !== undefined) {
+    try {
+      const lib = await loadLibraryAgainst(opts.against)
+      for (const { id, at } of libraryProbeUnits(lib, opts.against)) {
+        if (idSeen.has(id)) continue // the library's own internals: not ours to judge
+        idSeen.set(id, { pack: DEEP_LIB_TAG, at: `--against (${at})` })
+        libraryIds++
+      }
+    } catch (err) {
+      violations.push({ pack: DEEP_LIB_TAG, norm: 'library-ref', message: `--against "${opts.against}": failed to load the host library: ${err.message}` })
+    }
+  }
   for (const name of readdirSync(publicDir).sort()) {
     const packDir = join(publicDir, name)
     let isDir = true
@@ -136,7 +185,7 @@ export async function deepLintPacks(dir) {
       idsCensused++
       if (idsCensused > MAX_IDS) {
         violations.push({ pack: name, norm: 'deep-floor', message: `census floor exceeded (>${MAX_IDS} ids) - refusing to walk further rather than pretending` })
-        return { packsChecked: shallow.packsChecked, violations, modulesProbed, idsCensused }
+        return { packsChecked: shallow.packsChecked, violations, modulesProbed, idsCensused, libraryIds }
       }
       const first = idSeen.get(id)
       if (first === undefined) { idSeen.set(id, { pack: name, at }); continue }
@@ -145,12 +194,16 @@ export async function deepLintPacks(dir) {
           violations.push({ pack: name, norm: 'id-duplicate', message: `id "${id}" appears twice within the pack (first: ${first.at})` })
         }
       } else {
-        if (!violations.some(v => v.norm === 'id-collision' && v.message.includes(`"${id}"`))) {
-          violations.push({ pack: name, norm: 'id-collision', message: `id "${id}" claimed by both ${first.pack}/ (${first.at}) and ${name}/ (${at}) - the host id space cannot carry both` })
+        const vsLibrary = first.pack === DEEP_LIB_TAG
+        const norm = vsLibrary ? 'id-library-collision' : 'id-collision'
+        if (!violations.some(v => v.norm === norm && v.message.includes(`"${id}"`))) {
+          const who = vsLibrary
+            ? `the host library (${first.at})` : `${first.pack}/ (${first.at})`
+          violations.push({ pack: name, norm, message: `id "${id}" claimed by both ${who} and ${name}/ (${at}) - the host id space cannot carry both` })
         }
       }
     }
   }
-  return { packsChecked: shallow.packsChecked, violations, modulesProbed, idsCensused }
+  return { packsChecked: shallow.packsChecked, violations, modulesProbed, idsCensused, libraryIds }
 }
 

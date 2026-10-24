@@ -33,7 +33,8 @@ export default function Nav() {
       <nav className="nav">
         <div className="wrap nav-inner">
           <Link to="/" className="brand" onClick={() => setOpen(false)}>
-            <span className="brand-pack">pack</span>struct
+            <img src="/icon.svg" alt="" className="brand-logo" aria-hidden="true" />
+            <span><span className="brand-pack">pack</span>struct</span>
             <span className="brand-badge">spec v1</span>
           </Link>
           <div className="nav-right">

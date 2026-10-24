@@ -42,6 +42,20 @@ if (!deepNorms.has('id-duplicate')) {
   console.error(`FAIL deep norms missing: id-duplicate\ngot: ${JSON.stringify(deepBad.violations, null, 2)}`); process.exit(1)
 }
 
+// --- deep + --against (host-library census): clean library = 2 ids seeded,
+// no collisions; colliding library = id-library-collision rows ---
+const libGood = await deepLintPacks(DEEP_GOOD, { against: 'test/fixtures/deep/library-good.mjs' })
+if (libGood.violations.length) {
+  console.error('FAIL deep --against clean library should not violate:', libGood.violations); process.exit(1)
+}
+if (libGood.libraryIds !== 2) {
+  console.error(`FAIL --against clean library seeded ${libGood.libraryIds} ids (want 2)`); process.exit(1)
+}
+const libBad = await deepLintPacks(DEEP_GOOD, { against: 'test/fixtures/deep/library-bad.mjs' })
+if (!libBad.violations.some(v => v.norm === 'id-library-collision')) {
+  console.error(`FAIL colliding library should yield id-library-collision:\n${JSON.stringify(libBad.violations, null, 2)}`); process.exit(1)
+}
+
 // --- wire-level checks (the honest bin invocation, as docs/CI write it) ---
 const wire = spawnSync(process.execPath, ['bin/cli.mjs', 'lint', GOOD, '--json'], { encoding: 'utf8' })
 if (wire.status !== 0 || JSON.parse(wire.stdout).violations.length !== 0) {
@@ -61,4 +75,10 @@ if (wireDeepBad.status === 0) {
   process.exit(1)
 }
 
-console.log(`packstruct self-test: good pack clean, bad pack caught (${bad.violations.length} violations), wire subcommand OK, deep pass/bad both ways (${deepGood.idsCensused} ids censused good-side, ${deepBad.violations.length} deep violations bad-side) - PASS`)
+const wireAgainst = spawnSync(process.execPath, ['bin/cli.mjs', 'lint', DEEP_GOOD, '--deep', '--against', 'test/fixtures/deep/library-good.mjs', '--json'], { encoding: 'utf8' })
+const againstJson = JSON.parse(wireAgainst.stdout)
+if (wireAgainst.status !== 0 || againstJson.libraryIds !== 2) {
+  console.error(`FAIL wire-level --against: exit ${wireAgainst.status}\n${wireAgainst.stdout}\n${wireAgainst.stderr}`)
+  process.exit(1)
+}
+console.log(`packstruct self-test: good pack clean, bad pack caught (${bad.violations.length} violations), wire subcommand OK, deep pass/bad both ways (${deepGood.idsCensused} ids censused good-side, ${deepBad.violations.length} deep violations bad-side), --against both ways (${libGood.libraryIds} seeded clean, ${libBad.violations.filter(v => v.norm === 'id-library-collision').length} library collisions) - PASS`)

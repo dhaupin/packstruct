@@ -44,3 +44,11 @@ jobs:
       # audit's id space independently reproduced through our own linter.
       - name: Deep-probe the corpus (entry import + id census, expect clean)
         run: node bin/cli.mjs lint corpus-crashtest/packs --deep
+
+      # Host-library census: the pack ids vs the built-in scenario library
+      # inside the same pinned tree. Receipt (labs/corpus-receipt.md,
+      # 2026-10-24): 63 library ids seeded (module + attack + step names;
+      # the #19 count of 49 counts attacks only - taxonomic difference,
+      # not a contradiction), zero collisions, exit 0.
+      - name: Census pack ids against the built-in library (expect clean)
+        run: node bin/cli.mjs lint corpus-crashtest/packs --deep --against corpus-crashtest/src/scenarios/library

@@ -92,6 +92,7 @@ html[data-theme="light"] .theme-switch .icon-sun { display: block; }
 .nav-burger:hover { border-color: var(--ink-soft); }
 .nav-burger svg { width: 18px; height: 18px; display: block; }
 .brand { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--ink); font-weight: 700; letter-spacing: 0.02em; }
+.brand-logo { width: 20px; height: 20px; display: block; border-radius: 5px; }
 .brand-pack { color: var(--accent); }
 .brand-badge { font-size: 10px; color: var(--ink-soft); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; }
 .nav-links { display: flex; gap: 16px; }

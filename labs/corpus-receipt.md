@@ -37,6 +37,19 @@ refusing the live corpus becomes visible in lint-CI immediately.
   inside the pinned tree, which is why the lane pins the full repo).
 - CI: the corpus lane runs this as its second step.
 
+## --against receipt (packstruct#2's host-library census, 2026-10-24)
+
+- Command: `node bin/cli.mjs lint <crashtest-checkout>/packs --deep --against <crashtest-checkout>/src/scenarios/library`
+- Output: exit 0 - `8 pack(s) checked - 8 module(s) probed, 44 id(s) censused, 63 library id(s) seeded`, zero violations.
+- Reading: the 44 pack ids vs the 14-module built-in library: **zero
+  collisions**, still - the second crashtest#19 head-claim reproduced
+  end-to-end through the CLI. Census-floor note, documented so nobody
+  re-litigates it later: 63 library ids are seeded because the probe
+  counts module names + attack names + step names; #19's "49" counts
+  attacks only. A taxonomic difference, not a contradiction - and the
+  collision CHECK is identical (id vs id).
+- CI: the corpus lane runs this as its third step.
+
 ## Boundaries (one truth per concern)
 
 - Zero runtime dependencies: the lane clones pin first (`actions/checkout`
