@@ -1,4 +1,4 @@
-# The packstruct spec — version 1
+# The packstruct spec, version 1
 
 One `/packs` system, many hosts. This document is normative for any app that
 loads packs from a `packs/` directory and for anyone authoring a pack.
