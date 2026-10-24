@@ -26,6 +26,20 @@ const PKG_VERSION = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'))
 
 const base = { schemaVersion: 1, name: 'shape-pack', version: '1.0.0', entry: 'probes-entry.js', description: 'battery base - clean otherwise' }
 
+// The ONE manifest serialization, used by BOTH the temp materialization and
+// the battery-file emitter. Divergence here was the schemaVersion-missing
+// bug found by the crashtest#25 fold (the emitter ignored `drop`, so the
+// portable file carried the key the row promised was gone): one code path,
+// so the bytes and the row can never disagree again.
+function manifestFor(shape) {
+  if (shape.noManifest) return null
+  if (shape.malformed) return 'INVALID JSON PLACEHOLDER - see gen-refusal-matrix.mjs'
+  const manifest = { ...base }
+  for (const k of shape.drop ?? []) delete manifest[k]
+  Object.assign(manifest, shape.mutate ?? {})
+  return JSON.parse(JSON.stringify(manifest))
+}
+
 const BATTERY = [
   { id: 'schemaVersion-num-2', mutate: { schemaVersion: 2 }, expect: { refused: true, norms: ['schemaVersion'] } },
   { id: 'schemaVersion-string-1', mutate: { schemaVersion: '1' }, expect: { refused: true, norms: ['schemaVersion'] } },
@@ -37,7 +51,9 @@ const BATTERY = [
   { id: 'description-empty', mutate: { description: '' }, expect: { refused: true, norms: ['description'] } },
   { id: 'entry-parent-escape', mutate: { entry: '../escape.js' }, expect: { refused: true, norms: ['entry'] } },
   { id: 'entry-missing-file', mutate: { entry: 'ghost.js' }, expect: { refused: true, norms: ['entry'] } },
-  { id: 'armedByKey-empty', mutate: { armedByKey: '' }, expect: { refused: true, norms: ['armedByKey'] } },
+  // Engine-first fold (crashtest#25): empty = present-not-yet-armed, valid.
+  { id: 'armedByKey-empty', mutate: { armedByKey: '' }, expect: { refused: false, note: 'presence semantics only - crashtest loader treats empty as unarmed' } },
+  { id: 'armedByKey-non-string', mutate: { armedByKey: 7 }, expect: { refused: true, norms: ['armedByKey'] } },
   { id: 'armedByKey-ok', mutate: { armedByKey: 'wp-money' }, expect: { refused: false } },
   { id: 'unknown-key-allowed', mutate: { snapshot: 'host-owned extra' }, expect: { refused: false } },
   { id: 'host-owned-env-allowed', mutate: { env: { kv: {} } }, expect: { refused: false } },
@@ -55,10 +71,8 @@ try {
     const packDir = join(packsRoot, 'public', 'shape-pack')
     mkdirSync(packDir, { recursive: true })
     if (!shape.noManifest) {
-      const manifest = { ...base }
-      for (const k of shape.drop ?? []) delete manifest[k]
-      Object.assign(manifest, shape.mutate ?? {})
-      writeFileSync(join(packDir, 'pack.json'), shape.malformed ? '{"schemaVersion":1,' : `${JSON.stringify(manifest, null, 2)}\n`)
+      const serialized = shape.malformed ? '{"schemaVersion":1,' : `${JSON.stringify(manifestFor(shape), null, 2)}\n`
+      writeFileSync(join(packDir, 'pack.json'), serialized)
     }
     // The entry file: present unless the shape points somewhere else.
     if (shape.mutate?.entry === undefined && !shape.drop?.includes('entry')) {
@@ -104,7 +118,7 @@ try {
     writeFileSync(join(batteryDir, `${shape.id}.json`), JSON.stringify({
       id: shape.id,
       dirName: 'shape-pack',
-      manifest: shape.noManifest ? null : (shape.malformed ? 'INVALID JSON PLACEHOLDER - see gen-refusal-matrix.mjs' : { ...base, ...(shape.mutate ?? {}) }),
+      manifest: manifestFor(shape),
       writeEntryFile: !(shape.mutate?.entry ?? '').includes('..') && shape.mutate?.entry !== 'ghost.js' && !shape.noManifest && !shape.malformed,
       expect: { refused: shape.expect.refused, norms: shape.expect.norms },
       note: 'Hosts: materialize dirName/pack.json (create pack.json only when manifest is non-null; substitute the placeholder bytes for malformed), run YOUR validator over it, return { id, host: refused, norms }. Column 3 of the golden matrix (dhaupin/packstruct#3).',

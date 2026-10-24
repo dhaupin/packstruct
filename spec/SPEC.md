@@ -30,7 +30,7 @@ packs/public/<pack-name>/
 | `description` | one-line, human-readable |
 | `version` | dotted MAJOR.MINOR[.PATCH] |
 | `entry` | relative path inside the pack dir, MUST exist (missing entry = instant, nameable refusal - the crashtest#16 lesson is a norm now) |
-| `armedByKey` | OPTIONAL string. Present: the host MAY require an arming key before activation. Absent: the host's own default lifecycle governs |
+| `armedByKey` | OPTIONAL string. Present: the host MAY run its arming-key ceremony before activation - presence semantics only, so an EMPTY value is "present, not yet armed" (folded from the crashtest#25 matrix fold: the engine treats empty as valid, so a non-empty rule would be a check the SPEC never promised). Absent: the host's own default lifecycle governs |
 
 **Host-owned acknowledged keys.** The table above is the shared-facts column:
 fields every conforming loader assigns meaning to. Some hosts additionally

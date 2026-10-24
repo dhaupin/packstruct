@@ -50,8 +50,12 @@ export function lintPacks(dir) {
     } else if (!existsSync(join(packDir, m.entry))) {
       violations.push({ pack: name, norm: 'entry', message: `entry file "${m.entry}" does not exist - instant refusal at load time (the crashtest#16 class)` })
     }
-    if (m.armedByKey !== undefined && (typeof m.armedByKey !== 'string' || !m.armedByKey.trim())) {
-      violations.push({ pack: name, norm: 'armedByKey', message: 'armedByKey, when present, must be a non-empty string' })
+    // armedByKey: OPTIONAL string. Type-checked only - an EMPTY value is
+    // "present, not yet armed" and the host owns presence semantics
+    // (folded from crashtest#25: our non-empty refusal was a check the
+    // SPEC didn't promise; the engine treats empty as valid).
+    if (m.armedByKey !== undefined && typeof m.armedByKey !== 'string') {
+      violations.push({ pack: name, norm: 'armedByKey', message: `armedByKey, when present, must be a string (got ${typeof m.armedByKey})` })
     }
   }
   return { packsChecked, violations }

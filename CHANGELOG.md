@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **The golden refusal matrix folded (#3).** `labs/refusal-matrix.golden.json`
+  (+ readable `.md`) joins both observed columns - ours from the
+  self-verifying battery, crashtest's from the #25 fold run over the same
+  bytes: **11 agree / 6 documented divergences / 1 re-verify-after-fix**.
+  Every divergence is a packstruct author-time strictness the engine does
+  not share, annotated row-by-row; name-dir-mismatch stays the one true
+  enforcement gap (engine-first call for the crashtest#19 chain).
+  **The fold changed us where it was right to change:** (1) battery-emitter
+  fix - the portable files now share the drop-aware serialization, so the
+  schemaVersion-missing file can never again carry the key its row says is
+  gone (found by crashtest#25 re-observing our own bytes); (2)
+  `armedByKey` de-invented on the SPEC's own law ("never ship a check the
+  SPEC doesn't promise") - empty = present-not-yet-armed, type-check only,
+  reworded in SPEC section 2 and honored in the web island too; a
+  non-string row added instead. Matrix: 18 rows, all honest.
+
 ### Added
 - **Refusal-matrix packstruct column (#3).** `scripts/gen-refusal-matrix.mjs`
   runs a 17-row hostile-manifest battery (shapes + allowed corners) against

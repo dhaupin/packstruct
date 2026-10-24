@@ -36,8 +36,9 @@ function validate(manifest, dirName) {
     // The browser can't stat the pack directory - say exactly what wasn't checked.
     violations.push({ norm: 'entry', message: `entry "${m.entry}" shape is valid - the CLI additionally confirms the file exists on disk (the crashtest#16 class)`, info: true })
   }
-  if (m.armedByKey !== undefined && (typeof m.armedByKey !== 'string' || !m.armedByKey.trim())) {
-    violations.push({ norm: 'armedByKey', message: 'armedByKey, when present, must be a non-empty string' })
+  // armedByKey: type check only - empty = present-not-yet-armed (the crashtest#25 matrix fold honored here too).
+  if (m.armedByKey !== undefined && typeof m.armedByKey !== 'string') {
+    violations.push({ norm: 'armedByKey', message: `armedByKey, when present, must be a string (got ${typeof m.armedByKey})` })
   }
   return violations
 }
