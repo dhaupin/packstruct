@@ -7,7 +7,7 @@ date: 2026-10-24
 last_modified_at: 2026-10-24
 nav_order: 5
 layout: default
-version: 1.0.0
+version: 0.9.0
 permalink: /conformance
 ---
 

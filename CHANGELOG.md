@@ -7,9 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-_(nothing staged yet)_
+_(nothing staged yet - the next release is the v1.0.0 tag with provenance; everything below ships manually as 0.9.0 today)_
 
-## [1.0.0] - 2026-10-24
+## [0.9.0] - 2026-10-24
 
 ### Changed
 - **Syntax-highlighting parity (#6, ported from crashtest@6033d27).** The
@@ -120,12 +120,11 @@ _(nothing staged yet)_
   the frozen table matches what crashtest's loader already shape-validates
   and the linter never refuses a pack for carrying them; baseline receipts
   updated (2026-10-24 audit: 8/8 conform, 44 ids, zero collisions);
-  `profiles/scenario.md` will link crashtest's `reference/scenario-contract`
-  rather than copy it.
+  `profiles/scenario.md` links to crashtest's `reference/scenario-contract`
+  (the one-address page now exists at profiles/).
 
-## [0.9.0] - 2026-10-23
 
-### Added
+### Added (scaffold, 2026-10-23)
 - `spec/SPEC.md` v1: directory contract (`packs/public/<name>/`), frozen
   pack.json field set (verified against crashtest production packs),
   named entry profiles (`scenario`/`check`), lifecycle norms, nameable
