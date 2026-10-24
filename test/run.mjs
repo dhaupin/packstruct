@@ -16,11 +16,21 @@ const good = lintPacks(GOOD)
 if (good.violations.length) { console.error('FAIL good pack should be clean:', good.violations); process.exit(1) }
 const bad = lintPacks(BAD)
 const norms = bad.violations.map(v => v.norm)
+// Phase markers ship with the suite: on CI a hang used to be invisible
+// (no partial logs while the step is running), so every phase prints its
+// start marker and duration when done. Diagnostic, not decoration.
+const t0 = Date.now()
+const mark = (phase) => console.log(`[run] ${phase} (${Date.now() - t0}ms in)`)
+mark('manifest mode')
 const missing = ['schemaVersion', 'entry'].filter(n => !norms.includes(n))
 if (missing.length) { console.error(`FAIL lint norms missing: ${missing}\ngot: ${JSON.stringify(bad.violations, null, 2)}`); process.exit(1) }
+mark('manifest mode: assert done')
 
 // --- deep mode, good side: clean manifest AND clean deep probe ---
+mark('deep good: start')
 const deepGood = await deepLintPacks(DEEP_GOOD)
+mark(`deep good: done (${deepGood.idsCensused} ids)`) // start marker precedes; the count lands here
+mark('deep good: assert done')
 if (deepGood.violations.length) {
   console.error('FAIL deep good fixture should be clean:', deepGood.violations); process.exit(1)
 }
@@ -31,7 +41,10 @@ if (deepGood.modulesProbed !== 1 || deepGood.idsCensused !== 5) {
 }
 
 // --- deep mode, bad side: exact norms expected, nothing more ---
+mark('deep bad: start')
 const deepBad = await deepLintPacks(DEEP_BAD)
+mark(`deep bad: done (${deepBad.violations.length} violations)`)
+mark('deep bad: assert done')
 const deepNorms = new Set(deepBad.violations.map(v => v.norm))
 for (const want of ['entry-default-export', 'id-collision', 'id-duplicate']) {
   if (!deepNorms.has(want)) {
@@ -45,7 +58,9 @@ if (!deepNorms.has('id-duplicate')) {
 
 // --- deep + --against (host-library census): clean library = 2 ids seeded,
 // no collisions; colliding library = id-library-collision rows ---
+mark('--against clean: start')
 const libGood = await deepLintPacks(DEEP_GOOD, { against: 'test/fixtures/deep/library-good.mjs' })
+mark('--against clean: done')
 if (libGood.violations.length) {
   console.error('FAIL deep --against clean library should not violate:', libGood.violations); process.exit(1)
 }
@@ -62,6 +77,7 @@ if (!libBad.violations.some(v => v.norm === 'id-library-collision')) {
 // CLI stands in as the conforming loader (dogfood); a loader that accepts
 // everything and one that refuses (and names) nothing must both fail the
 // audit loudly.
+mark('edge probe isolation: start')
 const conformingLoader = `${process.execPath} bin/cli.mjs lint {packs}`
 const auditGood = await auditConformance({ loader: conformingLoader })
 if (auditGood.caseCount !== 8 || auditGood.honored !== 8 || auditGood.violations.length) {
@@ -150,7 +166,9 @@ if (wireAudit.status !== 0 || !auditJson || auditJson.mode !== 'audit' || auditJ
   console.error(`FAIL wire-level audit-conformance: exit ${wireAudit.status}\n${wireAudit.stdout}\n${wireAudit.stderr}`)
   process.exit(1)
 }
-const wireAuditUsage = spawnSync(process.execPath, ['bin/cli.mjs', 'audit-conformance'], { encoding: 'utf8' })
+mark('wire-level audit: start')
+const wireAuditUsage = spawnSync(process.execPath, ['bin/cli.mjs', 'audit-conformance'], { encoding: 'utf8', timeout: 60000 })
+mark('wire-level audit: done')
 if (wireAuditUsage.status !== 2) {
   console.error(`FAIL audit-conformance without --loader should exit 2 (got ${wireAuditUsage.status})\n${wireAuditUsage.stderr}`)
   process.exit(1)

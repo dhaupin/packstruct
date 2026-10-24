@@ -4,6 +4,10 @@ on:
   pull_request: { branches: [main] }
 jobs:
   test:
+    # Bounded: the QC hang class showed up as an invisible forever-run; a
+    # stalled runner dies HERE (10 min) with its phase markers in the log
+    # instead of hanging silently.
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
