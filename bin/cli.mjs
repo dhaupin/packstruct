@@ -64,7 +64,7 @@ if (verb === 'audit-conformance') {
   }
   const repo = positional[0] ?? '.'
   const json = args.includes('--json')
-  const r = auditConformance({ loader, repo, json })
+  const r = await auditConformance({ loader, repo, json })
   if (json) {
     console.log(JSON.stringify({ schema: 1, mode: 'audit', repo, cases: r.caseCount, honored: r.honored, violations: r.violations }, null, 2))
   } else {

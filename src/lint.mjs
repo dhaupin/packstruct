@@ -12,7 +12,7 @@
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { spawnSync } from 'node:child_process'
+import { runCapped } from './run-capped.mjs'
 
 export function lintPacks(dir) {
   const violations = []
@@ -137,18 +137,26 @@ try {
 
 // Probe one code module in the child. Returns the probe report or throws a
 // plain Error carrying the reason the probe could not report.
-function childProbe(absPath, timeoutMs = PROBE_TIMEOUT_MS) {
+//
+// Stdio through runCapped (async): a killed probe must never wait on
+// pipe-EOF that an orphaned grandchild spawned by the entry can hold
+// forever, and an output-flooding entry hits the 1MB cap (an honest
+// entry-import refusal), not a scratch-file flood that fills the disk.
+async function childProbe(absPath, timeoutMs = PROBE_TIMEOUT_MS) {
   const fileUrl = pathToFileURL(absPath).href
-  const r = spawnSync(
-    process.execPath,
-    ['--input-type=module', '--no-warnings', '-e', childProbeScript(fileUrl)],
-    { encoding: 'utf8', timeout: timeoutMs, killSignal: 'SIGKILL' },
-  )
-  if (r.error && r.error.code === 'ENOENT') throw new Error(`no node runtime to probe with`)
-  const out = r.stdout ?? ''
+  const r = await runCapped({
+    cmd: process.execPath,
+    args: ['--input-type=module', '--no-warnings', '-e', childProbeScript(fileUrl)],
+    timeoutMs,
+    maxBuffer: 1024 * 1024,
+    killSignal: 'SIGKILL',
+  })
+  if (r.spawnError && r.spawnError.code === 'ENOENT') throw new Error(`no node runtime to probe with`)
+  const out = r.stdout
   const idx = out.lastIndexOf(PROBE_MARKER)
   if (idx === -1) {
-    if (r.signal) throw new Error(`probe killed after the ${timeoutMs}ms timeout (signal ${r.signal}) - a pack stalling the probe is refusing the exit-code contract, and a refusal is instant`)
+    if (r.capped) throw new Error(`probe output hit the ${1 << 20}B cap before the probe reported (an entry flooding its own stdout) - a pack that floods the probe is refusing the exit-code contract, and a refusal is instant`)
+    if (r.timedOut) throw new Error(`probe killed after the ${timeoutMs}ms timeout (signal ${r.signal ?? 'SIGKILL'}) - a pack stalling the probe is refusing the exit-code contract, and a refusal is instant`)
     throw new Error(`entry terminated the probe process (exit ${r.status ?? 'null'}) before the probe could report`)
   }
   let report
@@ -181,7 +189,7 @@ async function collectLibraryUnits(ref, timeoutMs) {
   for (const file of files) {
     let report
     try {
-      report = childProbe(file, timeoutMs)
+      report = await childProbe(file, timeoutMs)
     } catch (err) {
       throw new Error(`${file}: ${err.message}`)
     }
@@ -245,7 +253,7 @@ export async function deepLintPacks(dir, opts = {}) {
     if (typeof m.entry !== 'string' || !existsSync(join(packDir, m.entry))) continue
     let report
     try {
-      report = childProbe(resolve(packDir, m.entry), timeoutMs)
+      report = await childProbe(resolve(packDir, m.entry), timeoutMs)
     } catch (err) {
       violations.push({ pack: name, norm: 'entry-import', message: `entry "${m.entry}": ${err.message}` })
       continue
