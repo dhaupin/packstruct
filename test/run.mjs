@@ -121,7 +121,7 @@ if (!(edgeSpin.violations.length === 1 && edgeSpin.violations[0].norm === 'entry
 // flood above the 1MB spawn buffer is a no-verdict violation (never a
 // harness crash), and a hung loader is killed at the audit timeout (a
 // refusal is instant - hangs are neither accept nor refuse). ---
-const auditFlood = await auditConformance({ loader: `${process.execPath} test/fixtures/audit/loader-flood.mjs {packs}` })
+const auditFlood = await auditConformance({ loader: `${process.execPath} test/fixtures/audit/loader-flood.mjs {packs}`, auditTimeoutMs: 5000 })
 if (!(auditFlood.violations.length === 8 && auditFlood.violations.every(v => v.message.includes('audit buffer')))) {
   console.error(`FAIL audit output-flood should fail all 8 cases with the buffer cap named:\n${JSON.stringify(auditFlood.violations, null, 2)}`)
   process.exit(1)
