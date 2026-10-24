@@ -1,1 +1,63 @@
-# packstruct
+# packstruct 0.9.0
+
+The shared `/packs` spec. **One manifest + entry + lifecycle contract, many
+hosts**, currently [crashtest](https://github.com/dhaupin/crashtest)
+(scenario profile) and [poststruct](https://github.com/dhaupin/poststruct)
+(check profile).
+
+This repo ships the normative spec ([spec/SPEC.md](spec/SPEC.md)) plus a
+zero-dependency lint CLI that kills the worst pack-authoring class at author
+time: a manifest declaring an entry file that doesn't actually ship
+(crashtest#16). Every fleet repo uses the same core check.
+
+## The directory contract
+
+```
+packs/
+  public/
+    <pack-name>/
+      pack.json    # REQUIRED: fields per spec/SPEC.md section 2
+      <entry>      # REQUIRED: the file pack.json's "entry" names
+```
+
+## Usage
+
+```bash
+npx packstruct lint packs/          # human, exit 0 clean / 1 violations / 2 usage
+npx packstruct lint packs/ --json   # machine-readable: {schema, packsChecked, violations}
+```
+
+The linter validates `schemaVersion === 1`, kebab-case name matching its
+directory, dotted versions, non-empty description, relative entry paths, and
+that the entry file physically exists under the pack dir. Optional
+`armedByKey` string. Host-owned keys the engine also recognizes (`env`,
+`plugins`, `package`) are acknowledged by name and never refused. Everything
+else (extra manifest keys, snapshot files beside the entry) is
+minimum-spec and left alone.
+
+## How the schema version was chosen
+
+The baseline (formalized 2026-10-23) is exactly what crashtest's production
+packs already ship: `schemaVersion: 1` with the shared field set above.
+Therefore crashtest hosts v1 with **zero runtime changes**, and poststruct
+adopts v1 fresh. Neither host shares an implementation with the other. They
+share only this file convention.
+
+## Status (0.9.0)
+
+Version ladder follows [prestruct](https://github.com/dhaupin/prestruct)'s
+convention: 0.9.x is the manual `npm publish` ladder; 1.0.0 flips on OIDC
+trusted publishing, and the workflow refuses 0.x versions at the gate.
+
+## Related
+
+- [crashtest](https://github.com/dhaupin/crashtest) (scenario-profile host)
+- [poststruct](https://github.com/dhaupin/poststruct) (check-profile host)
+
+## Landing & docs
+
+Landing: `packstruct.creadev.org` (Cloudflare Pages, static `site/`, functions under `functions/`). Docs: `docs.creadev.org/packstruct` (Jekyll + Pagefind + Freestruct via GitHub Actions; see `.github/workflows/docs.yml` and `docs/`).
+
+## Crashtest dogfood
+
+`crashtest run` from the repo root drives `packs/public/packstruct-lint-shapes`: hostile pack.json corpora through an in-process lint double (the same CLI wire CI uses), asserting the SPEC v1 section 5 contract - instant nameable refusal, no crashes, no deep stacks, and strict tolerance for spec-allowed shapes. Pinned to dhaupin/crashtest v1.0.0.

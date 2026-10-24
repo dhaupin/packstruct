@@ -1,0 +1,212 @@
+{
+  "schemaVersion": 1,
+  "findings": [
+    {
+      "id": "auth/identity-spoof-headers",
+      "verdict": "REFUSED",
+      "detail": "route \"admin\" not declared on this target - spoof matrix skipped (declare it for coverage)"
+    },
+    {
+      "id": "auth/secret-watermark",
+      "verdict": "REFUSED",
+      "detail": "no fake secrets planted in env - declare CRASHTEST_SECRET to arm this probe"
+    },
+    {
+      "id": "auth/privilege-escalation",
+      "verdict": "REFUSED",
+      "detail": "route \"device\" not declared on this target - escalation skipped (declare it for coverage)"
+    },
+    {
+      "id": "authz/method-matrix-privileged",
+      "verdict": "REFUSED",
+      "detail": "route \"admin\" not declared on this target - authz skipped (declare it for coverage)"
+    },
+    {
+      "id": "authz/role-body-spoof-family",
+      "verdict": "REFUSED",
+      "detail": "route \"admin\" not declared on this target - authz skipped (declare it for coverage)"
+    },
+    {
+      "id": "authz/handler-alias-confusion",
+      "verdict": "REFUSED",
+      "detail": "route \"admin\" not declared on this target - authz skipped (declare it for coverage)"
+    },
+    {
+      "id": "guards/hygiene-no-store",
+      "verdict": "REFUSED",
+      "detail": "route \"enroll\" not declared on this target - attack skipped (declare it for coverage)"
+    },
+    {
+      "id": "guards/burst-wall",
+      "verdict": "REFUSED",
+      "detail": "route \"burst\" not declared on this target - attack skipped (declare it for coverage)"
+    },
+    {
+      "id": "input/proto-pollution-body",
+      "verdict": "REFUSED",
+      "detail": "route \"enroll\" not declared on this target - attack skipped (declare it for coverage)"
+    },
+    {
+      "id": "input/never-fail-mutations",
+      "verdict": "REFUSED",
+      "detail": "route \"enroll\" not declared on this target - attack skipped (declare it for coverage)"
+    },
+    {
+      "id": "input/oversized-field",
+      "verdict": "REFUSED",
+      "detail": "route \"enroll\" not declared on this target - attack skipped (declare it for coverage)"
+    },
+    {
+      "id": "packstruct-lint-shapes/hostile-manifest-fuzz",
+      "verdict": "REFUSED",
+      "detail": "4 hostile manifest shapes held: in-bounds verdicts, nameable refusals + norms, no crash, no deep stack (SPEC v1 section 5)"
+    },
+    {
+      "id": "packstruct-lint-shapes/entry-path-containment",
+      "verdict": "REFUSED",
+      "detail": "4 entry-escape shapes held: every escape flagged by the nameable 'entry' norm (the crashtest#16 class, closed at the wire)"
+    },
+    {
+      "id": "packstruct-lint-shapes/over-strict-drift-canary",
+      "verdict": "REFUSED",
+      "detail": "minimum-spec shapes held: extra manifest keys and extra-files existing beside the entry both exit 0, zero violations (SPEC 3.4 additive-first contract)"
+    },
+    {
+      "id": "packstruct-lint-shapes/clean-pack-canary",
+      "verdict": "REFUSED",
+      "detail": "clean pack canary held: conforming shape answers exit 0, zero violations - the lint never flags honest packs"
+    },
+    {
+      "id": "proto-hygiene/head-get-parity",
+      "verdict": "REFUSED",
+      "detail": "1 route(s): HEAD mirrors GET (no throws, no status drift beyond honest 405) + 1 info note(s)"
+    },
+    {
+      "id": "proto-hygiene/request-shape-flood",
+      "verdict": "REFUSED",
+      "detail": "1 route(s) x 18 bare shapes (query chaos, path shapes, header casings) all landed 4xx-or-cleaner with case-parity intact"
+    },
+    {
+      "id": "race/double-submit-idempotency",
+      "verdict": "REFUSED",
+      "detail": "route \"charge\" not declared on this target - race skipped (declare it for coverage)"
+    },
+    {
+      "id": "race/concurrent-write-lost-update",
+      "verdict": "REFUSED",
+      "detail": "route \"profile\" not declared on this target - race skipped (declare it for coverage)"
+    },
+    {
+      "id": "recursion/deep-nest-stack-overflow",
+      "verdict": "REFUSED",
+      "detail": "route \"enroll\" not declared on this target - recursion skipped (declare it for coverage)"
+    },
+    {
+      "id": "recursion/redos-catastrophic-pattern",
+      "verdict": "REFUSED",
+      "detail": "route \"validate\" not declared on this target - recursion skipped (declare it for coverage)"
+    },
+    {
+      "id": "session/cookie-hygiene",
+      "verdict": "REFUSED",
+      "detail": "route \"login\" not declared on this target - session skipped (declare it for coverage)"
+    },
+    {
+      "id": "session/session-fixation",
+      "verdict": "REFUSED",
+      "detail": "route(s) \"login\", \"me\" not declared on this target - session skipped (declare it for coverage)"
+    },
+    {
+      "id": "session/token-replay-deny",
+      "verdict": "REFUSED",
+      "detail": "route \"login\" not declared on this target - session skipped (declare it for coverage)"
+    },
+    {
+      "id": "session/logout-invalidates",
+      "verdict": "REFUSED",
+      "detail": "route(s) \"login\", \"me\", \"logout\" not declared on this target - session skipped (declare it for coverage)"
+    },
+    {
+      "id": "state/enumeration-oracle",
+      "verdict": "REFUSED",
+      "detail": "route \"device\" not declared on this target - enumeration skipped (declare it for coverage)"
+    },
+    {
+      "id": "state/id-collision-alias",
+      "verdict": "REFUSED",
+      "detail": "route \"enroll\" not declared on this target - alias check skipped"
+    },
+    {
+      "id": "taxonomy/abuse-not-5xx",
+      "verdict": "REFUSED",
+      "detail": "route \"enroll\" not declared on this target - taxonomy skipped (declare it for coverage)"
+    },
+    {
+      "id": "taxonomy/errors-stay-impersonal",
+      "verdict": "REFUSED",
+      "detail": "route \"enroll\" not declared on this target - taxonomy skipped (declare it for coverage)"
+    },
+    {
+      "id": "upload/filename-traversal-family",
+      "verdict": "REFUSED",
+      "detail": "route \"upload\" not declared on this target - upload skipped (declare the upload route + its kv store for coverage)"
+    },
+    {
+      "id": "upload/mime-polyglot-family",
+      "verdict": "REFUSED",
+      "detail": "route \"upload\" not declared on this target - upload skipped (declare the upload route + its kv store for coverage)"
+    },
+    {
+      "id": "volume/credential-stuffing",
+      "verdict": "REFUSED",
+      "detail": "route \"enroll\" not declared on this target - stuffing skipped (declare it for coverage)"
+    },
+    {
+      "id": "volume/storage-fill",
+      "verdict": "REFUSED",
+      "detail": "route \"kvwrite\" not declared on this target - fill check skipped (declare a KV-writing route)"
+    },
+    {
+      "id": "volume/cost-amplification",
+      "verdict": "REFUSED",
+      "detail": "route \"enroll\" not declared on this target - amplification skipped (declare it for coverage)"
+    }
+  ],
+  "acceptedRisks": [],
+  "baseline": [
+    "auth/identity-spoof-headers",
+    "auth/secret-watermark",
+    "auth/privilege-escalation",
+    "authz/method-matrix-privileged",
+    "authz/role-body-spoof-family",
+    "authz/handler-alias-confusion",
+    "guards/hygiene-no-store",
+    "guards/burst-wall",
+    "input/proto-pollution-body",
+    "input/never-fail-mutations",
+    "input/oversized-field",
+    "packstruct-lint-shapes/hostile-manifest-fuzz",
+    "packstruct-lint-shapes/entry-path-containment",
+    "packstruct-lint-shapes/over-strict-drift-canary",
+    "packstruct-lint-shapes/clean-pack-canary",
+    "proto-hygiene/head-get-parity",
+    "proto-hygiene/request-shape-flood",
+    "race/double-submit-idempotency",
+    "race/concurrent-write-lost-update",
+    "recursion/deep-nest-stack-overflow",
+    "recursion/redos-catastrophic-pattern",
+    "session/cookie-hygiene",
+    "session/session-fixation",
+    "session/token-replay-deny",
+    "session/logout-invalidates",
+    "state/enumeration-oracle",
+    "state/id-collision-alias",
+    "taxonomy/abuse-not-5xx",
+    "taxonomy/errors-stay-impersonal",
+    "upload/filename-traversal-family",
+    "upload/mime-polyglot-family",
+    "volume/credential-stuffing",
+    "volume/storage-fill",
+    "volume/cost-amplification"
+  ]
+}

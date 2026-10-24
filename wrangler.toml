@@ -1,0 +1,11 @@
+# Cloudflare Pages — packstruct landing (packstruct.creadev.org)
+# Deploy: CF Pages Git integration on this repo, or `npx wrangler pages deploy site`
+name = "packstruct"
+compatibility_date = "2026-10-23"
+pages_build_output_dir = "site"
+
+[vars]
+SITE_NAME = "packstruct"
+
+# Functions live in functions/ (Pages Functions = Workers under the hood).
+# functions/api/health.js is the living proof; add more only when a real need shows.

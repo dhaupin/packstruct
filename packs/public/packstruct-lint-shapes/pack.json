@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "packstruct-lint-shapes",
+  "description": "Hostile-manifest wire truths for packstruct lint: malformed pack.json never crashes the CLI (refuse, never fail), entry path traversal is contained, and spec-allowed shapes are never over-strictly flagged. Zero dependencies, zero sockets.",
+  "version": "0.1.0",
+  "entry": "index.js"
+}
