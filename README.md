@@ -1,7 +1,7 @@
 # packstruct 0.9.0
 
 The shared `/packs` spec. **One manifest + entry + lifecycle contract, many
-hosts** — currently [crashtest](https://github.com/dhaupin/crashtest)
+hosts**, currently [crashtest](https://github.com/dhaupin/crashtest)
 (scenario profile) and [poststruct](https://github.com/dhaupin/poststruct)
 (check profile).
 
@@ -32,7 +32,7 @@ directory, dotted versions, non-empty description, relative entry paths, and
 that the entry file physically exists under the pack dir. Optional
 `armedByKey` string. Host-owned keys the engine also recognizes (`env`,
 `plugins`, `package`) are acknowledged by name and never refused. Everything
-else — extra manifest keys, snapshot files beside the entry — is
+else (extra manifest keys, snapshot files beside the entry) is
 minimum-spec and left alone.
 
 ## How the schema version was chosen
@@ -40,10 +40,10 @@ minimum-spec and left alone.
 The baseline (formalized 2026-10-23) is exactly what crashtest's production
 packs already ship: `schemaVersion: 1` with the shared field set above.
 Therefore crashtest hosts v1 with **zero runtime changes**, and poststruct
-adopts v1 fresh. Neither host shares an implementation with the other — they
+adopts v1 fresh. Neither host shares an implementation with the other. They
 share only this file convention.
 
-## Status — 0.9.0
+## Status (0.9.0)
 
 Version ladder follows [prestruct](https://github.com/dhaupin/prestruct)'s
 convention: 0.9.x is the manual `npm publish` ladder; 1.0.0 flips on OIDC
@@ -51,12 +51,12 @@ trusted publishing, and the workflow refuses 0.x versions at the gate.
 
 ## Related
 
-- [crashtest](https://github.com/dhaupin/crashtest) — scenario-profile host
-- [poststruct](https://github.com/dhaupin/poststruct) — check-profile host
+- [crashtest](https://github.com/dhaupin/crashtest) (scenario-profile host)
+- [poststruct](https://github.com/dhaupin/poststruct) (check-profile host)
 
 ## Landing & docs
 
-Landing: `packstruct.creadev.org` (Cloudflare Pages, static `site/`, functions under `functions/`). Docs: `docs.creadev.org/packstruct` (Jekyll + Pagefind + Freestruct via GitHub Actions — see `.github/workflows/docs.yml` and `docs/`).
+Landing: `packstruct.creadev.org` (Cloudflare Pages, static `site/`, functions under `functions/`). Docs: `docs.creadev.org/packstruct` (Jekyll + Pagefind + Freestruct via GitHub Actions; see `.github/workflows/docs.yml` and `docs/`).
 
 ## Crashtest dogfood
 

@@ -35,22 +35,22 @@ exactly:
 
 ## Key facts baked in
 
-- `package.json`: `"files"` whitelists `bin/`, `src/`, `spec/`, `LICENSE` —
+- `package.json`: `"files"` whitelists `bin/`, `src/`, `spec/`, `LICENSE`.
   so spec + CLI ship together and `npx packstruct lint` works from a fresh
   install.
 - `engines.node: ">=20"` runtime floor.
 
-## Landing site — Cloudflare Pages (packstruct.creadev.org)
+## Landing site (Cloudflare Pages, packstruct.creadev.org)
 
 - The lean branded landing deploys as a **Cloudflare Pages project** named
   `packstruct` with the production custom domain `packstruct.creadev.org`.
-- `wrangler.toml` pins the contract: `pages_build_output_dir = "site"` — the
+- `wrangler.toml` pins the contract: `pages_build_output_dir = "site"`: the
   landing is static files in `site/`, no build step required; serving is
   Pages' job.
-- **Functions:** `functions/api/health.js` — `GET /api/health` returns honest
+- **Functions:** `functions/api/health.js`: `GET /api/health` returns honest
   JSON including the spec pin. Pages Functions are the only worker surface
   this repo runs.
-- Docs site: `docs.creadev.org/packstruct` — **GitHub Pages via Actions**
+- Docs site: `docs.creadev.org/packstruct` (**GitHub Pages via Actions**)
   (`.github/workflows/docs.yml`): docs-truth gates first (ported house
   checkers: frontmatter 5-field law, resolvable links, style law incl.
   no-dashes-in-prose, English-only prose), then Jekyll, then
