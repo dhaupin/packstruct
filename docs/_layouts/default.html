@@ -202,7 +202,7 @@
                   {%- assign external = false -%}
                   {%- if item.url contains '://' -%}{%- assign external = true -%}{%- endif -%}
                   {%- unless external -%}
-                    {%- assign i_path = item.url | remove: '.html' | remove: '/packstruct', '' | replace: '/', '' -%}
+                    {%- assign i_path = item.url | remove: '.html' | replace: '/', '' -%}
                     {%- assign p_path = page.url | remove: 'index.html' | replace: '/', '' -%}
                   {%- endunless -%}
                 <li><a href="{{ item.url }}"
