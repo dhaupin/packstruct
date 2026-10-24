@@ -6,6 +6,19 @@ exactly:
 1. **0.9.x is manual.** While the major is 0.x, publishing is done by a human
    with `npm publish`. The publish workflow REFUSES 0.x versions.
 
+## Release atomicity ([Unreleased] discipline, ruled 2026-10-24 on crashtest#20)
+
+- The CHANGELOG `[Unreleased]` section is staged content, not a release. At
+  publish time it is flipped to the dated version header IN the same commit
+  that carries the tag, so the git push and the npm release tell one story.
+- Never mint a patch version for a docs-only change after a published
+  release: if anything slips and a publish would ever ship without its
+  fold text, prefer retagging the same commit over a version bump - a docs
+  bump masquerading as an artifact change is a semver governance fail both
+  here and at the crashtest pack-semver governance side.
+- A `[Unreleased]` section sitting untagged across two or more pushes is
+  the misriff signal: whichever linter is on hand should flag it.
+
 ## Ladder to automated publishes
 
 1. Bump `package.json` + `CHANGELOG.md` to 1.0.0 (Unreleased → Dated).
