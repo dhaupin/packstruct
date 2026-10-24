@@ -56,7 +56,16 @@ trusted publishing, and the workflow refuses 0.x versions at the gate.
 
 ## Landing & docs
 
-Landing: `packstruct.creadev.org` (Cloudflare Pages, static `site/`, functions under `functions/`). Docs: `docs.creadev.org/packstruct` (Jekyll + Pagefind + Freestruct via GitHub Actions; see `.github/workflows/docs.yml` and `docs/`).
+Landing: `packstruct.creadev.org` (Cloudflare Pages Git integration rooted at
+`web/` - a Vite + React app prerendered by `prestruct build` into `web/dist/`
+per-route; Pages Functions under `web/functions/`). Docs:
+`docs.creadev.org/packstruct` (Jekyll + Pagefind + Freestruct via GitHub
+Actions; see `.github/workflows/docs.yml` and `docs/`).
+
+Build the site locally: `cd web && npm install && npm run build` - `prestruct`
+runs the vite build, injects brand/SEO tags from `web/ssr.config.js`, and
+prerenders every route to static HTML (bots get HTML, the SPA hydrates for
+humans).
 
 ## Crashtest dogfood
 

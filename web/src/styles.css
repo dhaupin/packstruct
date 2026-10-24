@@ -1,0 +1,218 @@
+/* packstruct site theme - deep pine + spec mint: a dark "spec sheet" look.
+   Token structure borrowed from the house palette (paper/surface/ink/line)
+   used across crashtest's amber lab and the vant dashboard - re-tuned to
+   mint-on-pine so the family sibling reads distinct at a glance. */
+
+:root {
+  --paper: #0b1418;
+  --surface: #0f1d22;
+  --raised: #14262d;
+  --ink: #e3efec;
+  --ink-soft: #8aa8a6;
+  --accent: #4fd6c2;      /* spec mint */
+  --accent-deep: #33b39e;
+  --moss: #7db691;        /* ok / green */
+  --err: #e07752;         /* refusal / violation */
+  --line: #1e343c;
+  --code-bg: #0a1619;
+}
+
+html {
+  background: var(--paper);
+  color-scheme: dark;
+}
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: Inter, "SF Pro Text", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.wrap { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+
+/* --- nav (app shell: fixed header + burger + one shared sidebar) --- */
+.nav {
+  position: sticky; top: 0; z-index: 10;
+  background: rgba(11, 20, 24, 0.88);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+.nav-inner { display: flex; align-items: center; gap: 22px; height: 56px; }
+.nav-burger {
+  display: none; background: none; border: 1px solid var(--line); border-radius: 6px;
+  color: var(--ink); cursor: pointer; padding: 7px; align-items: center; justify-content: center;
+}
+.nav-burger:hover { border-color: var(--ink-soft); }
+.nav-burger svg { width: 18px; height: 18px; display: block; }
+.brand { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--ink); font-weight: 700; letter-spacing: 0.02em; }
+.brand-pack { color: var(--accent); }
+.brand-badge { font-size: 10px; color: var(--ink-soft); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; }
+.nav-links { display: flex; gap: 16px; margin-left: auto; }
+.nav-links a { color: var(--ink-soft); text-decoration: none; font-size: 14px; }
+.nav-links a:hover, .nav-links a.active { color: var(--accent); }
+
+/* The ONE sidebar: slide-out drawer, same at every viewport. A bigger app
+   promotes this to a permanent rail via .app-rail (AppLayout), no page
+   changes needed. */
+.nav-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 40;
+  opacity: 0; pointer-events: none; transition: opacity .25s ease;
+}
+.nav-overlay.open { opacity: 1; pointer-events: auto; }
+.nav-sidebar {
+  position: fixed; top: 0; bottom: 0; left: 0; width: 264px; max-width: 86vw;
+  background: var(--surface); border-right: 1px solid var(--line);
+  padding: 22px 0; overflow-y: auto; z-index: 50;
+  transform: translateX(-100%); transition: transform .28s ease;
+}
+.nav-sidebar.open { transform: translateX(0); }
+.nav-sidebar-title {
+  color: var(--ink-soft); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase;
+  padding: 0 18px 6px; margin-top: 14px;
+}
+.nav-sidebar-title:first-child { margin-top: 0; }
+.nav-sidebar-nav { list-style: none; margin: 0; padding: 0; }
+.nav-sidebar-nav a {
+  display: block; padding: 8px 18px; color: var(--ink-soft); text-decoration: none;
+  font-size: 14px; border-left: 3px solid transparent;
+}
+.nav-sidebar-nav a:hover { color: var(--ink); background: var(--raised); }
+.nav-sidebar-nav a.active { color: var(--accent); background: var(--raised); border-left-color: var(--accent); }
+
+/* --- hero --- */
+.hero { padding: 72px 0 32px; }
+.eyebrow { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin: 0 0 12px; }
+.hero h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.15; margin: 0 0 14px; font-weight: 800; letter-spacing: -0.01em; }
+.hero .accent { color: var(--accent); }
+.lede { color: var(--ink-soft); font-size: 17px; max-width: 640px; margin: 0 0 26px; }
+.lede a { color: var(--accent); }
+.cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 30px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; text-decoration: none; border: 1px solid transparent; }
+.btn-primary { background: var(--accent); color: #07231e; }
+.btn-primary:hover { background: var(--accent-deep); }
+.btn-ghost { border-color: var(--line); color: var(--ink); }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+/* --- code block --- */
+.code {
+  background: var(--code-bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 18px 20px;
+  font-family: "SF Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-x: auto;
+  margin: 0 0 34px;
+  color: var(--ink);
+}
+.code .dim { color: var(--ink-soft); }
+.code .ok { color: var(--moss); }
+.code .bad { color: var(--err); }
+.code .kw { color: var(--accent); }
+
+/* --- sections / cards --- */
+.section { padding: 34px 0; }
+.section h2 { font-size: 22px; margin: 0 0 6px; }
+.section .sub { color: var(--ink-soft); margin: 0 0 20px; font-size: 14px; }
+.section .sub a, .legal a { color: var(--accent); }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 18px;
+}
+.card h3 { margin: 0 0 8px; font-size: 15px; }
+.card h3 .glyph { color: var(--accent); margin-right: 6px; }
+.card p { margin: 0; color: var(--ink-soft); font-size: 13.5px; }
+
+/* --- pipeline --- */
+.pipeline { display: grid; gap: 10px; }
+.pipe-step { display: flex; gap: 14px; align-items: baseline; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; }
+.pipe-n { font-family: ui-monospace, monospace; color: var(--accent); font-weight: 700; }
+.pipe-step strong { color: var(--ink); }
+.pipe-step span { color: var(--ink-soft); font-size: 13.5px; }
+
+/* --- spec table --- */
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+table.spec-table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+table.spec-table th { text-align: left; background: var(--raised); color: var(--ink); padding: 10px 14px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+table.spec-table td { padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.spec-table tr:last-child td { border-bottom: 0; }
+table.spec-table td.mod { font-family: ui-monospace, monospace; color: var(--accent); white-space: nowrap; }
+table.spec-table td.why { color: var(--ink-soft); }
+table.spec-table code { color: var(--ink); }
+
+.shipped { color: var(--moss); font-weight: 600; }
+.field-report { color: var(--ink-soft); font-size: 13px; margin: 18px 0 0; }
+.field-report a { color: var(--accent); }
+.field-report .bad { color: var(--err); }
+.field-report .ok { color: var(--moss); }
+.field-report code { color: var(--ink); }
+
+/* --- legal pages --- */
+.legal h3 { margin: 26px 0 8px; font-size: 16px; }
+.legal ul { color: var(--ink-soft); padding-left: 22px; }
+.legal ul li { margin: 6px 0; }
+.legal ul li strong { color: var(--ink); }
+.legal code { color: var(--ink); }
+
+.footer a.madeby { color: var(--accent); font-weight: 600; }
+
+/* --- footer --- */
+.footer { border-top: 1px solid var(--line); margin-top: 60px; padding: 26px 0 40px; color: var(--ink-soft); font-size: 13px; }
+.footer a { color: var(--ink-soft); }
+.footer a:hover { color: var(--accent); }
+.footer-inner { display: flex; gap: 18px; flex-wrap: wrap; align-items: center; }
+
+/* --- not found --- */
+.nf { padding: 90px 0; text-align: center; }
+.nf h1 { font-size: 30px; margin: 0 0 10px; }
+.nf p { color: var(--ink-soft); margin: 0 0 22px; }
+
+@media (max-width: 640px) {
+  .hero { padding-top: 44px; }
+  /* Mobile: collapse inline links into the burger; the sidebar carries them. */
+  .nav-burger { display: flex; }
+  .nav-links { display: none; }
+}
+
+/* Desktop keeps inline links PLUS the burger (consistent menu trigger in
+   both modes - vant-dashboard behavior). */
+@media (min-width: 641px) {
+  .nav-burger { display: flex; }
+}
+
+/* --- lint demo (browser island) --- */
+pre-island { display: block; }
+.lint-demo-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 10px; }
+.lint-demo-dir { display: flex; flex-direction: column; gap: 4px; }
+.lint-demo-dir span { font-size: 11.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-soft); }
+.lint-demo-dir input {
+  background: var(--code-bg); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px;
+  font-size: 13px; font-family: "SF Mono", ui-monospace, Menlo, monospace;
+}
+.lint-demo-input {
+  width: 100%; box-sizing: border-box;
+  background: var(--code-bg); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px;
+  font-family: "SF Mono", ui-monospace, Menlo, monospace; font-size: 12.5px;
+  line-height: 1.6; resize: vertical;
+}
+.lint-demo-verdict {
+  margin-top: 12px; border-radius: 10px; padding: 12px 16px;
+  font-family: "SF Mono", ui-monospace, Menlo, monospace; font-size: 13px;
+}
+.lint-demo-verdict.is-pass { border: 1px solid var(--moss); color: var(--moss); }
+.lint-demo-verdict.is-fail { border: 1px solid var(--err); color: var(--err); }
+.lint-demo-violation { margin: 4px 0; }
+.lint-demo-violation.dim { color: var(--ink-soft); }
+.lint-demo-verdict code { color: var(--ink); }
+.lint-demo .btn { cursor: pointer; }

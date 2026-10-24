@@ -1,3 +1,4 @@
+# packstruct site - crawler policy (all the way open, it's a spec site)
 User-agent: *
 Allow: /
 

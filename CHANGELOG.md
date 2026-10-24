@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- The landing moved from static `site/` files to a real Vite + React app
+  under `web/`, prerendered by `prestruct build` (the same npm engine
+  crashtest's site rides - dogfooding the family's own SEO layer).
+  Routes: `/`, `/spec`, `/lint` (with an in-browser SPEC v1 manifest
+  validator island), `/terms`, `/privacy`; per-route static HTML, brand
+  injection from `ssr.config.js`, islands ontology intact, mint-on-pine
+  theme (distinct from crashtest's amber). Cloudflare Pages contract:
+  Git integration rooted at `web/`, output `web/dist`, Functions at
+  `web/functions/api/health.js`.
 - SPEC v1 folds the crashtest#19 ruling: three host-owned acknowledged keys
   (`env`, `plugins`, `package`) named alongside the shared-facts column, so
   the frozen table matches what crashtest's loader already shape-validates

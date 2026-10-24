@@ -1,0 +1,28 @@
+{
+  "routeCount": 5,
+  "succeeded": 5,
+  "cached": 5,
+  "force": false,
+  "routes": [
+    {
+      "path": "/",
+      "cached": true
+    },
+    {
+      "path": "/spec",
+      "cached": true
+    },
+    {
+      "path": "/lint",
+      "cached": true
+    },
+    {
+      "path": "/terms",
+      "cached": true
+    },
+    {
+      "path": "/privacy",
+      "cached": true
+    }
+  ]
+}

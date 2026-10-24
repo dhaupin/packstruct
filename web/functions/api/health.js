@@ -3,7 +3,7 @@ export async function onRequestGet(context) {
   return Response.json({
     ok: true,
     name: context.env.SITE_NAME || 'packstruct',
-    service: 'landing',
+    service: 'packstruct-site',
     spec: 'packstruct@1',
     ts: new Date().toISOString(),
   })

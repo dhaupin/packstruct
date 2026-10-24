@@ -42,14 +42,23 @@ exactly:
 
 ## Landing site (Cloudflare Pages, packstruct.creadev.org)
 
-- The lean branded landing deploys as a **Cloudflare Pages project** named
-  `packstruct` with the production custom domain `packstruct.creadev.org`.
-- `wrangler.toml` pins the contract: `pages_build_output_dir = "site"`: the
-  landing is static files in `site/`, no build step required; serving is
-  Pages' job.
-- **Functions:** `functions/api/health.js`: `GET /api/health` returns honest
-  JSON including the spec pin. Pages Functions are the only worker surface
-  this repo runs.
+- The landing deploys as a **Cloudflare Pages project** named `packstruct`
+  with the production custom domain `packstruct.creadev.org`. It is a Vite +
+  React app under `web/`, prerendered by the `prestruct` engine the same way
+  crashtest's site is (same template, different palette: mint-on-pine vs
+  amber lab).
+- Pages Git integration settings: **root directory `web`**, build command
+  `npm run build` (which runs `prestruct build`: vite build + brand/SEO
+  injection from `web/ssr.config.js` + per-route static prerender), output
+  directory `dist`. There is no root `wrangler.toml` - the contract lives in
+  this runbook and the dashboard settings, exactly like crashtest's.
+- **Functions:** `web/functions/api/health.js`: `GET /api/health` returns
+  honest JSON including the spec pin. Optionally set `SITE_NAME` in the
+  Pages project vars; the function's fallback covers its absence. Pages
+  Functions are the only worker surface this repo runs.
+- **Do not add a `/* /index.html 200` SPA fallback** (`web/public/_redirects`
+  explains why: every route prerenders its own HTML, and the fallback
+  redirect-loops against CF's pretty URLs).
 - Docs site: `docs.creadev.org/packstruct` (**GitHub Pages via Actions**)
   (`.github/workflows/docs.yml`): docs-truth gates first (ported house
   checkers: frontmatter 5-field law, resolvable links, style law incl.

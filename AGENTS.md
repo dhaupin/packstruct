@@ -19,6 +19,11 @@
 - Adding a validate rule = added cases both ways in `test/fixtures`.
 - Don't version-bump the spec (major) without a migration note: §6.
 - All prose uses zero configured-voice words from poststruct's language pack.
+- Site: `web/` is a Vite + React app built by `prestruct build` (identity in
+  `web/ssr.config.js`). `web/src/islands.js` + `web/src/hooks/usePageMeta.js`
+  are engine files - copy once, never edit. `web/src/App.jsx` keeps
+  BrowserRouter alone; importing it anywhere the prerender loads makes every
+  route render as the homepage.
 
 ## Release
 - 0.9.0 = current manual npm. Bump to 1.0.0 → tag v1.0.0 → publish.yml runs
