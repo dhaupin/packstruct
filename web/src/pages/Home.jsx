@@ -76,7 +76,7 @@ export default function Home() {
             <div className="card"><h3>One address for authors</h3><p>"How do I write a pack?" has one answer: read packstruct, pick your app's declared profile. No archaeology in two repos.</p></div>
             <div className="card"><h3>Frozen from reality</h3><p>v1 is what crashtest's eight production packs already ship, verified pack-by-pack: nothing to migrate, poststruct adopts fresh.</p></div>
             <div className="card"><h3>Cheap future consumers</h3><p>Any struct-family tool that wants a <code>/packs</code> dir adopts the spec instead of inventing a third dialect.</p></div>
-            <div className="card"><h3>Conformance, not vibes</h3><p>The lint CLI is live on npm (<code>packstruct@0.9.0</code>); the conformance harness (<code>packstruct audit-conformance</code>) shipped with it - bundled verdict-claiming packs verify a host loader honors the spec, so the <code>implements: packstruct@1</code> pin is verifiable, not honorary.</p></div>
+            <div className="card"><h3>Conformance, not vibes</h3><p>The lint CLI is live on npm (<code>packstruct@1.0.0</code>); the conformance harness (<code>packstruct audit-conformance</code>) shipped with it - bundled verdict-claiming packs verify a host loader honors the spec, so the <code>implements: packstruct@1</code> pin is verifiable, not honorary.</p></div>
           </div>
         </div>
       </section>

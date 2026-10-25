@@ -26,6 +26,7 @@
   route render as the homepage.
 
 ## Release
-- 0.9.0 = current manual npm. Bump to 1.0.0 → tag v1.0.0 → publish.yml runs
-  (same OIDC trusted publishing as prestruct, refuses 0.x versions).
+- 1.0.0 and later = the governed ladder: tag v1.x.0 → publish.yml runs
+  (same OIDC trusted publishing as prestruct, refuses 0.x versions; 0.9.0
+  was the manual npm release that seeded the package).
 - CHANGELOG.md is Keep-a-Changelog; every PR adds an Unreleased item.

@@ -1,4 +1,4 @@
-# packstruct 0.9.0
+# packstruct 1.0.0
 
 The shared `/packs` spec. **One manifest + entry + lifecycle contract, many
 hosts**, currently [crashtest](https://github.com/dhaupin/crashtest)
@@ -65,13 +65,14 @@ Therefore crashtest hosts v1 with **zero runtime changes**, and poststruct
 adopts v1 fresh. Neither host shares an implementation with the other. They
 share only this file convention.
 
-## Status (0.9.0)
+## Status (1.0.0)
 
 Version ladder follows [prestruct](https://github.com/dhaupin/prestruct)'s
-convention: 0.9.x is the manual `npm publish` ladder (0.9.0 is this
-release); 1.0.0 flips on the CI publish lane - publish.yml refuses 0.x,
-verifies the tag matches the version, and publishes with `--provenance`,
-so v1.0.0 carries provenance by construction.
+convention: 0.9.x is the manual `npm publish` ladder (0.9.0 was the manual
+release that seeded the package); 1.0.0 and later flip on the CI publish
+lane - tag v1.0.0 and publish.yml runs (refuses 0.x, verifies the tag
+matches the version, and publishes with `--provenance`, so v1.0.0 carries
+provenance by construction).
 
 ## Related
 

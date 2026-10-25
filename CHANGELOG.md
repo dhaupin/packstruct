@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-_(final-QC fixes below ride the same manual 0.9.0 publish if they land before it; otherwise they open the v1.0.0 ladder)_
+## [1.0.0] - 2026-10-25
 
 ### Changed
 - **The golden refusal matrix closed its last pending row (crashtest#27's

@@ -17,9 +17,9 @@ jobs:
         with: { node-version: 20 }
       - run: npm install --no-fund --no-audit
       - run: npm test
-      # Pinned to the same rev freestruct's docs dogfood pins (the pack
-      # contracts target the stable v1.0.0 harness surface).
+      # npm registry pin (the pack contracts target the stable v1.0.0
+      # harness surface). Bump to crashtest@1.0.1 when it publishes.
       - name: Install crashtest
-        run: npm install --no-save --no-audit --no-fund github:dhaupin/crashtest#dc80a7c7a42e58a532b8ad624b79de2742d1ccbb
+        run: npm install --no-save --no-audit --no-fund crashtest@1.0.0
       - name: Run the lint-shapes pack
         run: npx crashtest run
