@@ -7,7 +7,7 @@ date: 2026-10-23
 last_modified_at: 2026-10-23
 nav_order: 6
 layout: default
-version: 0.9.0
+version: 1.0.0
 permalink: /search
 ---
 

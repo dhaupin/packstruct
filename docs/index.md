@@ -8,7 +8,7 @@ last_modified_at: 2026-10-24
 nav_order: 1
 permalink: /
 layout: default
-version: 0.9.0
+version: 1.0.0
 ---
 # packstruct
 
@@ -29,7 +29,7 @@ The v1 manifest is the formalized reality of crashtest's production packs:
 one-line description, relative `entry` that **must exist**, optional
 `armedByKey`.
 
-Published on npm as [`packstruct@0.9.0`](https://www.npmjs.com/package/packstruct)
+Published on npm as [`packstruct@1.0.0`](https://www.npmjs.com/package/packstruct)
 (zero dependencies; `npx` fetches it straight from that page).
 
 <div class="crosslinks">
