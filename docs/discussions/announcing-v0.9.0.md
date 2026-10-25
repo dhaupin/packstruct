@@ -1,5 +1,15 @@
 ---
-title: "Announcing packstruct v0.9.0" description: "The packstruct v0.9.0 release post - the shared /packs SPEC plus a zero-dependency conformance CLI (lint --deep --against, audit-conformance), first on npm." author: "Creadev.org" lang: "en" date: 2026-10-24 last_modified_at: 2026-10-24 nav_order: 8 layout: default version: "0.9.0" permalink: /discussions/announcing-v0.9.0 ---
+title: "Announcing packstruct v0.9.0"
+description: "The packstruct v0.9.0 release post - the shared /packs SPEC plus a zero-dependency conformance CLI (lint --deep --against, audit-conformance), first on npm."
+author: "Creadev.org"
+lang: "en"
+date: 2026-10-24
+last_modified_at: 2026-10-24
+nav_order: 8
+layout: default
+version: "0.9.0"
+permalink: /discussions/announcing-v0.9.0
+---
 
 # packstruct v0.9.0
 

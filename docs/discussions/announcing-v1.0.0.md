@@ -1,5 +1,15 @@
 ---
-title: "Announcing packstruct v1.0.0" description: "The packstruct v1.0.0 release post - the SPEC frozen at schemaVersion 1, a hardened zero-dependency conformance CLI (probe isolation, loader caps), the refusal matrix fully closed, and the first governed-ladder publish with provenance." author: "Creadev.org" lang: "en" date: 2026-10-25 last_modified_at: 2026-10-25 nav_order: 9 layout: default version: "1.0.0" permalink: /discussions/announcing-v1.0.0 ---
+title: "Announcing packstruct v1.0.0"
+description: "The packstruct v1.0.0 release post - the SPEC frozen at schemaVersion 1, a hardened zero-dependency conformance CLI (probe isolation, loader caps), the refusal matrix fully closed, and the first governed-ladder publish with provenance."
+author: "Creadev.org"
+lang: "en"
+date: 2026-10-25
+last_modified_at: 2026-10-25
+nav_order: 9
+layout: default
+version: "1.0.0"
+permalink: /discussions/announcing-v1.0.0
+---
 
 # packstruct v1.0.0
 
