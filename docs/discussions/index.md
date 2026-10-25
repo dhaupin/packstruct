@@ -51,4 +51,4 @@ strip the frontmatter, post.
 | post | version | live |
 |---|---|---|
 | [Announcing packstruct v0.9.0](/discussions/announcing-v0.9.0) | 0.9.0 | 2026-10-24 on npm |
-| [Announcing packstruct v1.0.0](/discussions/announcing-v1.0.0) | 1.0.0 | drafted 2026-10-25 - live on npm with the v1.0.0 tag |
+| [Announcing packstruct v1.0.0](/discussions/announcing-v1.0.0) | 1.0.0 | 2026-10-25 on npm (governed ladder, provenance) |

@@ -38,7 +38,7 @@ The publish lane is the family's, verbatim: no publish secret is stored in the r
 
 ## Tarball facts, stated honestly
 
-Tarball shaping grows from the verified 0.9.0 bytes by exactly one file: same `files` field - the 28-file contract of `bin/`, `src/`, `spec/`, `profiles/`, `conformance/`, LICENSE, no runtime dependencies, the CLI linked by `bin` - where the added `src/run-capped.mjs` is imported by both shipped surfaces (the QC probe/ caps hardening). This post drafts against the tree that publishes at the v1.0.0 tag; the 0.9.0 tar those facts were verified against is byte-checked (registry shasum match, both CLI verbs exercised from the extracted archive). Once the tag publishes, `npm view packstruct@1.0.0` is the receipt for this post's claims.
+Tarball shaping grows from the verified 0.9.0 bytes by exactly one file: same `files` field - the 28-file contract of `bin/`, `src/`, `spec/`, `profiles/`, `conformance/`, LICENSE, no runtime dependencies, the CLI linked by `bin` - where the added `src/run-capped.mjs` is imported by both shipped surfaces (the QC probe/ caps hardening). The receipts stand on the published bytes: `npm view packstruct@1.0.0 dist.integrity` sha512-verified against a fresh pull, the GitHub Release asset sha256-identical to the npm tarball, both CLI verbs exercised from the extracted archive, and the provenance attestation live at the registry.
 
 ## Surfaces
 
