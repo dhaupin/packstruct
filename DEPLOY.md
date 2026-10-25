@@ -23,20 +23,41 @@ exactly:
 
 1. Bump `package.json` + `CHANGELOG.md` to 1.0.0 (Unreleased → Dated).
 2. Run `npm test` + `npm pack --dry-run` locally. Tag `v1.0.0` and push.
-3. `publish.yml`: `push: tags: ['v*']` + `workflow_dispatch`; idempotent
-   already-published check (`npm view packstruct@<version>`); `npm ci` +
-   `npm test`; publishes with provenance via `id-token: write` OIDC.
+3. `publish.yml`: `push: tags: ['v*']` + `workflow_dispatch`; tag-match
+   + 0.x-refuse + idempotent already-published gates (`npm view
+   packstruct@<version>`); `npm install` + `npm test`; publishes via
+   OIDC trusted publishing (`id-token: write`, NO NPM_TOKEN secret).
 4. Thereafter: change files, bump version, tag vX.Y.Z. Done.
 
 ## npm prep
 
 - Registry name **packstruct** is namespace-checked in CI with `npm view`
   before publish - if it's taken, the release fails instead of clobbering.
+- **npm Trusted Publishing (OIDC), no NPM_TOKEN** - matching prestruct/
+  crashtest/freestruct: the repo stores no publish secret. One-time setup
+  on npmjs.com is required BEFORE the first tag: packstruct -> Settings ->
+  Trusted Publisher (repo `dhaupin/packstruct`, workflow `publish.yml`).
+  The manual 0.9.0 bootstrap already created the package, so OIDC's
+  brand-new-package limit (npm/cli#8544) does not apply.
+
+## Ladder detail: publish.yml (as built)
+
+- Node 24 on the runner (trusted publishing needs node >= 22.14 /
+  npm >= 11.5.1); `npm install` - this repo ships no root lockfile, so
+  `npm ci` is not an option.
+- Gate order: tag must equal package.json's version (a workflow_dispatch
+  on main cannot leak-publish), 0.x versions refuse, then the
+  `npm view packstruct@<version>` idempotent skip.
+- After publish, the `github-release` job cuts the GitHub Release for the
+  same tag (`needs: publish`): the npm tarball packed as the release asset
+  with a listing-file guardrail (shipped surfaces present, repo-bound
+  internals like web/, docs/, labs/, test/ absent), generated notes.
 
 ## Key facts baked in
 
-- `package.json`: `"files"` whitelists `bin/`, `src/`, `spec/`, `LICENSE`.
-  so spec + CLI ship together and `npx packstruct lint` works from a fresh
+- `package.json`: `"files"` whitelists `bin/`, `src/`, `spec/`,
+  `profiles/`, `conformance/`, `LICENSE` - so spec + CLI + the conformance
+  fixtures ship together and `npx packstruct lint` works from a fresh
   install.
 - `engines.node: ">=20"` runtime floor.
 

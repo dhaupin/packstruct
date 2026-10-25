@@ -40,6 +40,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   consistently, the npm package is linked from the landing (CTA row + nav),
   docs (nav + footer + index), and the stale web example claiming
   `armedByKey` must be non-empty (fixed by the crashtest#25 fold) is gone;
+### Added
+- **The release mechanics join the family (publish.yml rewritten).**
+  npm Trusted Publishing (OIDC) replaces the NPM_TOKEN design - no
+  publish secret is stored, matching prestruct/crashtest/freestruct
+  (node 24 for npm >= 11.5.1; the npmjs.com Trusted Publisher entry is
+  the one-time user setup). After the publish, the new `github-release`
+  job (needs: publish) cuts the GitHub Release for the tag: the npm
+  tarball packed as the asset through a listing-file guardrail (shipped
+  surfaces present, repo-bound internals absent), generated notes.
+  DEPLOY.md's runbook drift fixed with it (`npm install`, not `npm ci` -
+  no root lockfile; the files whitelist carries profiles/ + conformance/;
+  the ladder describes the gates as built).
 
 ## [0.9.0] - 2026-10-24
 

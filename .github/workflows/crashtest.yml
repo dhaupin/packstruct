@@ -10,12 +10,7 @@ permissions:
 jobs:
   run:
     timeout-minutes: 10
-    # Pinned against the ubuntu-latest -> Ubuntu 26 migration (began
-    # 2026-10-19): the new image's orphan-process teardown SIGTERM-kills
-    # steps mid-flight (exit 143 + "Cleaning up orphan processes") - this
-    # lane has eaten kills in three different steps on the new image while
-    # the same steps pass on 24.04 and local. Un-pin when 26 is stable.
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

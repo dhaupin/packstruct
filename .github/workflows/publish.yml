@@ -1,4 +1,20 @@
 name: publish
+# npm Trusted Publishing (OIDC) - the family pattern (prestruct, crashtest,
+# freestruct publish.yml): there is NO NPM_TOKEN secret anywhere. Provenance
+# is generated automatically for trusted-publisher runs (ATTStatements are
+# issued against the workflow's OIDC identity); do not add
+# publishConfig.provenance to package.json. One-time npmjs.com setup is
+# REQUIRED before the first tag: packstruct -> Settings -> Trusted Publisher
+# (repo dhaupin/packstruct, workflow publish.yml). The manual bootstrap
+# publish (0.9.0) already created the package, so the npm/cli#8544 limit
+# (OIDC cannot create a brand-new package) does not apply.
+#
+# Trusted publishing needs node >= 22.14 / npm >= 11.5.1.
+#
+# After the npm publish lands, a second job cuts the GitHub Release for the
+# same tag (title, notes, and the npm tarball as asset). It NEEDS the
+# publish job as its gate: the release only exists to mirror a publish that
+# actually happened.
 on:
   push:
     tags: ['v*']
@@ -16,8 +32,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '24' # trusted publishing needs node >= 22.14, npm >= 11.5.1
           registry-url: https://registry.npmjs.org
+          package-manager-cache: false
       - run: npm install --no-fund --no-audit
       - run: npm test
       # The gate replaces two footguns: the old job-level `!startsWith(ref,'v0.')`
@@ -25,7 +42,7 @@ jobs:
       # "already published" step that ECHOED 'skipping' and published anyway.
       # Gate rules, in order: the ref must BE the version tag (so a dispatch on
       # main can never leak-publish), 0.x versions refuse here hard (the
-      # DEPLOY.md ladder publishes 0.9.x manually only, per prestruct's
+      # DEPLOY.md ladder publishes 0.9.x manually only, per the family
       # convention), and an already-published version is a genuine skip.
       - id: gate
         run: |
@@ -44,7 +61,69 @@ jobs:
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
-      - run: npm publish --provenance
+      - run: npm publish
         if: steps.gate.outputs.skip != 'true'
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  github-release:
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # create the release + upload the asset
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version from the tag
+        run: echo "VERSION=${GITHUB_REF_NAME}" >> $GITHUB_ENV
+
+      # npm pack needs no node_modules - it packages exactly the `files`
+      # entries. This pack is built from the SAME commit npm published from,
+      # so the asset mirrors the registry artifact (not byte-identical:
+      # tar stores mtimes - same tree, other clock).
+      - name: Pack the npm tarball as the release asset
+        run: |
+          set -euo pipefail
+          TARBALL="packstruct-${VERSION#v}.tgz"
+          npm pack
+          test -f "$TARBALL" || { echo "::error::expected asset $TARBALL not produced"; exit 1; }
+
+          # Guardrail: the release asset must contain the reusable surfaces
+          # (bin/, src/, spec/, profiles/, conformance/) and never repo-bound
+          # internals - web/, docs/, labs/, test/, .github/, .vscode/.
+          # Listing goes through a FILE first: `tar | grep -q` echoes the
+          # grep early-exit into a SIGPIPE which pipefail turns into a
+          # failure - the exact piped-exit hazard the house rules warn
+          # about, and it bit crashtest's v1.0.0 asset job.
+          tar -tzf "$TARBALL" > tarball-listing.txt
+          for required in bin/cli.mjs src/lint.mjs src/audit.mjs spec/SPEC.md profiles/check.md profiles/scenario.md conformance; do
+            grep -q "^package/$required" tarball-listing.txt || { echo "::error::release tarball missing package/$required"; exit 1; }
+          done
+          if grep -Eq "^package/(web/|docs/|labs/|test/|\.github/)" tarball-listing.txt; then
+            echo "::error::release tarball contains repo-bound internals:"
+            grep -E "^package/(web/|docs/|labs/|test/|\.github/)" tarball-listing.txt
+            exit 1
+          fi
+          rm tarball-listing.txt
+          echo "TARBALL=$TARBALL" >> $GITHUB_ENV
+
+      - name: Create the GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "packstruct ${{ env.VERSION }}"
+          body: |
+            The shared `/packs` spec: one manifest, entry, and lifecycle contract for
+            crashtest and poststruct packs - plus a zero-dependency lint CLI that
+            kills broken pack manifests at author time, and `audit-conformance` to
+            verify a host loader actually honors the spec.
+
+            ```bash
+            npx packstruct lint packs/ --deep --against lib/
+            npx packstruct audit-conformance . --loader "node bin/load-packs.js {packs}"
+            ```
+
+            Zero runtime dependencies. The `packstruct-${{ env.VERSION }}.tgz` asset is
+            the same tarball shape npm published for this tag. Spec:
+            [SPEC.md](https://github.com/dhaupin/packstruct/blob/main/spec/SPEC.md) /
+            docs: [docs.creadev.org/packstruct](https://docs.creadev.org/packstruct)
+          files: ${{ env.TARBALL }}
+          fail_on_unmatched_files: true
+          generate_release_notes: true

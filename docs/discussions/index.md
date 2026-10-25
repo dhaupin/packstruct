@@ -4,7 +4,7 @@ description: "The release-post conventions: one announcing-vX.Y.Z.md per release
 author: "Creadev.org"
 lang: "en"
 date: 2026-10-24
-last_modified_at: 2026-10-24
+last_modified_at: 2026-10-25
 nav_order: 7
 layout: default
 version: 1.0.0
@@ -51,3 +51,4 @@ strip the frontmatter, post.
 | post | version | live |
 |---|---|---|
 | [Announcing packstruct v0.9.0](/discussions/announcing-v0.9.0) | 0.9.0 | 2026-10-24 on npm |
+| [Announcing packstruct v1.0.0](/discussions/announcing-v1.0.0) | 1.0.0 | drafted 2026-10-25 - live on npm with the v1.0.0 tag |
