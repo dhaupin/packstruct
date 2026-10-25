@@ -21,6 +21,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   linter at their head-of-tree - 8/8 packs clean, deep probe 8 modules /
   44 ids, exit 0.
 ### Fixed
+- **`runCapped` group kill (QC leak pass, the CI-kill cause found): caps
+  now SIGKILL the whole process group, not just the direct child.**
+  Loaders spawn under `shell: true`, so when `/bin/sh` forked instead of
+  exec'ing, a cap-killed flood loader left an orphaned node grandchild
+  holding the stdout pipe: with nobody reading, `console.log` buffers every
+  write in the child's own memory, gigabytes per child in seconds. Four
+  leaked children from one suite run ballooned a dev sandbox 104MB ->
+  3.3GB used and starved CI runners mid-suite - the publish lane's five
+  `exit 143` job deaths all landed inside the probe-heavy phases where
+  those children are alive. The child now spawns detached (own process
+  group) and every kill path - deadline and cap, stdout and stderr -
+  signals the negated pid, taking the shell and every grandchild in one
+  shot. Verified empirically: suite PASS with zero surviving children and
+  flat memory where the leak measured 3.2GB.
 - **`lint --deep` probe isolation (QC vuln pass): pack code can no longer
   drive the linter's own process.** Entries were imported in-process, so
   pack.json cargo with top-level code could hijack the CLI's exit code
