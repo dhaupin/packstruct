@@ -8,9 +8,9 @@ name: corpus
 # nothing imported from the crashtest codebase.
 on:
   push:
-    branches: [main]
+    branches: [main, staging]
   pull_request:
-    branches: [main]
+    branches: [main, staging]
   workflow_dispatch:
 
 permissions:

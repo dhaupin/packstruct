@@ -30,3 +30,16 @@
   (same OIDC trusted publishing as prestruct, refuses 0.x versions; 0.9.0
   was the manual npm release that seeded the package).
 - CHANGELOG.md is Keep-a-Changelog; every PR adds an Unreleased item.
+
+## Branches (packstruct#42)
+- `staging` is the PERMANENT integration branch: work branches off it, PRs
+  target it, and promotion to `main` is the only path out. Never delete it.
+- CI covers `staging` as well as `main` (test, crashtest, corpus, docs).
+  Any deploy job is gated `if: github.ref == 'refs/heads/main'` - once the
+  trigger covers staging, the trigger no longer keeps its content out of
+  production, the job must (docs.yml's deploy is gated).
+- Promote by FAST-FORWARD so drift cannot happen:
+  `git push origin staging:main`. A merge-commit promotion puts a commit on
+  `main` the integration branch lacks, so the two drift by one on every
+  promotion; if a merge-commit promotion ever happens, resync with
+  `git push origin origin/main:staging` (non-destructive).
