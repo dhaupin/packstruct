@@ -22,6 +22,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   substring bug). The dogfood's `entry-path-containment` case grew two
   shapes (`entry-absolute-inpack`, `entry-dot`) - the old absolute shape
   (`/etc/passwd`) also failed file existence, which masked the bug.
+- **A symlink entry escaping the pack passed both passes clean.** The
+  containment test above is lexical, so `entry: "index.js"` where `index.js`
+  is a symlink to a valid module OUTSIDE the pack was accepted silently on
+  the shallow pass AND imported on the deep pass - no refusal, code loaded
+  from outside the pack. "Inside the pack dir" is now PHYSICAL: the entry is
+  realpath'd and must resolve under the realpath'd pack dir (both sides
+  realpath'd, so a symlinked ancestor of `packDir` itself does not
+  false-refuse). An in-pack symlink stays clean. `armedCoverage` gets the
+  same physical check. SPEC §2 now says containment is physical, not merely
+  lexical. New unit cases (escape refuses both passes; in-pack link stays
+  clean) + dogfood shape `entry-symlink-escape` (7 → 8 entry-escape shapes).
 - **The linter shipped an `armed-coverage` refusal the SPEC never promised
   (packstruct#27).** `src/lint.mjs` refused a declared `armedCoverage` whose
   file did not ship, but `spec/SPEC.md` never listed the key - the exact

@@ -9,7 +9,7 @@
 // (crashtest `fc93ca6` src/packs/loader.js:389-391) at author time.
 // PROBE ONLY: host module-shape norms stay host-owned (SPEC section 3) -
 // deep censes ids, it does not police the host's contract shapes.
-import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs'
+import { readFileSync, existsSync, readdirSync, statSync, realpathSync } from 'node:fs'
 import { join, resolve, relative, isAbsolute, dirname, basename, sep } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { runCapped } from './run-capped.mjs'
@@ -63,6 +63,23 @@ function entryEscape(packDir, entry) {
   return rel === '' || rel === '..' || rel.startsWith('..' + sep) || isAbsolute(rel)
 }
 
+// Lexical containment is not enough: a SYMLINK whose target lives outside
+// the pack passes the string test yet loads code from elsewhere (a silent
+// success, worse than a shallow/deep split). Compare the PHYSICAL paths -
+// both sides realpath'd, so a symlinked ancestor of packDir itself (macOS
+// /tmp -> /private/tmp, a vendored packs/ link) does not false-refuse. Only
+// called once the entry exists as a file, so realpathSync has a target;
+// an unresolvable path here is the existence check's business, not ours.
+function entryEscapesViaLink(packDir, entry) {
+  let realPack, realEntry
+  try {
+    realPack = realpathSync(packDir)
+    realEntry = realpathSync(join(packDir, entry))
+  } catch { return false }
+  const rel = relative(realPack, realEntry)
+  return rel === '..' || rel.startsWith('..' + sep) || isAbsolute(rel)
+}
+
 // Manifest validation for ONE pack dir (SPEC v1 section 2). Returns the
 // violations plus whether the pack counted as checked (a pack.json exists).
 // The caller tags lane and tallies; the checks never learn which lane they
@@ -100,6 +117,8 @@ function manifestViolations(packDir, name) {
       violations.push({ pack: name, norm: 'entry', message: `entry file "${m.entry}" does not exist - instant refusal at load time (the crashtest#16 class)` })
     } else if (!entryStat.isFile()) {
       violations.push({ pack: name, norm: 'entry', message: `entry "${m.entry}" is not a file - an entry is an ES module (SPEC section 3)` })
+    } else if (entryEscapesViaLink(packDir, m.entry)) {
+      violations.push({ pack: name, norm: 'entry', message: `entry "${m.entry}" is a symlink resolving OUTSIDE the pack - the manifest path is contained, but the physical target is not (SPEC section 2)` })
     }
   }
   // armedByKey: OPTIONAL string. Type-checked only - an EMPTY value is
@@ -128,6 +147,8 @@ function manifestViolations(packDir, name) {
       violations.push({ pack: name, norm: 'armed-coverage', message: `armedCoverage, when present, must be a relative path inside the pack (got ${JSON.stringify(m.armedCoverage)})` })
     } else if (!existsSync(join(packDir, m.armedCoverage))) {
       violations.push({ pack: name, norm: 'armed-coverage', message: `armedCoverage declares "${m.armedCoverage}" but that file does not ship - the declared armed row is vacuous (packstruct#27)` })
+    } else if (entryEscapesViaLink(packDir, m.armedCoverage)) {
+      violations.push({ pack: name, norm: 'armed-coverage', message: `armedCoverage "${m.armedCoverage}" is a symlink resolving OUTSIDE the pack - the declared row is not the pack's own (SPEC section 2)` })
     }
   }
   return { checked: true, violations, warnings }

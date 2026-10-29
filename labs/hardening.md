@@ -38,7 +38,7 @@
 - memory/resolution-order-stability: vocabulary knob(s) "writeRoute", "readRoute" not declared on this target - memory skipped (export moduleCtx['memory'].writeRoute/readRoute for coverage)
 - memory/delete-is-loud: vocabulary knob(s) "writeRoute", "readRoute", "deleteRoute" not declared on this target - delete skip (export moduleCtx['memory'].writeRoute/readRoute/deleteRoute for coverage)
 - packstruct-lint-shapes/hostile-manifest-fuzz: 4 hostile manifest shapes held: in-bounds verdicts, nameable refusals + norms, no crash, no deep stack (SPEC v1 section 5)
-- packstruct-lint-shapes/entry-path-containment: 7 entry-escape shapes held: every escape flagged by the nameable 'entry' norm (the crashtest#16 class, closed at the wire)
+- packstruct-lint-shapes/entry-path-containment: 8 entry-escape shapes held: every escape flagged by the nameable 'entry' norm (the crashtest#16 class, closed at the wire)
 - packstruct-lint-shapes/over-strict-drift-canary: minimum-spec shapes held: extra manifest keys and extra-files existing beside the entry both exit 0, zero violations (SPEC 3.4 additive-first contract)
 - packstruct-lint-shapes/clean-pack-canary: clean pack canary held: conforming shape answers exit 0, zero violations - the lint never flags honest packs
 - proto-hygiene/head-get-parity: 1 route(s): HEAD mirrors GET (no throws, no status drift beyond honest 405) + 1 info note(s)
@@ -66,7 +66,7 @@
 ### 🔒 BOUNDED (0)
 
 ## Cost economics
-- total: 34 backend ops across 64 in-process requests from 53 attacks
+- total: 35 backend ops across 67 in-process requests from 53 attacks
   - auth/identity-spoof-headers: 0 ops / 0 requests
   - auth/secret-watermark: 0 ops / 0 requests
   - auth/privilege-escalation: 0 ops / 0 requests
@@ -98,9 +98,9 @@
   - memory/resolution-order-stability: 0 ops / 0 requests
   - memory/delete-is-loud: 0 ops / 0 requests
   - packstruct-lint-shapes/hostile-manifest-fuzz: 4 ops / 4 requests
-  - packstruct-lint-shapes/entry-path-containment: 7 ops / 11 requests
-  - packstruct-lint-shapes/over-strict-drift-canary: 2 ops / 13 requests
-  - packstruct-lint-shapes/clean-pack-canary: 1 ops / 14 requests
+  - packstruct-lint-shapes/entry-path-containment: 8 ops / 12 requests
+  - packstruct-lint-shapes/over-strict-drift-canary: 2 ops / 14 requests
+  - packstruct-lint-shapes/clean-pack-canary: 1 ops / 15 requests
   - proto-hygiene/head-get-parity: 2 ops / 2 requests
   - proto-hygiene/request-shape-flood: 18 ops / 20 requests
   - race/double-submit-idempotency: 0 ops / 0 requests

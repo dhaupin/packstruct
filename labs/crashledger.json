@@ -159,7 +159,7 @@
     {
       "id": "packstruct-lint-shapes/entry-path-containment",
       "verdict": "REFUSED",
-      "detail": "7 entry-escape shapes held: every escape flagged by the nameable 'entry' norm (the crashtest#16 class, closed at the wire)"
+      "detail": "8 entry-escape shapes held: every escape flagged by the nameable 'entry' norm (the crashtest#16 class, closed at the wire)"
     },
     {
       "id": "packstruct-lint-shapes/over-strict-drift-canary",

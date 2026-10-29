@@ -6,7 +6,7 @@
 import { lintPacks, deepLintPacks } from '../src/lint.mjs'
 import { auditConformance } from '../src/audit.mjs'
 import { spawnSync } from 'node:child_process'
-import { mkdtempSync, rmSync, mkdirSync, writeFileSync, readFileSync } from 'node:fs'
+import { mkdtempSync, rmSync, mkdirSync, writeFileSync, readFileSync, symlinkSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 const GOOD = 'test/fixtures/good/packs'
@@ -385,6 +385,27 @@ for (const deep of [false, true]) {
   const r = contRun('dir.js', deep)
   if (r.status !== 1 || !JSON.parse(r.stdout).violations.some(v => v.norm === 'entry')) {
     console.error(`FAIL a directory entry (${deep ? 'deep' : 'shallow'}) must refuse as entry:\n${r.stdout}`); process.exit(1)
+  }
+}
+// A symlink entry whose target escapes the pack: the manifest path is
+// lexically contained, the physical target is not. Must refuse on BOTH
+// passes (a lexical-only check passes it silently - the worst outcome).
+const outsideFile = join(contRoot, 'outside.js')
+writeFileSync(outsideFile, 'export default { name: "outside", attacks: [] }\n')
+symlinkSync(outsideFile, join(contPack, 'link.js'))
+for (const deep of [false, true]) {
+  const r = contRun('link.js', deep)
+  if (r.status !== 1 || !JSON.parse(r.stdout).violations.some(v => v.norm === 'entry')) {
+    console.error(`FAIL a symlink entry escaping the pack (${deep ? 'deep' : 'shallow'}) must refuse as entry:\n${r.stdout}`); process.exit(1)
+  }
+}
+// ...but a symlink whose target stays INSIDE the pack is legitimate and
+// must stay clean (the physical check must not false-refuse honest links).
+symlinkSync(join(contPack, 'index.js'), join(contPack, 'link-inside.js'))
+for (const deep of [false, true]) {
+  const r = contRun('link-inside.js', deep)
+  if (r.status !== 0 || JSON.parse(r.stdout).violations.length !== 0) {
+    console.error(`FAIL an in-pack symlink entry (${deep ? 'deep' : 'shallow'}) must stay clean:\n${r.stdout}`); process.exit(1)
   }
 }
 rmSync(contRoot, { recursive: true, force: true })
