@@ -18,9 +18,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   committed receipt, so a flipped row shipped stale and silent; `--check` now
   regenerates in memory and exits 1 on any delta, covering the matrix and
   every `labs/refusal-battery/` file, and runs as a leg of `npm run check`
-  (the `prepublishOnly` gate) plus the test workflow. `test/refusal-matrix.test.mjs`
-  pins all four cases (in-sync passes; superset norm, stale matrix, tampered
-  battery file each fail).
+  (the `prepublishOnly` gate) plus the test workflow. `--check` also holds
+  the golden set's packstruct column (`labs/refusal-matrix.golden.json`)
+  against the linter, so a hand-edited or stale copy of the same
+  observations cannot contradict the matrix it cites.
+  `test/refusal-matrix.test.mjs` pins all five cases (in-sync passes;
+  superset norm, stale matrix, tampered battery file, drifted golden column
+  each fail).
 - **The dogfood receipt was cut by the wrong crashtest (packstruct#29).** The
   committed `labs/crashledger.json` + `labs/hardening.md` were cut by
   crashtest **v1.0.0** (34 findings), but the README registry row attributed

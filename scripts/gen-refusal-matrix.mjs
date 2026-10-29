@@ -163,7 +163,27 @@ try {
       console.error('  regenerate with: node scripts/gen-refusal-matrix.mjs')
       process.exit(1)
     }
-    console.log(`refusal matrix: ${rows.length} row(s), all honest, all ${artifacts.length} receipt file(s) in sync`)
+    // The golden set's packstruct column is the SAME observations, folded with
+    // the crashtest column. It is not fully regenerable (the crashtest column
+    // is theirs), but its packstruct half must never drift from the linter
+    // either - a hand-edited or stale copy would contradict the matrix it
+    // cites. Compare id -> {refused, sorted norms}.
+    const goldenPath = join(ROOT, 'labs', 'refusal-matrix.golden.json')
+    const norm = (r) => [r.refused, [...(r.norms ?? [])].sort().join('|')].join(':')
+    const mine = new Map(rows.map((r) => [r.id, norm(r.packstruct)]))
+    let golden = null
+    try { golden = JSON.parse(readFileSync(goldenPath, 'utf8')) } catch { /* absent */ }
+    const goldenMismatch = golden
+      ? golden.rows.filter((r) => mine.get(r.id) !== norm(r.packstruct)).map((r) => r.id)
+      : ['(golden set unreadable)']
+    const goldenMissing = golden ? [...mine.keys()].filter((id) => !golden.rows.some((r) => r.id === id)) : []
+    if (goldenMismatch.length || goldenMissing.length) {
+      console.error('refusal matrix is STALE: labs/refusal-matrix.golden.json packstruct column disagrees with the linter')
+      for (const id of goldenMismatch) console.error(`  ${id}: golden=${norm(golden.rows.find((r) => r.id === id).packstruct)} linter=${mine.get(id)}`)
+      for (const id of goldenMissing) console.error(`  ${id}: missing from the golden set`)
+      process.exit(1)
+    }
+    console.log(`refusal matrix: ${rows.length} row(s), all honest, all ${artifacts.length} receipt file(s) in sync, golden packstruct column agrees`)
     process.exit(0)
   }
 
