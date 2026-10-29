@@ -176,6 +176,16 @@ never silent success.
 - `packstruct lint <packs-dir>`: manifest validation + entry existence +
   name/dir match (section 2, plus directory-contract checks from section 1).
   Exit 0 conforming / 1 violations / 2 usage error.
+- `packstruct lint <packs-dir> --deep`: the same shallow pass, plus the
+  section-3/4/5 norms at author time - import each declared entry in an
+  isolated child (an entry that fails to import or carries no default export
+  refuses as `entry-import`/`entry-default-export`) and census the declared
+  ids (a duplicate within a pack, a cross-pack name/id collision, or a
+  collision against a `--against <lib>` host library refuses as
+  `id-duplicate`/`id-collision`/`id-library-collision`). These are the
+  spec's own load-time refusals surfaced early, never new norms; a hostile
+  entry is killed on a timeout or output cap and refused nameably, never run
+  in the linter's own process.
 - `packstruct audit-conformance <repo-dir> --loader "<cmd> {packs}"`: the
   conformance harness. Bundled verdict-claiming cases (one clean bundle,
   one per section-5 refusal norm, plus a name-collision pair) are
