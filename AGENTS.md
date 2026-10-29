@@ -33,6 +33,18 @@
   BrowserRouter alone; importing it anywhere the prerender loads makes every
   route render as the homepage.
 
+## Companion pins & receipts
+- Never pin to a line npm does not serve. `prestruct` and `freestruct`
+  publish 1.1.0; their react-router/basePath fixes sit on `main` as
+  unreleased 1.2.0. `npm view <pkg> versions` before any bump - an
+  `ETARGET` pin breaks the lane instead of fixing a bug.
+- The docs lane holds `freestruct@1.0.0` on purpose: published 1.1.0
+  resolves root-absolute hrefs literally, so on the `/packstruct` baseurl
+  `--strict` fails every nav link. The pin moves when the fix publishes.
+- Registry rows (README "Family lanes") are receipts: re-run the lane
+  against the pinned sha before trusting a row. A row that is wrong is
+  worse than absent.
+
 ## Release
 - 1.0.0 and later = the governed ladder: tag v1.x.0 → publish.yml runs
   (same OIDC trusted publishing as prestruct, refuses 0.x versions; 0.9.0
