@@ -44,6 +44,15 @@
 - Registry rows (README "Family lanes") are receipts: re-run the lane
   against the pinned sha before trusting a row. A row that is wrong is
   worse than absent.
+- The dogfood ledger (`labs/crashledger.json` + `labs/hardening.md`) is cut
+  by whatever crashtest is installed - it must be re-cut with the pinned
+  `crashtest@<version>` in the workflow, and the registry row must cite that
+  same version's tally. A row quoting vX over a ledger cut by vY is the
+  receipt-error class.
+- The refusal matrix + `labs/refusal-battery/` are drift-gated: `npm run
+  matrix:check` (`gen-refusal-matrix.mjs --check`) fails on any delta, and the
+  honesty compare is exact both ways (a linter stricter than the SPEC fails
+  as loudly as a looser one). Regenerate with `npm run matrix:gen`.
 
 ## Release
 - 1.0.0 and later = the governed ladder: tag v1.x.0 → publish.yml runs
