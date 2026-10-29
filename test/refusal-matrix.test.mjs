@@ -88,3 +88,17 @@ test('a tampered battery receipt fails the check', () => {
     assert.match(r.stderr, /armedByKey-empty\.json/)
   } finally { rmSync(root, { recursive: true, force: true }) }
 })
+
+test('a golden set whose packstruct column drifts fails the check', () => {
+  const root = makeTree()
+  try {
+    const goldenPath = join(root, 'labs', 'refusal-matrix.golden.json')
+    const doc = JSON.parse(readFileSync(goldenPath, 'utf8'))
+    doc.rows[0].packstruct.norms = ['hand-edited-lie']
+    writeFileSync(goldenPath, JSON.stringify(doc, null, 2) + '\n')
+
+    const r = runCheck(root)
+    assert.equal(r.status, 1, `a drifted golden column must fail the check:\n${r.stdout}${r.stderr}`)
+    assert.match(r.stderr, /golden\.json packstruct column/)
+  } finally { rmSync(root, { recursive: true, force: true }) }
+})
