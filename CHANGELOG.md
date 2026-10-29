@@ -33,6 +33,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   same physical check. SPEC §2 now says containment is physical, not merely
   lexical. New unit cases (escape refuses both passes; in-pack link stays
   clean) + dogfood shape `entry-symlink-escape` (7 → 8 entry-escape shapes).
+- **SPEC §7 under-described the linter's own surface.** §7 named only the
+  shallow pass, while `packstruct lint --deep` (+ `--against`) emits norms
+  (`entry-import`, `entry-default-export`, `id-duplicate`, `id-collision`,
+  `id-library-collision`) that the SPEC never listed under Conformance
+  tooling. They were already promised by §3/§4/§5, but §7 - the section that
+  describes the tool - did not say so. §7 now documents the deep pass and
+  names those refusals as the spec's own load-time refusals surfaced early,
+  never new norms (the "never ship a check the SPEC doesn't promise" law,
+  applied to the tool surface).
 - **The linter shipped an `armed-coverage` refusal the SPEC never promised
   (packstruct#27).** `src/lint.mjs` refused a declared `armedCoverage` whose
   file did not ship, but `spec/SPEC.md` never listed the key - the exact
