@@ -54,6 +54,14 @@ async function lintOne(shape) {
   try {
     if (shape in HOSTILE) writeDir(root, 't', HOSTILE[shape]);
     else if (shape in ESCAPES) writeDir(root, 't', ESCAPES[shape]);
+    else if (shape === 'entry-is-directory') {
+      // The entry names a DIRECTORY: not an ES module (SPEC 3), so it must
+      // refuse on the manifest pass - not only when deep tries to import it.
+      writeDir(root, 't', JSON.stringify({ schemaVersion: 1, name: 'corpus-pack', description: 'hostile', version: '0.1.0', entry: 'e.mjs' }));
+      const entry = join(root, 't', 'public', 'corpus-pack', 'e.mjs');
+      rmSync(entry, { force: true });
+      mkdirSync(entry, { recursive: true });
+    }
     else if (shape === 'clean-pack') writeDir(root, 't', CLEAN);
     else if (shape === 'extra-keys') writeDir(root, 't', EXTRA_KEYS);
     else if (shape === 'extra-files') writeDir(root, 't', CLEAN, [{ name: 'snapshot.json', body: '{}' }]);
@@ -81,6 +89,11 @@ const HOSTILE = {
 const ESCAPES = {
   'entry-traversal': JSON.stringify({ schemaVersion: 1, name: 'corpus-pack', description: 'hostile', version: '0.1.0', entry: '../../package.json' }),
   'entry-absolute': JSON.stringify({ schemaVersion: 1, name: 'corpus-pack', description: 'hostile', version: '0.1.0', entry: '/etc/passwd' }),
+  // Absolute yet resolving INSIDE the pack (node's `join` would re-root it,
+  // so the old substring check passed it while `resolve` refused - the two
+  // passes disagreed). Containment refuses it on both.
+  'entry-absolute-inpack': JSON.stringify({ schemaVersion: 1, name: 'corpus-pack', description: 'hostile', version: '0.1.0', entry: '/e.mjs' }),
+  'entry-dot': JSON.stringify({ schemaVersion: 1, name: 'corpus-pack', description: 'hostile', version: '0.1.0', entry: '.' }),
   'entry-file-url': JSON.stringify({ schemaVersion: 1, name: 'corpus-pack', description: 'hostile', version: '0.1.0', entry: 'file:///etc/passwd' }),
   'entry-null-byte': JSON.stringify({ schemaVersion: 1, name: 'corpus-pack', description: 'hostile', version: '0.1.0', entry: 'e.mjs\u0000/../passwd' }),
 };
