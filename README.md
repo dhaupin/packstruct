@@ -1,4 +1,4 @@
-# packstruct 1.0.0
+# packstruct 1.1.0
 
 The shared `/packs` spec. **One manifest + entry + lifecycle contract, many
 hosts**, currently [crashtest](https://github.com/dhaupin/crashtest)

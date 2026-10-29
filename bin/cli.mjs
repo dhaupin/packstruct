@@ -170,6 +170,7 @@ if (args.includes('--json')) {
     idsCensused: r.idsCensused,
     libraryIds: r.libraryIds ?? 0,
     violations: r.violations,
+    warnings: r.warnings ?? [],
   }, null, 2))
   process.exit(r.violations.length ? 1 : 0)
 }
@@ -181,4 +182,6 @@ const probe = deep
 const localNote = local ? `, ${r.localChecked ?? 0} local pack(s)` : ''
 console.log(`packstruct ${mode}: ${r.packsChecked} pack(s) checked in ${dir}${localNote}${probe}`)
 for (const v of r.violations) console.log(`  VIOLATION ${v.pack}${v.lane === 'local' ? ' [local]' : ''} [${v.norm}]: ${v.message}`)
+// Warnings are advisory: they never change the exit code (SPEC v1.1 section 2).
+for (const w of r.warnings ?? []) console.log(`  WARNING ${w.pack}${w.lane === 'local' ? ' [local]' : ''} [${w.norm}]: ${w.message}`)
 process.exit(r.violations.length ? 1 : 0)

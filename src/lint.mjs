@@ -50,15 +50,20 @@ function wrongArgHint(dir) {
 // violations plus whether the pack counted as checked (a pack.json exists).
 // The caller tags lane and tallies; the checks never learn which lane they
 // run in - public and local packs obey the same frozen manifest contract.
+//
+// `warnings` (SPEC v1.1 section 2) are advisory rows: they never redden a
+// run, never change the exit code, and are reported separately from
+// violations. The first warning shape is `implements` format.
 function manifestViolations(packDir, name) {
   const violations = []
+  const warnings = []
   const manifestPath = join(packDir, 'pack.json')
   if (!existsSync(manifestPath)) {
-    return { checked: false, violations: [{ pack: name, norm: 'manifest-missing', message: 'pack.json missing' }] }
+    return { checked: false, violations: [{ pack: name, norm: 'manifest-missing', message: 'pack.json missing' }], warnings }
   }
   let m
   try { m = JSON.parse(readFileSync(manifestPath, 'utf8')) } catch (e) {
-    return { checked: true, violations: [{ pack: name, norm: 'manifest-invalid', message: `pack.json is not valid JSON: ${e.message}` }] }
+    return { checked: true, violations: [{ pack: name, norm: 'manifest-invalid', message: `pack.json is not valid JSON: ${e.message}` }], warnings }
   }
   if (m.schemaVersion !== 1) violations.push({ pack: name, norm: 'schemaVersion', message: `schemaVersion must be 1 (got ${JSON.stringify(m.schemaVersion)})` })
   if (typeof m.name !== 'string' || !/^[a-z0-9][a-z0-9-]*$/.test(m.name)) violations.push({ pack: name, norm: 'name-kebab-case', message: `name must be kebab-case (got ${JSON.stringify(m.name)})` })
@@ -77,7 +82,28 @@ function manifestViolations(packDir, name) {
   if (m.armedByKey !== undefined && typeof m.armedByKey !== 'string') {
     violations.push({ pack: name, norm: 'armedByKey', message: `armedByKey, when present, must be a string (got ${typeof m.armedByKey})` })
   }
-  return { checked: true, violations }
+  // implements (SPEC v1.1 section 2): OPTIONAL host-owned acknowledgement of
+  // the spec the pack builds against, formatted `packstruct@<MAJOR>` or an
+  // exact `packstruct@1.0.0`. FORMAT ONLY, and format drift is a WARNING,
+  // never a refusal - absence is the quiet default and never colors a
+  // verdict (the row's own cost-to-host: none).
+  if (m.implements !== undefined && (typeof m.implements !== 'string' || !/^packstruct@\d+(\.\d+){0,2}$/.test(m.implements))) {
+    warnings.push({ pack: name, norm: 'implements', message: `implements, when present, should be "packstruct@<major>" or an exact pin like "packstruct@1.0.0" (got ${JSON.stringify(m.implements)}) - advisory only, never a refusal` })
+  }
+  // armedCoverage (packstruct#27, optional assist): a declared claim that
+  // this pack lane has an armed end-to-end row (a test file that simulates
+  // its target with the vocabulary armed). The lint CONFIRMS the declared
+  // file exists - it never runs the row (runs are the host's business).
+  // A declared claim that names a file that isn't there is the vacuous-green
+  // class this key exists to make loud; an absent key is the quiet default.
+  if (m.armedCoverage !== undefined) {
+    if (typeof m.armedCoverage !== 'string' || !m.armedCoverage.trim() || m.armedCoverage.includes('..')) {
+      violations.push({ pack: name, norm: 'armed-coverage', message: `armedCoverage, when present, must be a relative path inside the pack (got ${JSON.stringify(m.armedCoverage)})` })
+    } else if (!existsSync(join(packDir, m.armedCoverage))) {
+      violations.push({ pack: name, norm: 'armed-coverage', message: `armedCoverage declares "${m.armedCoverage}" but that file does not ship - the declared armed row is vacuous (packstruct#27)` })
+    }
+  }
+  return { checked: true, violations, warnings }
 }
 
 // List the pack directories of one lane (<root>/<lane>/<name>/). Anything
@@ -99,31 +125,34 @@ function lanePackDirs(dir, lane) {
 // consumer can tell the lanes apart; public rows stay byte-identical.
 export function lintPacks(dir, opts = {}) {
   const violations = []
+  const warnings = []
   let packsChecked = 0
   let localChecked = 0
   if (!existsSync(dir)) {
-    return { packsChecked, localChecked, violations: [{ pack: dir, norm: 'usage', message: `no such directory: ${dir}` }] }
+    return { packsChecked, localChecked, violations: [{ pack: dir, norm: 'usage', message: `no such directory: ${dir}` }], warnings }
   }
   // Section 1 contract: packs live at <packs-root>/public/<name>/
   const publicDir = join(dir, 'public')
   if (!existsSync(publicDir)) {
     const hint = wrongArgHint(dir)
-    if (hint) return { packsChecked, localChecked, violations: [{ pack: dir, norm: 'usage', message: hint }] }
-    return { packsChecked, localChecked, violations: [{ pack: dir, norm: 'directory-contract', message: `missing ${dir}/public/ - packs live at <packs-root>/public/<name>/` }] }
+    if (hint) return { packsChecked, localChecked, violations: [{ pack: dir, norm: 'usage', message: hint }], warnings }
+    return { packsChecked, localChecked, violations: [{ pack: dir, norm: 'directory-contract', message: `missing ${dir}/public/ - packs live at <packs-root>/public/<name>/` }], warnings }
   }
   for (const { name, packDir } of lanePackDirs(dir, 'public')) {
     const r = manifestViolations(packDir, name)
     if (r.checked) packsChecked++
     violations.push(...r.violations)
+    warnings.push(...r.warnings)
   }
   if (opts.local) {
     for (const { name, packDir } of lanePackDirs(dir, 'local')) {
       const r = manifestViolations(packDir, name)
       if (r.checked) localChecked++
       for (const v of r.violations) violations.push({ ...v, lane: 'local' })
+      for (const w of r.warnings) warnings.push({ ...w, lane: 'local' })
     }
   }
-  return { packsChecked, localChecked, violations }
+  return { packsChecked, localChecked, violations, warnings }
 }
 
 // Ids ONE default export carries (generic over the two house profiles:
@@ -270,11 +299,12 @@ export async function deepLintPacks(dir, opts = {}) {
   const tagLane = (v, lane) => (lane === 'local' ? { ...v, lane: 'local' } : v)
   const shallow = lintPacks(dir, { local: opts.local })
   const violations = [...shallow.violations]
+  const warnings = [...(shallow.warnings ?? [])]
   const localChecked = shallow.localChecked ?? 0
   const publicDir = join(dir, 'public')
   let libraryIds = 0
   if (!existsSync(publicDir)) {
-    return { packsChecked: shallow.packsChecked, localChecked, violations, modulesProbed: 0, idsCensused: 0, libraryIds }
+    return { packsChecked: shallow.packsChecked, localChecked, violations, warnings, modulesProbed: 0, idsCensused: 0, libraryIds }
   }
   const shallowFlagged = new Map()
   for (const v of shallow.violations) shallowFlagged.set(`${v.lane ?? 'public'}/${v.pack}`, v.norm)
@@ -344,7 +374,7 @@ export async function deepLintPacks(dir, opts = {}) {
         idsCensused++
         if (idsCensused > MAX_IDS) {
           violations.push(tagLane({ pack: name, norm: 'deep-floor', message: `census floor exceeded (>${MAX_IDS} ids) - refusing to walk further rather than pretending` }, lane))
-          return { packsChecked: shallow.packsChecked, localChecked, violations, modulesProbed, idsCensused, libraryIds }
+          return { packsChecked: shallow.packsChecked, localChecked, violations, warnings, modulesProbed, idsCensused, libraryIds }
         }
         const first = idSeen.get(id)
         if (first === undefined) { idSeen.set(id, { pack: name, at }); continue }
@@ -364,6 +394,6 @@ export async function deepLintPacks(dir, opts = {}) {
       }
     }
   }
-  return { packsChecked: shallow.packsChecked, localChecked, violations, modulesProbed, idsCensused, libraryIds }
+  return { packsChecked: shallow.packsChecked, localChecked, violations, warnings, modulesProbed, idsCensused, libraryIds }
 }
 

@@ -19,7 +19,8 @@ this page mirrors its frame:
 
 1. Directory contract: `packs/public/<name>/` = `pack.json` + entry file
 2. Manifest fields (frozen for v1) - crashtest's production reality,
-   plus the three host-owned acknowledged keys (`env`, `plugins`, `package`)
+   plus the four host-owned acknowledged keys (`env`, `plugins`, `package`,
+   `implements`)
 3. Entry profiles: `scenario` (crashtest) / `check` (poststruct), declared by the host
 4. Lifecycle norms: explicit loads, slug-namespaced ids, self-audit fixtures
 5. Errors: instant, nameable, never a deep stack trace
@@ -27,6 +28,13 @@ this page mirrors its frame:
 7. Conformance tooling: `packstruct lint` + the `audit-conformance` harness
    (bundled verdict-claiming cases verify a HOST loader honors the spec -
    see [the harness page](https://docs.creadev.org/packstruct/conformance))
+
+**v1.1.0 (additive, 2026-10-29)** - five engine-receipted rows, no
+`schemaVersion` move: the `implements` key, the formalized `--loader`
+template contract, ESM-default entries stated plainly, interop routes as a
+lifecycle norm, and companion-pin receipts. Plus the walk-exit (promotion)
+rule, the new-host onboarding shape, and the MIGRATION-NOTE convention.
+Sections 8-11 of the normative document.
 
 <div class="crosslinks">
 <p><strong>More in these docs:</strong>

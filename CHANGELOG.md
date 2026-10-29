@@ -7,16 +7,60 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-29
+
 ### Added
-- **A permanent `staging` integration branch, covered by CI (packstruct#42).**
-  `staging` is created from `main` and kept forever: work branches off it,
-  PRs target it, promotion to `main` is the only path out. `test.yml`,
-  `crashtest.yml`, `corpus.yml` and `docs.yml` now watch `staging` on push
-  and pull_request. The `docs.yml` deploy job is gated to `main`
+- **SPEC v1.1.0: the five additive rows (packstruct#19).** Engine-receipted,
+  no `schemaVersion` move, no conforming host changes: the optional
+  `implements` key (format-lint only, WARNING never refusal), the formalized
+  `--loader` template contract, ESM-default entries stated plainly, interop
+  routes as a lifecycle norm, and companion-pin receipts. Sections 8-11 of
+  `spec/SPEC.md`.
+- **The walk-exit (promotion) rule (packstruct#37).** A walk is not done
+  until every finding it produced is promoted to a battery leg, a pack
+  verdict row, or a named docket row - the one-mortem class made a norm.
+- **The new-host onboarding shape (packstruct#20).** A traveler joins by
+  answering the three questions the spec already structures (manifest / lint
+  / run) - profiles, never forks - and inherits the standing refusals.
+- **The MIGRATION-NOTE convention (packstruct#21).** The shape a
+  non-additive schema event must carry, defined before first need: a
+  schema-number bump, a MIGRATIONS row, refusal wording on old shapes, a
+  dual-read window only where a host owns the artifact, and consumer receipts.
+- **`implements` format lint + `warnings[]` (SPEC v1.1 section 2).** A
+  non-conforming `implements` is a WARNING in `--json` (`warnings[]`) and
+  the human readout, never a refusal; the exit code is unchanged.
+- **`armedCoverage` declaration (packstruct#27 assist).** A pack may declare
+  the relative path of its armed e2e row; the lint confirms the file ships
+  and refuses (`armed-coverage`) when a declared row is vacuous. It never
+  runs the row.
+- **The version-truth leg (packstruct#40).** `package.json` is the single
+  version source; the test suite refuses `web/package.json`, `web/VERSION`,
+  the README title, and the docs npm line when they drift from it.
+
+### Changed
+- **The version moved 1.0.0 -> 1.1.0** (tool + spec patch). The frozen
+  `schemaVersion` stays 1: v1.1.0 is additive by construction.
+- **`staging` is the working branch (packstruct#42).** `staging` is created
+  from `main` and kept forever: work branches off it, PRs target it,
+  promotion to `main` is the only path out. `test.yml`, `crashtest.yml`,
+  `corpus.yml` and `docs.yml` now watch `staging` on push and pull_request.
+  The `docs.yml` deploy job is gated to `main`
   (`if: github.ref == 'refs/heads/main'`) - once the trigger covers staging,
   the trigger no longer keeps its content out of production, so the job must.
   Promotion is fast-forward (`git push origin staging:main`) so the two
   branches cannot drift.
+- **Wrong-argument hints (packstruct#13, #17): the natural first gestures now
+  name the fix instead of doubling a segment.** Passing the `public/` dir
+  itself, one pack dir (`public/<name>`), or the repo root used to draw a
+  `directory-contract` refusal like `missing packs/public/public/` - faithful
+  to the parser, nonsense at the interface, and graded as a pack DEFECT.
+  Those shapes now answer a `usage`-norm hint naming the probable intent
+  ("looks like a public/ directory itself - pass the packs ROOT, ...",
+  "looks like a repo root - ... try: packstruct lint packs"). A genuinely
+  empty root still refuses `directory-contract` (the missing-public-dir
+  matrix row is unchanged).
+
+### Added (earlier 1.1.0 work)
 - **`lint --local` (packstruct#16): the gitignored `local/` WIP lane is now
   lintable, opt-in.** The default stays public-only and byte-compatible; the
   flag also walks `<packs-root>/local/` - the manifests an author is actively
@@ -48,17 +92,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   without clobbering (bad name, occupied target). The packs root is
   discovered git-style (walk up for `packs/public/`); `--dir` overrides it.
   Pure convenience: its output is just another manifest the lint grades.
-### Changed
-- **Wrong-argument hints (packstruct#13, #17): the natural first gestures now
-  name the fix instead of doubling a segment.** Passing the `public/` dir
-  itself, one pack dir (`public/<name>`), or the repo root used to draw a
-  `directory-contract` refusal like `missing packs/public/public/` - faithful
-  to the parser, nonsense at the interface, and graded as a pack DEFECT.
-  Those shapes now answer a `usage`-norm hint naming the probable intent
-  ("looks like a public/ directory itself - pass the packs ROOT, ...",
-  "looks like a repo root - ... try: packstruct lint packs"). A genuinely
-  empty root still refuses `directory-contract` (the missing-public-dir
-  matrix row is unchanged).
+
 ### Fixed
 - **Unknown flags are refused, not silently ignored (packstruct#18).** The
   arg scan special-cased only `--deep`/`--json`/`--against`, so a typo'd

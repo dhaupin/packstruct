@@ -56,7 +56,8 @@ npx packstruct new my-shapes --json     # { schema, mode: 'new', name, dir, pack
 
 ## Exit codes (the contract CI pins)
 
-- **exit 0** - zero violations, clean authoring surface;
+- **exit 0** - zero violations, clean authoring surface. A run may still
+  print `WARNING` rows (advisory, never fatal - see below);
 - **exit 1** - at least one `VIOLATION` row (the CI gate red). One line per
   violation, `VIOLATION <unit> [<norm>]: <message>` shape stable, grep-able
   and diff-able in CI logs;
@@ -66,7 +67,25 @@ npx packstruct new my-shapes --json     # { schema, mode: 'new', name, dir, pack
 
 The `--json` shape is a stable contract too: additive-only evolving (new
 keys may appear, existing keys are never repurposed), matching the
-MIGRATION-NOTE convention.
+MIGRATION-NOTE convention. v1.1.0 adds a `warnings[]` array alongside
+`violations[]`.
+
+## Warnings (advisory, SPEC v1.1 section 2)
+
+A `WARNING` row never changes the exit code. The first warning shape is the
+`implements` key: when present it must be `packstruct@<major>` or an exact
+pin like `packstruct@1.0.0`, and a non-conforming shape is reported as
+`WARNING <pack> [implements]: ...` - never a refusal. Absence is the quiet
+default.
+
+## armedCoverage (SPEC v1.1, packstruct#27)
+
+A pack MAY declare `armedCoverage` - a relative path to its armed
+end-to-end row (the test that simulates the pack's target with its
+vocabulary armed). The lint CONFIRMS the declared file ships; a
+declaration naming a missing file refuses as `armed-coverage` (the
+vacuous-green class made loud). The lint never RUNS the row - runs are the
+host's business.
 
 ## Wrong-argument hints (packstruct#13, #17)
 
