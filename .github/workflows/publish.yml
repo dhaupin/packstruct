@@ -37,6 +37,10 @@ jobs:
           package-manager-cache: false
       - run: npm install --no-fund --no-audit
       - run: npm test
+      # Belt: npm publish runs prepublishOnly (npm test && npm run check),
+      # so the battery gates the registry cut itself (packstruct#33). The
+      # explicit steps above give a clearer CI failure signal; the gate is
+      # the guarantee.
       # The gate replaces two footguns: the old job-level `!startsWith(ref,'v0.')`
       # check (blind to workflow_dispatch, where ref_name='main') and an
       # "already published" step that ECHOED 'skipping' and published anyway.

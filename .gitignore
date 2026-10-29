@@ -1,0 +1,44 @@
+# packstruct .gitignore (the family block; crashtest/prestruct/poststruct/eyestruct)
+# Zero runtime dependencies, so the only install surface is the dev tooling
+# the dogfood lanes pull in (crashtest) and the web workspace.
+node_modules/
+coverage/
+*.tgz
+.npm/
+.DS_Store
+Thumbs.db
+*.log
+*.swp
+
+# The gitignored WIP pack lane (packstruct#16): the manifests an author is
+# editing right now. `lint --local` reads them; they never travel.
+packs/local/
+
+# The sidecar cut stamp is the ONE churn-by-design surface (AGENTS.md's
+# determinism ritual): the committed ledger + report are byte-stable, the
+# stamp moves with every run.
+labs/run-meta.json
+
+# Environment files never travel with the repo (defense-in-depth: the CLI
+# itself reads no .env secrets - they only exist in maintainer sandboxes).
+.env
+.env.*
+!.env.example
+
+# Web build artifacts (web/.gitignore repeats these for its own tooling).
+# web/.prestruct/status.json is emitted by every `prestruct build` and
+# reads nothing back at build time - a stale copy is the drift class the
+# family kills everywhere else.
+web/node_modules/
+web/dist/
+web/.prestruct/
+
+# Docs build products (family gitignore block, gistory#19 via eyestruct):
+# an accidental in-tree Jekyll build taints nothing; CI resolves the bundle
+# fresh. docs/Gemfile.lock is resolved per-run, never committed.
+docs/.bundle/
+docs/vendor/
+docs/_site/
+docs/.jekyll-cache/
+docs/.jekyll-metadata
+docs/Gemfile.lock

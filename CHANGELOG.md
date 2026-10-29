@@ -25,6 +25,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `lane: "local"` in `--json` (and `[local]` in the human readout), the JSON
   gains a `localChecked` count, and `--deep` pairs with it (probing local
   entries the same way). Fixtures both ways under `test/fixtures/local/`.
+- **A composed check battery, and a publish gate (packstruct#33).** The
+  repo had only `test` and no `prepublishOnly`, so a corrupt or drifted
+  SPEC/pack surface could publish to npm ungated. `check` now composes the
+  four docs gates (`lint:docs`), a deep lint of the repo's own shipped pack
+  (`lint:packs`), and the 8/8 conformance audit (`conform:packs`); the gate
+  is `prepublishOnly = npm test && npm run check`, so `npm publish` cannot
+  cut a release the battery has not verified. `check` also runs in `test.yml`
+  on every push and PR.
+- **A repo `.gitignore` (and two generated files untracked).** The root
+  carried none, so dev installs and build products read as changes:
+  `node_modules/`, `web/dist/`, `web/.prestruct/`, `docs/_site/`,
+  `docs/Gemfile.lock`, `packs/local/` (the WIP lane) and the churn-by-design
+  `labs/run-meta.json` stamp. `labs/run-meta.json` and
+  `web/.prestruct/status.json` were tracked build/run output and are removed
+  from the index (both regenerate on their own).
 ### Changed
 - **Wrong-argument hints (packstruct#13, #17): the natural first gestures now
   name the fix instead of doubling a segment.** Passing the `public/` dir

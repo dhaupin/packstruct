@@ -18,14 +18,17 @@ jobs:
         with: { node-version: 20 }
       - run: npm install --no-fund --no-audit
       - run: npm test
-      - name: lint the repo's own conformance fixtures + shipped packs through the CLI
+      # The battery (packstruct#33): docs gates + the shipped pack's deep
+      # lint + the 8/8 conformance audit. The SAME `npm run check` is the
+      # prepublishOnly gate, so a red battery blocks a PR and a publish.
+      - name: check battery
+        run: npm run check
+      - name: lint the repo's own conformance fixtures through the CLI (both ways)
         run: |
           node bin/cli.mjs lint test/fixtures/good/packs
           if node bin/cli.mjs lint test/fixtures/bad/packs >/dev/null 2>&1; then
             echo "lint should have failed on broken fixtures"; exit 1
           fi
-          # dogfood: the repo's own packs tree (the crashtest scenario pack) is itself SPEC-v1 shaped
-          node bin/cli.mjs lint packs
       # The refusal matrix must stay honest: any linter change that flips a
       # battery row's verdict fails here loudly (scripts/gen-refusal-matrix.mjs
       # refuses to write a lying matrix).

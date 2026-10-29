@@ -16,6 +16,14 @@
 - Fixtures under `test/fixtures/` carry both sides: a clean sample pack +
   a broken pack manifest pointing at a missing entry. `npm test` before
   touching anything in `src/`.
+- The gate is `npm test && npm run check` (`prepublishOnly`, packstruct#33):
+  `check` = `lint:docs` (4 docs gates) + `lint:packs` (the shipped pack
+  deep) + `conform:packs` (the 8/8 conformance audit). The registry cut
+  cannot happen without it. Run `npm run check` before merges too.
+- Generated files never travel: `node_modules/`, `web/dist/`,
+  `web/.prestruct/`, `docs/_site/`, `docs/Gemfile.lock`, `labs/run-meta.json`
+  (the one churn-by-design stamp), and `packs/local/` (the WIP lane) are in
+  `.gitignore`. Root `.gitignore` + `web/.gitignore` both apply.
 - Adding a validate rule = added cases both ways in `test/fixtures`.
 - Don't version-bump the spec (major) without a migration note: §6.
 - All prose uses zero configured-voice words from poststruct's language pack.

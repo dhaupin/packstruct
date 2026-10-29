@@ -45,6 +45,10 @@ exactly:
 - Node 24 on the runner (trusted publishing needs node >= 22.14 /
   npm >= 11.5.1); `npm install` - this repo ships no root lockfile, so
   `npm ci` is not an option.
+- `npm publish` runs `prepublishOnly` = `npm test && npm run check`
+  (packstruct#33): the registry cut cannot happen without the test suite,
+  the docs gates, the shipped pack's deep lint, and the 8/8 conformance
+  audit all green. `check` is the battery; `prepublishOnly` is the gate.
 - Gate order: tag must equal package.json's version (a workflow_dispatch
   on main cannot leak-publish), 0.x versions refuse, then the
   `npm view packstruct@<version>` idempotent skip.

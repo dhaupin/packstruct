@@ -95,6 +95,19 @@ runs the vite build, injects brand/SEO tags from `web/ssr.config.js`, and
 prerenders every route to static HTML (bots get HTML, the SPA hydrates for
 humans).
 
+## Development
+
+Zero runtime dependencies. The gate is `npm test && npm run check` - `check`
+composes the docs gates, a deep lint of the repo's own shipped pack, and the
+8/8 conformance audit (the same command `prepublishOnly` runs, so a publish
+cannot ship an unverified SPEC or pack surface).
+
+```bash
+npm test        # the lint + deep + audit + edge contract suite
+npm run check   # docs gates + lint:packs + conform:packs (the battery)
+npx crashtest run   # the dogfood: hostile manifests through the CLI wire
+```
+
 ## Crashtest dogfood
 
 `crashtest run` from the repo root drives `packs/public/packstruct-lint-shapes`: hostile pack.json corpora through an in-process lint double (the same CLI wire CI uses), asserting the SPEC v1 section 5 contract - instant nameable refusal, no crashes, no deep stacks, and strict tolerance for spec-allowed shapes. Pinned to dhaupin/crashtest v1.0.0.
