@@ -38,6 +38,16 @@ packs/public/<pack-name>/
 | `entry` | relative path inside the pack dir, MUST exist (missing entry = instant, nameable refusal - the crashtest#16 lesson is a norm now) |
 | `armedByKey` | OPTIONAL string. Present: the host MAY run its arming-key ceremony before activation - presence semantics only, so an EMPTY value is "present, not yet armed" (folded from the crashtest#25 matrix fold: the engine treats empty as valid, so a non-empty rule would be a check the SPEC never promised). Absent: the host's own default lifecycle governs |
 
+**Lint-assist key.** `armedCoverage` (added v1.1.0, section 8 row 6) is
+OPTIONAL: a pack's own declaration of the relative path to its armed
+end-to-end row - the test that runs the pack against a stub target with its
+vocabulary armed. It is NOT a shared fact: no conforming loader assigns it
+meaning. It exists for `packstruct lint`, which CONFIRMS the declared file
+ships inside the pack dir (a declaration naming a missing or escaping path
+refuses as `armed-coverage` - the vacuous-green class made loud) and never
+RUNS the row; runs are the host's business. Absent is the quiet default and
+never colors a verdict (packstruct#27).
+
 **Host-owned acknowledged keys.** The table above is the shared-facts column:
 fields every conforming loader assigns meaning to. Some hosts additionally
 carry their own optional manifest keys with host-side shape validation. For
@@ -177,7 +187,7 @@ never silent success.
 
 ## 8. v1.1.0 - the additive rows (adopted 2026-10-29)
 
-Five rows, each citing an ENGINE receipt, none moving `schemaVersion` and
+Six rows, each citing an ENGINE receipt, none moving `schemaVersion` and
 none changing a conforming host's behavior. Full proposal (byte-pinned at
 `dd05454` in dhaupin/gistory): `labs/` receipts and issue dhaupin/packstruct#19.
 
@@ -214,6 +224,18 @@ none changing a conforming host's behavior. Full proposal (byte-pinned at
    A host may lag another host's pin; its `implements` row and CI battery
    reveal the state. Nothing forces synced bumps - it forces the
    SYNCHRONIZED RECEIPT when a bump happens.
+6. **`armedCoverage` - the pack-lane coverage declaration (section 2).**
+   OPTIONAL string: the relative path to the pack's armed end-to-end row.
+   `packstruct lint` CONFIRMS the declared file ships inside the pack dir
+   (a declaration naming a missing or escaping path refuses as
+   `armed-coverage` - the vacuous-green class made loud); it never RUNS the
+   row. Absent is the quiet default and never colors a verdict. Receipt:
+   packstruct#27 - crashtest walk rounds 18-20 found pack defects invisible
+   to shape lint (oracle bugs that only fire on a real wire), so the row
+   exists to make "declared armed coverage that isn't there" nameable at
+   author time. This row makes SPEC §2 promise the `armed-coverage` refusal
+   `src/lint.mjs` already emitted - before it, the linter shipped a check
+   the SPEC never promised.
 
 ## 9. The walk-exit (promotion) rule (v1.1.0)
 

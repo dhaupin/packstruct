@@ -8,6 +8,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **The `entry` check was a substring proxy, not a containment test
+  (packstruct#2).** `entry.includes('..')` both over- and under-refused:
+  (a) it PASSED an absolute path like `entry: "/index.js"` - node's `join`
+  re-roots it inside the pack, so the shallow pass said clean while the deep
+  probe's `resolve` treated it as `/index.js` and refused: the same manifest
+  drew two verdicts, and SPEC §2 says entry MUST be a relative path inside
+  the pack dir; (b) it FALSE-REFUSED a legitimate in-pack filename like
+  `a..b.js`. Both checks now share one real containment test
+  (`entryEscape`): reject non-strings, NUL, and absolute paths (POSIX or
+  Windows-drive), then resolve against the pack dir and require the result
+  to stay under it. `armedCoverage` uses the same test (it carried the same
+  substring bug). The dogfood's `entry-path-containment` case grew two
+  shapes (`entry-absolute-inpack`, `entry-dot`) - the old absolute shape
+  (`/etc/passwd`) also failed file existence, which masked the bug.
+- **The linter shipped an `armed-coverage` refusal the SPEC never promised
+  (packstruct#27).** `src/lint.mjs` refused a declared `armedCoverage` whose
+  file did not ship, but `spec/SPEC.md` never listed the key - the exact
+  "never ship a check the SPEC doesn't promise" defect (AGENTS.md). The SPEC
+  now documents `armedCoverage` as a v1.1.0 lint-assist key (§2 + §8 row 6,
+  explicitly NOT a shared fact no loader reads), so the refusal is promised.
 - **The refusal matrix could go stale green (packstruct#3).** Two defects in
   `scripts/gen-refusal-matrix.mjs`, both against the repo's own law ("never
   ship a check the SPEC doesn't promise"): (1) the honesty check was a SUBSET

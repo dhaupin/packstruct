@@ -345,4 +345,49 @@ rmSync(armRoot, { recursive: true, force: true })
 rmSync(implRoot, { recursive: true, force: true })
 mark('armed-coverage: assert done')
 
+// --- entry containment (the substring-proxy bug, found in the cruise). The
+// old check was `entry.includes('..')`: it false-refused a legitimate
+// filename like `a..b.js`, yet PASSED an absolute path (`/index.js`) - node's
+// `join` re-rooted it inside the pack, so shallow said clean while the deep
+// probe's `resolve` refused. Same manifest, two verdicts. Containment now
+// refuses absolute/dot escapes on BOTH passes and accepts honest filenames. ---
+mark('entry containment: start')
+const contRoot = mkdtempSync(join(tmpdir(), 'packstruct-cont-'))
+const contPack = join(contRoot, 'packs', 'public', 'cont-pack')
+mkdirSync(contPack, { recursive: true })
+writeFileSync(join(contPack, 'a..b.js'), 'export default { name: "cont-pack" }\n')
+writeFileSync(join(contPack, 'index.js'), 'export default { name: "cont-pack" }\n')
+const contRun = (entry, deep) => {
+  writeFileSync(join(contPack, 'pack.json'), JSON.stringify({ schemaVersion: 1, name: 'cont-pack', description: 'entry containment fixture', version: '0.1.0', entry }))
+  return spawnSync(process.execPath, ['bin/cli.mjs', 'lint', join(contRoot, 'packs'), ...(deep ? ['--deep'] : []), '--json'], { encoding: 'utf8' })
+}
+// Absolute path (even one resolving inside the pack) refuses on both passes.
+for (const entry of ['/index.js', '/etc/passwd', '.']) {
+  for (const deep of [false, true]) {
+    const r = contRun(entry, deep)
+    const j = JSON.parse(r.stdout)
+    if (r.status !== 1 || !j.violations.some(v => v.norm === 'entry')) {
+      console.error(`FAIL entry "${entry}" (${deep ? 'deep' : 'shallow'}) must refuse as entry:\n${r.stdout}`); process.exit(1)
+    }
+  }
+}
+// A legitimate `..`-bearing filename is NOT an escape - the false positive.
+for (const entry of ['a..b.js', './index.js']) {
+  const r = contRun(entry, false)
+  if (r.status !== 0 || JSON.parse(r.stdout).violations.length !== 0) {
+    console.error(`FAIL entry "${entry}" is a legitimate in-pack path and must pass:\n${r.stdout}`); process.exit(1)
+  }
+}
+// An entry that is a DIRECTORY is not an ES module (SPEC section 3): it must
+// refuse on both passes, not just deep.
+mkdirSync(join(contPack, 'dir.js'), { recursive: true })
+for (const deep of [false, true]) {
+  const r = contRun('dir.js', deep)
+  if (r.status !== 1 || !JSON.parse(r.stdout).violations.some(v => v.norm === 'entry')) {
+    console.error(`FAIL a directory entry (${deep ? 'deep' : 'shallow'}) must refuse as entry:\n${r.stdout}`); process.exit(1)
+  }
+}
+rmSync(contRoot, { recursive: true, force: true })
+mark('entry containment: assert done')
+
 console.log(`packstruct self-test: good pack clean, bad pack caught (${bad.violations.length} violations), wire subcommand OK, deep pass/bad both ways (${deepGood.idsCensused} ids censused good-side, ${deepBad.violations.length} deep violations bad-side), --against both ways (${libGood.libraryIds} seeded clean, ${libBad.violations.filter(v => v.norm === 'id-library-collision').length} library collisions), local lane (${localOnGood.localChecked} opt-in pack clean, ${localViol.length} lane-tagged refusal both ways), usage lanes (${hintCases.length} wrong-arg hints, unknown flag exit 2), audit-conformance both ways (${auditGood.honored}/${auditGood.caseCount} honored by our own loader, accept-all loader ${auditAllAccept.violations.length} audit failures, silent refuser ${auditNoName.violations.length}), edge probe isolation (exit-hijack and spin-lock refuse honestly, wire exit 1), audit caps (output flood ${auditFlood.violations.length}/8, hung loader ${auditHung.violations.length}/8), new scaffold (lint-clean by construction, refusals named both ways), version truth (${versionTruth.length} living surfaces == ${rootPkg.version}), armed-coverage + implements warning both ways - PASS`)

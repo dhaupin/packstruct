@@ -10,7 +10,7 @@
 // PROBE ONLY: host module-shape norms stay host-owned (SPEC section 3) -
 // deep censes ids, it does not police the host's contract shapes.
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs'
-import { join, resolve, dirname, basename } from 'node:path'
+import { join, resolve, relative, isAbsolute, dirname, basename, sep } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { runCapped } from './run-capped.mjs'
 
@@ -46,6 +46,23 @@ function wrongArgHint(dir) {
   return null
 }
 
+// Is `entry` a relative path that STAYS INSIDE `packDir` (SPEC section 2)?
+// The old check was a `..` substring proxy: it false-refused a legitimate
+// filename like `a..b.js`, yet PASSED an absolute path (`/index.js`), which
+// node's `join` silently re-roots inside the pack (so shallow said clean)
+// while `resolve` (the deep probe) treated as `/index.js` and refused - the
+// two passes disagreed on the same manifest. Containment is a real test:
+// reject non-strings, NUL, and absolute paths (POSIX or Windows-drive), then
+// resolve against the pack dir and require the result to stay under it.
+function entryEscape(packDir, entry) {
+  if (typeof entry !== 'string' || !entry.trim()) return true
+  if (entry.includes('\0')) return true
+  if (entry.startsWith('/') || entry.startsWith('\\') || /^[A-Za-z]:[\\/]/.test(entry)) return true
+  const abs = resolve(packDir, entry)
+  const rel = relative(packDir, abs)
+  return rel === '' || rel === '..' || rel.startsWith('..' + sep) || isAbsolute(rel)
+}
+
 // Manifest validation for ONE pack dir (SPEC v1 section 2). Returns the
 // violations plus whether the pack counted as checked (a pack.json exists).
 // The caller tags lane and tallies; the checks never learn which lane they
@@ -70,10 +87,20 @@ function manifestViolations(packDir, name) {
   if (m.name !== name) violations.push({ pack: name, norm: 'name-dir-match', message: `name "${m.name}" does not match its directory "${name}"` })
   if (typeof m.version !== 'string' || !/^\d+\.\d+(\.\d+)?$/.test(m.version)) violations.push({ pack: name, norm: 'version', message: `version must be dotted MAJOR.MINOR[.PATCH] (got ${JSON.stringify(m.version)})` })
   if (typeof m.description !== 'string' || !m.description.trim()) violations.push({ pack: name, norm: 'description', message: 'description missing or empty' })
-  if (typeof m.entry !== 'string' || !m.entry.trim() || m.entry.includes('..')) {
+  if (entryEscape(packDir, m.entry)) {
     violations.push({ pack: name, norm: 'entry', message: `entry must be a relative path inside the pack (got ${JSON.stringify(m.entry)})` })
-  } else if (!existsSync(join(packDir, m.entry))) {
-    violations.push({ pack: name, norm: 'entry', message: `entry file "${m.entry}" does not exist - instant refusal at load time (the crashtest#16 class)` })
+  } else {
+    // MUST exist AND be a file: SPEC §3 says an entry is an ES module, so a
+    // path that is a directory is not one. Checking existence alone let a
+    // directory entry pass shallow while the deep probe's import refused it -
+    // the same shallow/deep disagreement the containment fix closed.
+    let entryStat = null
+    try { entryStat = statSync(join(packDir, m.entry)) } catch { /* absent */ }
+    if (!entryStat) {
+      violations.push({ pack: name, norm: 'entry', message: `entry file "${m.entry}" does not exist - instant refusal at load time (the crashtest#16 class)` })
+    } else if (!entryStat.isFile()) {
+      violations.push({ pack: name, norm: 'entry', message: `entry "${m.entry}" is not a file - an entry is an ES module (SPEC section 3)` })
+    }
   }
   // armedByKey: OPTIONAL string. Type-checked only - an EMPTY value is
   // "present, not yet armed" and the host owns presence semantics
@@ -97,7 +124,7 @@ function manifestViolations(packDir, name) {
   // A declared claim that names a file that isn't there is the vacuous-green
   // class this key exists to make loud; an absent key is the quiet default.
   if (m.armedCoverage !== undefined) {
-    if (typeof m.armedCoverage !== 'string' || !m.armedCoverage.trim() || m.armedCoverage.includes('..')) {
+    if (entryEscape(packDir, m.armedCoverage)) {
       violations.push({ pack: name, norm: 'armed-coverage', message: `armedCoverage, when present, must be a relative path inside the pack (got ${JSON.stringify(m.armedCoverage)})` })
     } else if (!existsSync(join(packDir, m.armedCoverage))) {
       violations.push({ pack: name, norm: 'armed-coverage', message: `armedCoverage declares "${m.armedCoverage}" but that file does not ship - the declared armed row is vacuous (packstruct#27)` })

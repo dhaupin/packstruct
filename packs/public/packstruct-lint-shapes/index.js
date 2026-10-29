@@ -55,8 +55,15 @@ const HOSTILE_MANIFESTS = {
 const ENTRY_ESCAPE_MANIFESTS = {
   'entry-traversal': JSON.stringify({ schemaVersion: 1, name: 'corpus-pack', description: 'hostile', version: '0.1.0', entry: '../../package.json' }),
   'entry-absolute': JSON.stringify({ schemaVersion: 1, name: 'corpus-pack', description: 'hostile', version: '0.1.0', entry: '/etc/passwd' }),
+  // Absolute but resolving inside the pack: the class the substring proxy
+  // missed (join re-rooted it, so shallow passed it while deep refused).
+  'entry-absolute-inpack': JSON.stringify({ schemaVersion: 1, name: 'corpus-pack', description: 'hostile', version: '0.1.0', entry: '/e.mjs' }),
+  'entry-dot': JSON.stringify({ schemaVersion: 1, name: 'corpus-pack', description: 'hostile', version: '0.1.0', entry: '.' }),
   'entry-file-url': JSON.stringify({ schemaVersion: 1, name: 'corpus-pack', description: 'hostile', version: '0.1.0', entry: 'file:///etc/passwd' }),
   'entry-null-byte': JSON.stringify({ schemaVersion: 1, name: 'corpus-pack', description: 'hostile', version: '0.1.0', entry: 'e.mjs\0/../passwd' }),
+  // The entry names a directory (the transport materializes it as one): not
+  // an ES module (SPEC 3), so the manifest pass must refuse it, not only deep.
+  'entry-is-directory': JSON.stringify({ schemaVersion: 1, name: 'corpus-pack', description: 'hostile', version: '0.1.0', entry: 'e.mjs' }),
 };
 
 // Cross-repo pack doctrine: inline verdict helpers (no crashtest imports).
