@@ -29,7 +29,30 @@ npx packstruct lint packs/ --deep --json
 npx packstruct lint packs/ --deep --against lib/   # + host-library id census
 
 npx packstruct lint packs/ --local  # + the gitignored local/ WIP lane
+
+npx packstruct new my-shapes        # scaffold a conforming pack (packstruct#24)
 ```
+
+## Scaffolding (packstruct#24)
+
+`packstruct new <name>` writes a conforming pack skeleton - a
+`<root>/public/<name>/pack.json` plus an ESM entry stub - that `lint`
+accepts clean the moment it lands, before the author writes a line of real
+code. Refusals are the net; the trampoline is cheaper.
+
+```bash
+npx packstruct new my-shapes            # -> packs/public/my-shapes/{pack.json,index.js}
+npx packstruct new my-shapes --dir packs   # write into an explicit packs root
+npx packstruct new my-shapes --json     # { schema, mode: 'new', name, dir, packDir, files, violations }
+```
+
+- The packs root is discovered git-style (walk up for an existing
+  `packs/public/`); `--dir` overrides it. The skeleton always lands at
+  `<root>/public/<name>/`, never a bare pack dir the lint would refuse.
+- `name` must be kebab-case; an occupied target refuses by name and never
+  clobbers. Both refusals exit 1; a missing name or unknown flag exits 2.
+- `new` is pure convenience - its output is just another manifest the lint
+  grades, so the lint stays the one truth enforcer.
 
 ## Exit codes (the contract CI pins)
 

@@ -6,7 +6,7 @@
 import { lintPacks, deepLintPacks } from '../src/lint.mjs'
 import { auditConformance } from '../src/audit.mjs'
 import { spawnSync } from 'node:child_process'
-import { mkdtempSync, rmSync } from 'node:fs'
+import { mkdtempSync, rmSync, mkdirSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 const GOOD = 'test/fixtures/good/packs'
@@ -250,4 +250,35 @@ if (wireAuditUsage.status !== 2) {
   process.exit(1)
 }
 
-console.log(`packstruct self-test: good pack clean, bad pack caught (${bad.violations.length} violations), wire subcommand OK, deep pass/bad both ways (${deepGood.idsCensused} ids censused good-side, ${deepBad.violations.length} deep violations bad-side), --against both ways (${libGood.libraryIds} seeded clean, ${libBad.violations.filter(v => v.norm === 'id-library-collision').length} library collisions), local lane (${localOnGood.localChecked} opt-in pack clean, ${localViol.length} lane-tagged refusal both ways), usage lanes (${hintCases.length} wrong-arg hints, unknown flag exit 2), audit-conformance both ways (${auditGood.honored}/${auditGood.caseCount} honored by our own loader, accept-all loader ${auditAllAccept.violations.length} audit failures, silent refuser ${auditNoName.violations.length}), edge probe isolation (exit-hijack and spin-lock refuse honestly, wire exit 1), audit caps (output flood ${auditFlood.violations.length}/8, hung loader ${auditHung.violations.length}/8) - PASS`)
+// --- packstruct#24: `new` scaffolds a pack the lint accepts clean the
+// moment it lands (the trampoline before the nets), and refuses the two
+// author mistakes by name without writing anything. ---
+mark('new scaffold: start')
+const newRoot = mkdtempSync(join(tmpdir(), 'packstruct-new-'))
+mkdirSync(join(newRoot, 'packs', 'public'), { recursive: true })
+const newRun = spawnSync(process.execPath, ['bin/cli.mjs', 'new', 'scaffold-pack', '--dir', join(newRoot, 'packs'), '--json'], { encoding: 'utf8', cwd: process.cwd() })
+const newJson = JSON.parse(newRun.stdout)
+if (newRun.status !== 0 || newJson.violations.length || newJson.files.length !== 2) {
+  console.error(`FAIL new should scaffold clean: exit ${newRun.status}\n${newRun.stdout}${newRun.stderr}`); process.exit(1)
+}
+// The generated skeleton is just another manifest: the lint must pass it
+// clean, deep included (its stub exports a default with no colliding ids).
+const newLint = spawnSync(process.execPath, ['bin/cli.mjs', 'lint', join(newRoot, 'packs'), '--deep', '--json'], { encoding: 'utf8' })
+if (newLint.status !== 0 || JSON.parse(newLint.stdout).violations.length !== 0) {
+  console.error(`FAIL the scaffolded pack should lint clean (deep): exit ${newLint.status}\n${newLint.stdout}${newLint.stderr}`); process.exit(1)
+}
+// Refusals by name, non-destructive: bad name, then the occupied target.
+const newBadName = spawnSync(process.execPath, ['bin/cli.mjs', 'new', 'BadName', '--dir', join(newRoot, 'packs'), '--json'], { encoding: 'utf8' })
+if (newBadName.status !== 1 || JSON.parse(newBadName.stdout).violations[0].norm !== 'name-kebab-case') {
+  console.error(`FAIL new should refuse a bad name by name: exit ${newBadName.status}\n${newBadName.stdout}`); process.exit(1)
+}
+const newOccupied = spawnSync(process.execPath, ['bin/cli.mjs', 'new', 'scaffold-pack', '--dir', join(newRoot, 'packs'), '--json'], { encoding: 'utf8' })
+if (newOccupied.status !== 1 || JSON.parse(newOccupied.stdout).violations[0].norm !== 'pack-exists') {
+  console.error(`FAIL new should refuse to clobber an occupied target: exit ${newOccupied.status}\n${newOccupied.stdout}`); process.exit(1)
+}
+const newNoName = spawnSync(process.execPath, ['bin/cli.mjs', 'new'], { encoding: 'utf8' })
+if (newNoName.status !== 2) { console.error(`FAIL new with no name should exit 2 (usage): got ${newNoName.status}`); process.exit(1) }
+rmSync(newRoot, { recursive: true, force: true })
+mark('new scaffold: assert done')
+
+console.log(`packstruct self-test: good pack clean, bad pack caught (${bad.violations.length} violations), wire subcommand OK, deep pass/bad both ways (${deepGood.idsCensused} ids censused good-side, ${deepBad.violations.length} deep violations bad-side), --against both ways (${libGood.libraryIds} seeded clean, ${libBad.violations.filter(v => v.norm === 'id-library-collision').length} library collisions), local lane (${localOnGood.localChecked} opt-in pack clean, ${localViol.length} lane-tagged refusal both ways), usage lanes (${hintCases.length} wrong-arg hints, unknown flag exit 2), audit-conformance both ways (${auditGood.honored}/${auditGood.caseCount} honored by our own loader, accept-all loader ${auditAllAccept.violations.length} audit failures, silent refuser ${auditNoName.violations.length}), edge probe isolation (exit-hijack and spin-lock refuse honestly, wire exit 1), audit caps (output flood ${auditFlood.violations.length}/8, hung loader ${auditHung.violations.length}/8), new scaffold (lint-clean by construction, refusals named both ways) - PASS`)

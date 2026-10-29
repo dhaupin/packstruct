@@ -40,6 +40,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `labs/run-meta.json` stamp. `labs/run-meta.json` and
   `web/.prestruct/status.json` were tracked build/run output and are removed
   from the index (both regenerate on their own).
+- **`packstruct new <name>` (packstruct#24): a conforming pack skeleton at
+  author time.** The cheapest break class - a new author guessing the field
+  list - dies even earlier if the starting point is generated correct. `new`
+  writes `<root>/public/<name>/{pack.json,index.js}` (ESM default-export
+  stub) that the lint accepts clean the moment it lands, and refuses by name
+  without clobbering (bad name, occupied target). The packs root is
+  discovered git-style (walk up for `packs/public/`); `--dir` overrides it.
+  Pure convenience: its output is just another manifest the lint grades.
 ### Changed
 - **Wrong-argument hints (packstruct#13, #17): the natural first gestures now
   name the fix instead of doubling a segment.** Passing the `public/` dir

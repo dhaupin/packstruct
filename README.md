@@ -33,6 +33,8 @@ npx packstruct lint packs/ --local  # + the gitignored local/ WIP lane (lane-tag
 
 npx packstruct audit-conformance . \
     --loader "node bin/load-packs.js {packs}"   # audit a HOST loader (SPEC section 7)
+
+npx packstruct new my-shapes        # scaffold a conforming pack skeleton (packstruct#24)
 ```
 
 The linter validates `schemaVersion === 1`, kebab-case name matching its
