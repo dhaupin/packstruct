@@ -13,7 +13,7 @@
 // In CI the crashtest lane runs after `npm test` (see
 // .github/workflows/crashtest.yml).
 
-import { mkdtempSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, mkdirSync, rmSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -61,6 +61,18 @@ async function lintOne(shape) {
       const entry = join(root, 't', 'public', 'corpus-pack', 'e.mjs');
       rmSync(entry, { force: true });
       mkdirSync(entry, { recursive: true });
+    }
+    else if (shape === 'entry-symlink-escape') {
+      // The entry is a symlink to a VALID module OUTSIDE the pack: the
+      // manifest path is contained, the physical target is not. Must refuse
+      // on the manifest pass (a physical-containment check), not silently
+      // load outside code.
+      writeDir(root, 't', JSON.stringify({ schemaVersion: 1, name: 'corpus-pack', description: 'hostile', version: '0.1.0', entry: 'e.mjs' }));
+      const entry = join(root, 't', 'public', 'corpus-pack', 'e.mjs');
+      const outside = join(root, 't', 'outside.js');
+      writeFileSync(outside, 'export default { name: "outside", attacks: [] }\n');
+      rmSync(entry, { force: true });
+      symlinkSync(outside, entry);
     }
     else if (shape === 'clean-pack') writeDir(root, 't', CLEAN);
     else if (shape === 'extra-keys') writeDir(root, 't', EXTRA_KEYS);

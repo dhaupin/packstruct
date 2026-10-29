@@ -35,7 +35,7 @@ packs/public/<pack-name>/
 | `name` | kebab-case string, MUST match its directory name (mismatch = load refuse) |
 | `description` | one-line, human-readable |
 | `version` | dotted MAJOR.MINOR[.PATCH] |
-| `entry` | relative path inside the pack dir, MUST exist (missing entry = instant, nameable refusal - the crashtest#16 lesson is a norm now) |
+| `entry` | relative path inside the pack dir, MUST exist (missing entry = instant, nameable refusal - the crashtest#16 lesson is a norm now). "Inside the pack dir" is PHYSICAL, not merely lexical: an entry whose resolved target escapes the pack (via `..`, an absolute path, or a symlink pointing outside) refuses |
 | `armedByKey` | OPTIONAL string. Present: the host MAY run its arming-key ceremony before activation - presence semantics only, so an EMPTY value is "present, not yet armed" (folded from the crashtest#25 matrix fold: the engine treats empty as valid, so a non-empty rule would be a check the SPEC never promised). Absent: the host's own default lifecycle governs |
 
 **Lint-assist key.** `armedCoverage` (added v1.1.0, section 8 row 6) is

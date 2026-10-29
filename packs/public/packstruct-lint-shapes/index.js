@@ -64,6 +64,11 @@ const ENTRY_ESCAPE_MANIFESTS = {
   // The entry names a directory (the transport materializes it as one): not
   // an ES module (SPEC 3), so the manifest pass must refuse it, not only deep.
   'entry-is-directory': JSON.stringify({ schemaVersion: 1, name: 'corpus-pack', description: 'hostile', version: '0.1.0', entry: 'e.mjs' }),
+  // The entry is a SYMLINK whose target lives outside the pack: the manifest
+  // path is lexically contained, but the physical target escapes. The
+  // transport materializes the link; containment must refuse it on the
+  // manifest pass, not only when deep imports the outside file.
+  'entry-symlink-escape': JSON.stringify({ schemaVersion: 1, name: 'corpus-pack', description: 'hostile', version: '0.1.0', entry: 'e.mjs' }),
 };
 
 // Cross-repo pack doctrine: inline verdict helpers (no crashtest imports).

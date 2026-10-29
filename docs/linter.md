@@ -16,9 +16,10 @@ permalink: /linter
 Validates every pack under `packs/public/` against SPEC v1's manifest and
 directory contract: schemaVersion 1, kebab-case name matching its directory,
 dotted versions, non-empty description, entry paths that are relative AND
-contained inside the pack dir (an absolute or `..`-escaping entry refuses),
-and that the entry file physically exists - the crashtest#16 class, killed
-at author time.
+physically contained inside the pack dir (an absolute path, a `..` escape, or
+a symlink whose target resolves outside the pack refuses), and that the entry
+is an existing FILE (a missing or directory entry refuses) - the crashtest#16
+class, killed at author time.
 
 ```bash
 npx packstruct lint packs/          # human, exit 0/1/2
