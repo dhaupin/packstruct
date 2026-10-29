@@ -1,7 +1,7 @@
 name: test
 on:
-  push: { branches: [main] }
-  pull_request: { branches: [main] }
+  push: { branches: [main, staging] }
+  pull_request: { branches: [main, staging] }
   # Re-run surface: canceled-by-external-agent runs should be re-triggerable
   # without a noise commit on the fold trail.
   workflow_dispatch:

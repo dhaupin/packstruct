@@ -2,7 +2,10 @@ name: docs
 
 on:
   push:
-    branches: [main]
+    branches: [main, staging]
+    paths: ['docs/**', 'scripts/**', '.github/workflows/docs.yml']
+  pull_request:
+    branches: [main, staging]
     paths: ['docs/**', 'scripts/**', '.github/workflows/docs.yml']
   workflow_dispatch:
 
@@ -99,6 +102,10 @@ jobs:
 
   deploy:
     needs: build
+    # The production gate (packstruct#42): now that the trigger covers
+    # staging, the trigger no longer keeps staging's content out of
+    # production - the job must. Only main publishes to Pages.
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
       name: github-pages

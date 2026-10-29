@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **A permanent `staging` integration branch, covered by CI (packstruct#42).**
+  `staging` is created from `main` and kept forever: work branches off it,
+  PRs target it, promotion to `main` is the only path out. `test.yml`,
+  `crashtest.yml`, `corpus.yml` and `docs.yml` now watch `staging` on push
+  and pull_request. The `docs.yml` deploy job is gated to `main`
+  (`if: github.ref == 'refs/heads/main'`) - once the trigger covers staging,
+  the trigger no longer keeps its content out of production, so the job must.
+  Promotion is fast-forward (`git push origin staging:main`) so the two
+  branches cannot drift.
 - **`lint --local` (packstruct#16): the gitignored `local/` WIP lane is now
   lintable, opt-in.** The default stays public-only and byte-compatible; the
   flag also walks `<packs-root>/local/` - the manifests an author is actively
