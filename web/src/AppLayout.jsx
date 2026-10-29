@@ -10,6 +10,7 @@ import Spec from './pages/Spec.jsx'
 import Lint from './pages/Lint.jsx'
 import Terms from './pages/Terms.jsx'
 import Privacy from './pages/Privacy.jsx'
+import Status from './pages/Status.jsx'
 import NotFound from './pages/NotFound.jsx'
 
 function ScrollToTop() {
@@ -34,6 +35,7 @@ export default function AppLayout() {
           <Route path="/lint" element={<Lint />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
+          <Route path="/status" element={<Status />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

@@ -1,6 +1,6 @@
 {
   "name": "packstruct",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "The shared /packs spec: one manifest, entry, and lifecycle contract for crashtest and poststruct packs - plus a zero-dependency lint CLI that kills broken pack manifests at author time.",
   "type": "module",
   "license": "SEE LICENSE IN LICENSE",
@@ -21,14 +21,17 @@
     "LICENSE"
   ],
   "scripts": {
-    "test": "node test/run.mjs",
-    "lint:docs": "node scripts/check-docs-frontmatter.cjs && node scripts/check-docs-links.cjs && node scripts/check-docs-style.cjs && node scripts/check-language.cjs",
+    "test": "node test/run.mjs && node --test test/status.test.mjs tests/ship-from-download.test.cjs",
+    "test:ship": "node --test tests/ship-from-download.test.cjs",
+    "lint:docs": "node scripts/check-docs-frontmatter.cjs && node scripts/check-docs-links.cjs && node scripts/check-docs-style.cjs && node scripts/check-jekyll-filters.cjs && node scripts/check-language.cjs",
     "lint:packs": "node bin/cli.mjs lint packs --deep",
     "conform:packs": "node bin/cli.mjs audit-conformance . --loader \"node bin/cli.mjs lint {packs}\"",
-    "check": "npm run lint:docs && npm run lint:packs && npm run conform:packs",
+    "check": "npm run lint:docs && node scripts/check-legal.cjs && npm run lint:packs && npm run conform:packs",
     "prepublishOnly": "npm test && npm run check"
   },
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "keywords": [
     "packs",
     "spec",
@@ -38,7 +41,12 @@
     "ci",
     "manifest"
   ],
-  "repository": { "type": "git", "url": "git+https://github.com/dhaupin/packstruct.git" },
-  "bugs": { "url": "https://github.com/dhaupin/packstruct/issues" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dhaupin/packstruct.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dhaupin/packstruct/issues"
+  },
   "homepage": "https://github.com/dhaupin/packstruct#readme"
 }

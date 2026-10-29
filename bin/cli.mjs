@@ -34,10 +34,13 @@
 // 1 any case failed, 2 usage error - same ladder as lint.
 import { lintPacks, deepLintPacks } from '../src/lint.mjs'
 import { auditConformance } from '../src/audit.mjs'
+import { newPack } from '../src/new.mjs'
 
 let args = process.argv.slice(2)
-const verb = args[0] === 'audit-conformance' ? 'audit-conformance' : 'lint'
-if (args[0] === 'lint' || verb === 'audit-conformance') args = args.slice(1)
+const verb = args[0] === 'audit-conformance' ? 'audit-conformance'
+  : args[0] === 'new' ? 'new'
+  : 'lint'
+if (args[0] === 'lint' || verb === 'audit-conformance' || verb === 'new') args = args.slice(1)
 
 const exitUsage = (msg, usage) => {
   if (msg) console.error(msg)
@@ -48,6 +51,7 @@ const exitUsage = (msg, usage) => {
 // Usage strings, one per verb (the usage ladder's exit 2 surface).
 const USAGE_LINT = 'packstruct lint <packs-dir> [--json] [--deep] [--local] [--against <library-path>]'
 const USAGE_AUDIT = 'packstruct audit-conformance [<repo-dir>] --loader "<cmd> {packs}" [--json]'
+const USAGE_NEW = 'packstruct new <pack-name> [--dir <packs-root>] [--json]'
 
 // Unknown-flag rejection (packstruct#18): a typo'd mode flag used to be
 // silently ignored, so `--jso` ran text mode and `--dep` ran shallow - the
@@ -55,6 +59,45 @@ const USAGE_AUDIT = 'packstruct audit-conformance [<repo-dir>] --loader "<cmd> {
 // kill. Every leading-dash token must now be a recognized flag or the run
 // refuses with the usage ladder's exit 2.
 const rejectUnknownFlag = (a, have, usage) => exitUsage(`unknown flag "${a}" (have: ${have})`, usage)
+
+// new (packstruct#24): generate a conforming pack skeleton at author time.
+// The cheapest break class - a new author guessing the field list - dies
+// even earlier if the starting point is generated correct. Refusals are
+// the net; `new` is the trampoline. Its output is just another manifest
+// the lint grades, so the lint stays the one truth.
+if (verb === 'new') {
+  let dir
+  const dirIdx = args.indexOf('--dir')
+  if (dirIdx !== -1) {
+    dir = args[dirIdx + 1]
+    if (dir === undefined || dir.startsWith('-')) exitUsage('--dir needs a value (the packs root to write into)', USAGE_NEW)
+  }
+  const positional = []
+  for (let i = 0; i < args.length; i++) {
+    const a = args[i]
+    if (a === '--dir') { i++; continue }
+    if (a === '--json') continue
+    if (a.startsWith('-')) rejectUnknownFlag(a, '--dir <packs-root>, --json', USAGE_NEW)
+    positional.push(a)
+  }
+  const name = positional[0]
+  if (!name) exitUsage(undefined, USAGE_NEW)
+  if (positional.length > 1) exitUsage(`new takes one pack name (got ${positional.length})`, USAGE_NEW)
+  const r = newPack(name, { dir })
+  const json = args.includes('--json')
+  if (json) {
+    console.log(JSON.stringify({ schema: 1, mode: 'new', name, dir: r.dir, packDir: r.packDir, files: r.files, violations: r.violations }, null, 2))
+  } else {
+    if (r.violations.length) {
+      for (const v of r.violations) console.error(`  REFUSED [${v.norm}]: ${v.message}`)
+    } else {
+      console.log(`packstruct new: created ${r.packDir}`)
+      for (const f of r.files) console.log(`  created ${f}`)
+      console.log(`  next: packstruct lint ${r.dir}`)
+    }
+  }
+  process.exit(r.violations.length ? 1 : 0)
+}
 
 if (verb === 'audit-conformance') {
   const loaderIdx = args.indexOf('--loader')
@@ -127,6 +170,7 @@ if (args.includes('--json')) {
     idsCensused: r.idsCensused,
     libraryIds: r.libraryIds ?? 0,
     violations: r.violations,
+    warnings: r.warnings ?? [],
   }, null, 2))
   process.exit(r.violations.length ? 1 : 0)
 }
@@ -138,4 +182,6 @@ const probe = deep
 const localNote = local ? `, ${r.localChecked ?? 0} local pack(s)` : ''
 console.log(`packstruct ${mode}: ${r.packsChecked} pack(s) checked in ${dir}${localNote}${probe}`)
 for (const v of r.violations) console.log(`  VIOLATION ${v.pack}${v.lane === 'local' ? ' [local]' : ''} [${v.norm}]: ${v.message}`)
+// Warnings are advisory: they never change the exit code (SPEC v1.1 section 2).
+for (const w of r.warnings ?? []) console.log(`  WARNING ${w.pack}${w.lane === 'local' ? ' [local]' : ''} [${w.norm}]: ${w.message}`)
 process.exit(r.violations.length ? 1 : 0)

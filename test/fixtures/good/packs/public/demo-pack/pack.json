@@ -3,5 +3,7 @@
   "name": "demo-pack",
   "description": "Conforming sample pack for packstruct's self-test.",
   "version": "0.1.0",
-  "entry": "entry.mjs"
+  "entry": "entry.mjs",
+  "implements": "packstruct@1",
+  "armedCoverage": "entry.mjs"
 }

@@ -29,11 +29,35 @@ npx packstruct lint packs/ --deep --json
 npx packstruct lint packs/ --deep --against lib/   # + host-library id census
 
 npx packstruct lint packs/ --local  # + the gitignored local/ WIP lane
+
+npx packstruct new my-shapes        # scaffold a conforming pack (packstruct#24)
 ```
+
+## Scaffolding (packstruct#24)
+
+`packstruct new <name>` writes a conforming pack skeleton - a
+`<root>/public/<name>/pack.json` plus an ESM entry stub - that `lint`
+accepts clean the moment it lands, before the author writes a line of real
+code. Refusals are the net; the trampoline is cheaper.
+
+```bash
+npx packstruct new my-shapes            # -> packs/public/my-shapes/{pack.json,index.js}
+npx packstruct new my-shapes --dir packs   # write into an explicit packs root
+npx packstruct new my-shapes --json     # { schema, mode: 'new', name, dir, packDir, files, violations }
+```
+
+- The packs root is discovered git-style (walk up for an existing
+  `packs/public/`); `--dir` overrides it. The skeleton always lands at
+  `<root>/public/<name>/`, never a bare pack dir the lint would refuse.
+- `name` must be kebab-case; an occupied target refuses by name and never
+  clobbers. Both refusals exit 1; a missing name or unknown flag exits 2.
+- `new` is pure convenience - its output is just another manifest the lint
+  grades, so the lint stays the one truth enforcer.
 
 ## Exit codes (the contract CI pins)
 
-- **exit 0** - zero violations, clean authoring surface;
+- **exit 0** - zero violations, clean authoring surface. A run may still
+  print `WARNING` rows (advisory, never fatal - see below);
 - **exit 1** - at least one `VIOLATION` row (the CI gate red). One line per
   violation, `VIOLATION <unit> [<norm>]: <message>` shape stable, grep-able
   and diff-able in CI logs;
@@ -43,7 +67,25 @@ npx packstruct lint packs/ --local  # + the gitignored local/ WIP lane
 
 The `--json` shape is a stable contract too: additive-only evolving (new
 keys may appear, existing keys are never repurposed), matching the
-MIGRATION-NOTE convention.
+MIGRATION-NOTE convention. v1.1.0 adds a `warnings[]` array alongside
+`violations[]`.
+
+## Warnings (advisory, SPEC v1.1 section 2)
+
+A `WARNING` row never changes the exit code. The first warning shape is the
+`implements` key: when present it must be `packstruct@<major>` or an exact
+pin like `packstruct@1.0.0`, and a non-conforming shape is reported as
+`WARNING <pack> [implements]: ...` - never a refusal. Absence is the quiet
+default.
+
+## armedCoverage (SPEC v1.1, packstruct#27)
+
+A pack MAY declare `armedCoverage` - a relative path to its armed
+end-to-end row (the test that simulates the pack's target with its
+vocabulary armed). The lint CONFIRMS the declared file ships; a
+declaration naming a missing file refuses as `armed-coverage` (the
+vacuous-green class made loud). The lint never RUNS the row - runs are the
+host's business.
 
 ## Wrong-argument hints (packstruct#13, #17)
 

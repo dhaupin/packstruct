@@ -48,4 +48,3 @@ Tarball shaping grows from the verified 0.9.0 bytes by exactly one file: same `f
 - Source: [github.com/dhaupin/packstruct](https://github.com/dhaupin/packstruct)
 
 packstruct is made by [Creadev.org](https://creadev.org).
-

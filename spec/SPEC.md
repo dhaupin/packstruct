@@ -3,6 +3,12 @@
 One `/packs` system, many hosts. This document is normative for any app that
 loads packs from a `packs/` directory and for anyone authoring a pack.
 
+**Revision history.** v1.0.0 froze the manifest table against crashtest's
+production reality. v1.1.0 is the additive-first patch section 6 promises:
+five rows, every one citing an ENGINE receipt (behavior at least one host
+loader already holds), none moving `schemaVersion` and none changing a
+conforming host's behavior. See section 8 for the adopted rows.
+
 **Schema base (verified 2026-10-24, crashtest#19 receipts):** every crashtest
 production pack ships schemaVersion 1 with exactly the shared field set (8/8
 conform, nothing drifted since the 2026-10-23 audit). The id space is clean:
@@ -36,11 +42,17 @@ packs/public/<pack-name>/
 fields every conforming loader assigns meaning to. Some hosts additionally
 carry their own optional manifest keys with host-side shape validation. For
 v1, three are acknowledged by name because crashtest's loader already
-validates them (ruled on crashtest#19):
+validates them (ruled on crashtest#19); a fourth joined in v1.1.0
+(section 8 row 1):
 
 - `env` - the env-claims block (`d1`/`kv`/`routes`, plus optional `env.seed`)
 - `plugins` - bundled plugin imports, resolved against the pack dir
 - `package` - optional npm name for the pack
+- `implements` - optional string acknowledging the spec the pack builds
+  against, formatted `packstruct@<MAJOR>` or an exact pin
+  `packstruct@1.0.0` (added v1.1.0, section 8 row 1). `packstruct lint`
+  validates FORMAT ONLY and reports a non-conforming shape as a WARNING,
+  never a refusal; absence is the quiet default and never colors a verdict.
 
 These are **acknowledged, not shared facts**: the spec documents that they
 may appear and that the HOST owns their semantics and shape rules. Their
@@ -162,3 +174,111 @@ never silent success.
   non-zero AND names the offending pack on every violation bundle (section
   5: nameable refusals; identity matches, refusal wording stays host-owned).
   Same exit ladder: 0 all cases honored / 1 any case failed / 2 usage.
+
+## 8. v1.1.0 - the additive rows (adopted 2026-10-29)
+
+Five rows, each citing an ENGINE receipt, none moving `schemaVersion` and
+none changing a conforming host's behavior. Full proposal (byte-pinned at
+`dd05454` in dhaupin/gistory): `labs/` receipts and issue dhaupin/packstruct#19.
+
+1. **`implements`** - the optional host-owned acknowledgement key
+   (section 2). FORMAT ONLY: `packstruct@<MAJOR>` or an exact pin
+   `packstruct@1.0.0`; a non-conforming shape is a lint WARNING, never a
+   refusal; absence is the quiet default. Receipt: eyestruct and poststruct
+   both carry `packstruct@1.0.0` as an exact devDependency, so the pin
+   discipline exists but had no manifest surface.
+2. **The `--loader` template contract, formalized.** `{packs}` substitutes
+   the materialized case pack's DIRECTORY path (never a tarball, never a
+   URL). The loader command runs with CWD = the audited repo root. Exit
+   contract: 0 on the clean bundle; non-zero AND a stderr line naming the
+   offending pack on every violation bundle. The loader runs with NO
+   network and NO implicit host config. A loader that TIMES OUT or crashes
+   is verdict "1 any case failed", never 0, and the harness names which
+   loader failed. Receipt: both live harnesses (poststruct's
+   `run-packs.mjs`, eyestruct's `run-packs.cjs`) hold every clause.
+3. **ESM-default entries, stated plainly.** The entry's DEFAULT EXPORT is
+   the loaded thing. The module format (ESM `export default` / CJS
+   `module.exports`) is the pack's own concern; a loader per-profile
+   decides what run/execute shape it accepts on that default. Receipt: the
+   audit accepted eyestruct's and poststruct's CJS-default fixtures as
+   CORRECT, not as exceptions.
+4. **Interop routes are a LIFECYCLE NORM, not a manifest field.** A pack
+   MAY declare an interop route (run a sibling leg's gate, fork work to a
+   sibling CLI, consume a sibling's runtime) ONLY through the sibling's
+   public CLI surfaces - never by import, and never by guessing a path when
+   an `npx` resolution is available. Receipt: poststruct's `eyes-reference`
+   routes SVG verification through eyestruct's raster gate by invoking
+   eyestruct the TOOL.
+5. **Companion-pin receipts.** Hosts carry the packstruct pin they conform
+   to as an EXACT devDependency, bumped deliberately and receipted per host.
+   A host may lag another host's pin; its `implements` row and CI battery
+   reveal the state. Nothing forces synced bumps - it forces the
+   SYNCHRONIZED RECEIPT when a bump happens.
+
+## 9. The walk-exit (promotion) rule (v1.1.0)
+
+A manual walk is not done until nothing it found is uncommissioned: a walk
+is not finished while any finding it produced is still unrecorded. Every
+finding must be promoted, in the same session that found it, to one of:
+
+- a battery leg (an executable test that would catch the class again), or
+- a pack verdict row (a case the lint or a host's own suite now grades), or
+- a named docket row (a filed issue carrying the finding).
+
+The failure mode this closes is the one-mortem: a probe that got described
+in prose and never encoded is re-discovered by the next walk. Walks
+DISCOVER classes; packs REMEMBER them. Neither rung substitutes for the
+other, and the join between them is this rule. Receipt: eyestruct's walk
+round landed its serve-dist HTTP-shape proofs and the lint-packs
+exit-fidelity leg in the same session as the findings (eyestruct `9983b4f`).
+
+## 10. Onboarding a new host (the profiles-not-forks example)
+
+A new engine ("traveler") joins the grammar by answering the three questions
+this spec already structures, in this order - never by forking the manifest:
+
+1. **What does the manifest see?** The frozen v1 field table (section 2) and
+   the host-owned acknowledged keys (`env`, `plugins`, `package`,
+   `implements`). Nothing to fork; nothing to re-declare.
+2. **What does the lint see?** The same `packstruct lint` /
+   `audit-conformance` lanes. A new profile only extends the CASES it
+   reports, never the manifest grammar. All profile-bearing engines to date
+   gate clean through the same packstruct@1 lane.
+3. **What does run mean?** This is the only new thing a traveler owns: a
+   profile row (execution semantics declared by the host), an engine receipt
+   per adopted behavior, and cases in `audit-conformance` keyed to its
+   profile id.
+
+A traveler inherits the standing refusals unchanged: no remote packs, no
+runs inside lint, no `schemaVersion` bump for additive rows, exact-pin
+companion receipts.
+
+## 11. The MIGRATION-NOTE convention
+
+Section 6 promises a migration note for non-additive changes; this section
+defines its shape BEFORE first need, so every host does not improvise its
+own answer under pressure. A non-additive change to any family artifact
+schema (the pack manifest, the lint/audit JSON shapes, host ledger/report
+artifacts, conformance case packs) MUST carry ALL of:
+
+1. **A schema-number bump on the owning artifact** - major on
+   removal/renaming/semantic shift (section 6); additive rows stay
+   same-schema forever.
+2. **A MIGRATIONS row** - one durable file per owning repo (`MIGRATIONS.md`
+   or a spec section), one row per event: what changed, old shape, new
+   shape, refusal wording.
+3. **Refusal wording on old shapes, at the loader/lint** - the mismatch
+   names the schema version it has and the migration row it maps to.
+   Receipt: crashtest's `validatePackManifest` already emits
+   `unsupported schemaVersion N (have: 1)`.
+4. **A dual-read window ONLY where a host owns the artifact** (host configs,
+   host ledgers). NEVER for pack manifests: a manifest is either current or
+   refused loudly - it is a reviewable artifact, not a moving target.
+5. **Consumer receipts** - every companion-pin host that consumes the
+   changed artifact adds its bump row (the section-8-row-5 discipline
+   applied to non-additive events).
+
+Explicitly not proposed: no migration EXECUTION at load time (a loader
+either reads a shape or refuses; transforming on the fly hides the break
+this convention exists to name), and no new fields on `pack.json` (the note
+lives in prose/artifacts, not on the frozen field table).

@@ -6,7 +6,7 @@
 import { lintPacks, deepLintPacks } from '../src/lint.mjs'
 import { auditConformance } from '../src/audit.mjs'
 import { spawnSync } from 'node:child_process'
-import { mkdtempSync, rmSync } from 'node:fs'
+import { mkdtempSync, rmSync, mkdirSync, writeFileSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 const GOOD = 'test/fixtures/good/packs'
@@ -29,6 +29,13 @@ const mark = (phase) => console.log(`[run] ${phase} (${Date.now() - t0}ms in)`)
 mark('manifest mode')
 const missing = ['schemaVersion', 'entry'].filter(n => !norms.includes(n))
 if (missing.length) { console.error(`FAIL lint norms missing: ${missing}\ngot: ${JSON.stringify(bad.violations, null, 2)}`); process.exit(1) }
+// The bad pack also declares an armedCoverage row that does not ship: the
+// vacuous-green class (packstruct#27) is a violation, not a silent pass.
+if (!norms.includes('armed-coverage')) { console.error(`FAIL bad pack should refuse a vacuous armedCoverage row\ngot: ${JSON.stringify(bad.violations, null, 2)}`); process.exit(1) }
+// The good pack carries the v1.1 keys (implements, armedCoverage) and must
+// stay clean with zero warnings - the additive rows cost a conforming host
+// nothing.
+if (good.warnings.length) { console.error('FAIL good pack should carry no warnings:', good.warnings); process.exit(1) }
 mark('manifest mode: assert done')
 
 // --- deep mode, good side: clean manifest AND clean deep probe ---
@@ -250,4 +257,92 @@ if (wireAuditUsage.status !== 2) {
   process.exit(1)
 }
 
-console.log(`packstruct self-test: good pack clean, bad pack caught (${bad.violations.length} violations), wire subcommand OK, deep pass/bad both ways (${deepGood.idsCensused} ids censused good-side, ${deepBad.violations.length} deep violations bad-side), --against both ways (${libGood.libraryIds} seeded clean, ${libBad.violations.filter(v => v.norm === 'id-library-collision').length} library collisions), local lane (${localOnGood.localChecked} opt-in pack clean, ${localViol.length} lane-tagged refusal both ways), usage lanes (${hintCases.length} wrong-arg hints, unknown flag exit 2), audit-conformance both ways (${auditGood.honored}/${auditGood.caseCount} honored by our own loader, accept-all loader ${auditAllAccept.violations.length} audit failures, silent refuser ${auditNoName.violations.length}), edge probe isolation (exit-hijack and spin-lock refuse honestly, wire exit 1), audit caps (output flood ${auditFlood.violations.length}/8, hung loader ${auditHung.violations.length}/8) - PASS`)
+// --- packstruct#24: `new` scaffolds a pack the lint accepts clean the
+// moment it lands (the trampoline before the nets), and refuses the two
+// author mistakes by name without writing anything. ---
+mark('new scaffold: start')
+const newRoot = mkdtempSync(join(tmpdir(), 'packstruct-new-'))
+mkdirSync(join(newRoot, 'packs', 'public'), { recursive: true })
+const newRun = spawnSync(process.execPath, ['bin/cli.mjs', 'new', 'scaffold-pack', '--dir', join(newRoot, 'packs'), '--json'], { encoding: 'utf8', cwd: process.cwd() })
+const newJson = JSON.parse(newRun.stdout)
+if (newRun.status !== 0 || newJson.violations.length || newJson.files.length !== 2) {
+  console.error(`FAIL new should scaffold clean: exit ${newRun.status}\n${newRun.stdout}${newRun.stderr}`); process.exit(1)
+}
+// The generated skeleton is just another manifest: the lint must pass it
+// clean, deep included (its stub exports a default with no colliding ids).
+const newLint = spawnSync(process.execPath, ['bin/cli.mjs', 'lint', join(newRoot, 'packs'), '--deep', '--json'], { encoding: 'utf8' })
+if (newLint.status !== 0 || JSON.parse(newLint.stdout).violations.length !== 0) {
+  console.error(`FAIL the scaffolded pack should lint clean (deep): exit ${newLint.status}\n${newLint.stdout}${newLint.stderr}`); process.exit(1)
+}
+// Refusals by name, non-destructive: bad name, then the occupied target.
+const newBadName = spawnSync(process.execPath, ['bin/cli.mjs', 'new', 'BadName', '--dir', join(newRoot, 'packs'), '--json'], { encoding: 'utf8' })
+if (newBadName.status !== 1 || JSON.parse(newBadName.stdout).violations[0].norm !== 'name-kebab-case') {
+  console.error(`FAIL new should refuse a bad name by name: exit ${newBadName.status}\n${newBadName.stdout}`); process.exit(1)
+}
+const newOccupied = spawnSync(process.execPath, ['bin/cli.mjs', 'new', 'scaffold-pack', '--dir', join(newRoot, 'packs'), '--json'], { encoding: 'utf8' })
+if (newOccupied.status !== 1 || JSON.parse(newOccupied.stdout).violations[0].norm !== 'pack-exists') {
+  console.error(`FAIL new should refuse to clobber an occupied target: exit ${newOccupied.status}\n${newOccupied.stdout}`); process.exit(1)
+}
+const newNoName = spawnSync(process.execPath, ['bin/cli.mjs', 'new'], { encoding: 'utf8' })
+if (newNoName.status !== 2) { console.error(`FAIL new with no name should exit 2 (usage): got ${newNoName.status}`); process.exit(1) }
+rmSync(newRoot, { recursive: true, force: true })
+mark('new scaffold: assert done')
+
+// --- packstruct#40: version truth. package.json is the SINGLE version
+// source; every living surface that names the CURRENT version must derive
+// from it or the release moves them by hand and one copy lags (the
+// release-day stale-README class). Dated era rows (CHANGELOG sections,
+// freeze posts) and range pins (^1.0.0) are LAWFUL and stay out of scope.
+mark('version truth: start')
+const rootPkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'))
+const webPkg = JSON.parse(readFileSync(new URL('../web/package.json', import.meta.url), 'utf8'))
+const versionTruth = [
+  { surface: 'web/package.json', got: webPkg.version },
+  { surface: 'web/VERSION', got: readFileSync(new URL('../web/VERSION', import.meta.url), 'utf8').trim() },
+  { surface: 'README.md title', got: (readFileSync(new URL('../README.md', import.meta.url), 'utf8').match(/^# packstruct (\d+\.\d+\.\d+)/m) ?? [])[1] },
+  { surface: 'docs/index.md npm line', got: (readFileSync(new URL('../docs/index.md', import.meta.url), 'utf8').match(/packstruct@(\d+\.\d+\.\d+)/) ?? [])[1] },
+]
+for (const { surface, got } of versionTruth) {
+  if (got !== rootPkg.version) {
+    console.error(`FAIL version truth: ${surface} carries ${JSON.stringify(got)}, root package.json is ${rootPkg.version} - move them in the same commit or drop the number`); process.exit(1)
+  }
+}
+mark('version truth: assert done')
+
+// --- packstruct#27 assist: the armed-coverage declaration. A pack may
+// declare `armedCoverage` (a relative path to its armed e2e row); the lint
+// CONFIRMS the file ships - a declaration naming a missing file is the
+// vacuous-green class made loud, and it never runs the row. ---
+mark('armed-coverage: start')
+const armRoot = mkdtempSync(join(tmpdir(), 'packstruct-arm-'))
+const armPack = join(armRoot, 'packs', 'public', 'arm-pack')
+mkdirSync(armPack, { recursive: true })
+writeFileSync(join(armPack, 'pack.json'), JSON.stringify({ schemaVersion: 1, name: 'arm-pack', description: 'armed-coverage fixture', version: '0.1.0', entry: 'index.js', armedCoverage: 'test/armed.e2e.mjs' }))
+writeFileSync(join(armPack, 'index.js'), 'export default { name: "arm-pack" }\n')
+const armMissing = spawnSync(process.execPath, ['bin/cli.mjs', 'lint', join(armRoot, 'packs'), '--json'], { encoding: 'utf8' })
+const armMissingJson = JSON.parse(armMissing.stdout)
+if (armMissing.status !== 1 || !armMissingJson.violations.some(v => v.norm === 'armed-coverage')) {
+  console.error(`FAIL armedCoverage naming a missing file should refuse (armed-coverage):\n${armMissing.stdout}`); process.exit(1)
+}
+mkdirSync(join(armPack, 'test'), { recursive: true })
+writeFileSync(join(armPack, 'test', 'armed.e2e.mjs'), 'export default {}\n')
+const armOk = spawnSync(process.execPath, ['bin/cli.mjs', 'lint', join(armRoot, 'packs'), '--json'], { encoding: 'utf8' })
+if (armOk.status !== 0 || JSON.parse(armOk.stdout).violations.length !== 0) {
+  console.error(`FAIL armedCoverage naming a shipped file should pass:\n${armOk.stdout}`); process.exit(1)
+}
+// The implements warning: a non-conforming shape warns, never refuses.
+const implRoot = mkdtempSync(join(tmpdir(), 'packstruct-impl-'))
+const implPack = join(implRoot, 'packs', 'public', 'impl-pack')
+mkdirSync(implPack, { recursive: true })
+writeFileSync(join(implPack, 'pack.json'), JSON.stringify({ schemaVersion: 1, name: 'impl-pack', description: 'implements fixture', version: '0.1.0', entry: 'index.js', implements: 'packstruct' }))
+writeFileSync(join(implPack, 'index.js'), 'export default { name: "impl-pack" }\n')
+const implRun = spawnSync(process.execPath, ['bin/cli.mjs', 'lint', join(implRoot, 'packs'), '--json'], { encoding: 'utf8' })
+const implJson = JSON.parse(implRun.stdout)
+if (implRun.status !== 0 || implJson.violations.length !== 0 || !implJson.warnings.some(w => w.norm === 'implements')) {
+  console.error(`FAIL a malformed implements should WARN, never refuse (exit 0, warnings[]):\n${implRun.stdout}`); process.exit(1)
+}
+rmSync(armRoot, { recursive: true, force: true })
+rmSync(implRoot, { recursive: true, force: true })
+mark('armed-coverage: assert done')
+
+console.log(`packstruct self-test: good pack clean, bad pack caught (${bad.violations.length} violations), wire subcommand OK, deep pass/bad both ways (${deepGood.idsCensused} ids censused good-side, ${deepBad.violations.length} deep violations bad-side), --against both ways (${libGood.libraryIds} seeded clean, ${libBad.violations.filter(v => v.norm === 'id-library-collision').length} library collisions), local lane (${localOnGood.localChecked} opt-in pack clean, ${localViol.length} lane-tagged refusal both ways), usage lanes (${hintCases.length} wrong-arg hints, unknown flag exit 2), audit-conformance both ways (${auditGood.honored}/${auditGood.caseCount} honored by our own loader, accept-all loader ${auditAllAccept.violations.length} audit failures, silent refuser ${auditNoName.violations.length}), edge probe isolation (exit-hijack and spin-lock refuse honestly, wire exit 1), audit caps (output flood ${auditFlood.violations.length}/8, hung loader ${auditHung.violations.length}/8), new scaffold (lint-clean by construction, refusals named both ways), version truth (${versionTruth.length} living surfaces == ${rootPkg.version}), armed-coverage + implements warning both ways - PASS`)

@@ -3,5 +3,6 @@
   "name": "broken-pack",
   "description": "Manifest pointing at an entry that does not ship (the crashtest#16 class).",
   "version": "0.1.0",
-  "entry": "index.js"
+  "entry": "index.js",
+  "armedCoverage": "test/missing.e2e.mjs"
 }

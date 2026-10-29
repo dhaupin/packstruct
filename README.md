@@ -1,4 +1,4 @@
-# packstruct 1.0.0
+# packstruct 1.1.0
 
 The shared `/packs` spec. **One manifest + entry + lifecycle contract, many
 hosts**, currently [crashtest](https://github.com/dhaupin/crashtest)
@@ -33,6 +33,8 @@ npx packstruct lint packs/ --local  # + the gitignored local/ WIP lane (lane-tag
 
 npx packstruct audit-conformance . \
     --loader "node bin/load-packs.js {packs}"   # audit a HOST loader (SPEC section 7)
+
+npx packstruct new my-shapes        # scaffold a conforming pack skeleton (packstruct#24)
 ```
 
 The linter validates `schemaVersion === 1`, kebab-case name matching its
@@ -66,7 +68,29 @@ Therefore crashtest hosts v1 with **zero runtime changes**, and poststruct
 adopts v1 fresh. Neither host shares an implementation with the other. They
 share only this file convention.
 
-## Status (1.0.0)
+## Family lanes (receipts, not asks)
+
+Every consuming host keeps a receipt row here: engine, the exact source sha the
+row grates against, the lint result, and the cut date. The row is the receipt -
+`implements: packstruct@1` in a host README stops being honorary when the
+registry row is sha-pinned and cut before the consumer's publish wave. Bump a
+companion pin and the receipt moves in the same change, never silently
+(packstruct#25).
+
+| Host | Pin (engine @ source sha) | Result | Cut |
+|---|---|---|---|
+| crashtest | `crashtest@1.1.0` @ `2d1fe79` (npm tag v1.1.0) | 8/8 packs clean shallow + deep, 44 ids, 63 library ids, zero collisions (`labs/corpus-receipt.md`) | 2026-10-29 |
+| crashtest (dogfood) | `crashtest@1.1.0` @ `2d1fe79` | `packstruct-lint-shapes` 34/34 REFUSED, 0 EXPLOITED, 0 BOUNDED | 2026-10-29 |
+| eyestruct | `eyestruct@1.0.0` @ `4b979c0` | three staged packs (eye-adapter, eye-ci-gate, eye-text-leg) clean shallow + deep through the packstruct@1 lane | 2026-10-28 |
+| poststruct | staging in flight | row reserved - activates when it settles (honest absence, not padding) | - |
+
+The registry is the natural home for companion-pin bump receipts (SPEC v1.1
+section 8 row 5) and the checkable form of a traveler's onboarding (SPEC v1.1
+section 10): a host exists when it holds a row, not when a session transcript
+mentions it. A non-additive schema event must update the affected rows (SPEC
+v1.1 section 11).
+
+## Status (1.1.0)
 
 Version ladder follows [prestruct](https://github.com/dhaupin/prestruct)'s
 convention: 0.9.x is the manual `npm publish` ladder (0.9.0 was the manual
@@ -110,4 +134,4 @@ npx crashtest run   # the dogfood: hostile manifests through the CLI wire
 
 ## Crashtest dogfood
 
-`crashtest run` from the repo root drives `packs/public/packstruct-lint-shapes`: hostile pack.json corpora through an in-process lint double (the same CLI wire CI uses), asserting the SPEC v1 section 5 contract - instant nameable refusal, no crashes, no deep stacks, and strict tolerance for spec-allowed shapes. Pinned to dhaupin/crashtest v1.0.0.
+`crashtest run` from the repo root drives `packs/public/packstruct-lint-shapes`: hostile pack.json corpora through an in-process lint double (the same CLI wire CI uses), asserting the SPEC v1 section 5 contract - instant nameable refusal, no crashes, no deep stacks, and strict tolerance for spec-allowed shapes. Pinned to dhaupin/crashtest v1.1.0.

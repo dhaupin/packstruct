@@ -1,13 +1,14 @@
 {
   "name": "packstruct-site",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "description": "packstruct site - the shared /packs spec (prestruct prerender + CF Pages)",
   "scripts": {
     "dev": "vite",
-    "build": "prestruct build",
-    "preview": "vite preview"
+    "build": "node scripts/build-status.mjs && prestruct build",
+    "preview": "vite preview",
+    "status:build": "node scripts/build-status.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",

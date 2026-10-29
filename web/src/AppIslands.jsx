@@ -16,6 +16,7 @@
  */
 
 import LintDemo from './islands/LintDemo.jsx'
+import FamilyStatusIsland from './components/FamilyStatusIsland.jsx'
 
 export const islands = {
   // In-browser manifest check: validates pasted pack.json JSON against the
@@ -23,4 +24,9 @@ export const islands = {
   // fallback prerenders for crawlers; the interactive validator mounts in
   // the browser only.
   'lint-demo': LintDemo,
+  // Family status (family-status@1, packstruct#36): fetches each sibling's
+  // served /status.json and renders the family table honestly - absence is
+  // rendered as absent, never guessed. Static fallback prerenders for
+  // crawlers; the live table mounts in the browser only.
+  'family-status': FamilyStatusIsland,
 }

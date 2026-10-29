@@ -29,7 +29,7 @@ The v1 manifest is the formalized reality of crashtest's production packs:
 one-line description, relative `entry` that **must exist**, optional
 `armedByKey`.
 
-Published on npm as [`packstruct@1.0.0`](https://www.npmjs.com/package/packstruct)
+Published on npm as [`packstruct@1.1.0`](https://www.npmjs.com/package/packstruct)
 (zero dependencies; `npx` fetches it straight from that page).
 
 <div class="crosslinks">
