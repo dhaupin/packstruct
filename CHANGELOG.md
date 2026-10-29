@@ -41,8 +41,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`display: block; overflow-x: auto`) and `td code` never wraps, so a wide
   grammar table can no longer pin the whole page on a phone.
 - **The docs deploy rig aligned (packstruct#30).** `docs.yml`: ruby 3.3 ->
-  3.4, `upload-pages-artifact@v3` -> `@v5`, and `freestruct@1.0.0` ->
-  `@1.1.0` (the version live on npm), plus the new jekyll-filters gate.
+  3.4 and `upload-pages-artifact@v3` -> `@v5`, plus the new jekyll-filters
+  gate. The `freestruct` pin stays at `1.0.0`: the published `1.1.0` still
+  resolves root-absolute hrefs literally, so on a baseurl'd site
+  (`/packstruct`) `--strict` fails every nav link - the basePath-strip fix
+  is on freestruct `main` (1.2.0, unreleased; freestruct#32). Bumping to the
+  unreleased line would break this lane, so the pin moves when the fix
+  publishes.
 - **The crashtest pins re-audited (packstruct#29).** `corpus.yml` now pins
   crashtest tag `v1.1.0` (`2d1fe79`) and `crashtest.yml` installs
   `crashtest@1.1.0`; `labs/corpus-receipt.md` carries the re-audit (8/8
