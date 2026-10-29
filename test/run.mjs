@@ -6,10 +6,15 @@
 import { lintPacks, deepLintPacks } from '../src/lint.mjs'
 import { auditConformance } from '../src/audit.mjs'
 import { spawnSync } from 'node:child_process'
+import { mkdtempSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 const GOOD = 'test/fixtures/good/packs'
 const BAD = 'test/fixtures/bad/packs'
 const DEEP_GOOD = 'test/fixtures/deep/good/packs'
 const DEEP_BAD = 'test/fixtures/deep/bad/packs'
+const LOCAL_GOOD = 'test/fixtures/local/good/packs'
+const LOCAL_BAD = 'test/fixtures/local/bad/packs'
 
 // --- manifest mode (unchanged contract) ---
 const good = lintPacks(GOOD)
@@ -70,6 +75,70 @@ if (libGood.libraryIds !== 2) {
 const libBad = await deepLintPacks(DEEP_GOOD, { against: 'test/fixtures/deep/library-bad.mjs' })
 if (!libBad.violations.some(v => v.norm === 'id-library-collision')) {
   console.error(`FAIL colliding library should yield id-library-collision:\n${JSON.stringify(libBad.violations, null, 2)}`); process.exit(1)
+}
+
+// --- packstruct#16: the local lane is opt-in. Default stays public-only
+// (byte-compatible); --local surfaces the gitignored WIP lane's defects,
+// each tagged lane:'local' so a CI consumer can tell the lanes apart.
+// Fixtures both ways, per the house rule. ---
+mark('local lane: start')
+const localDefaultGood = lintPacks(LOCAL_GOOD)
+if (localDefaultGood.violations.length) { console.error('FAIL local-good default should be clean:', localDefaultGood.violations); process.exit(1) }
+const localDefaultBad = lintPacks(LOCAL_BAD)
+if (localDefaultBad.violations.length) { console.error('FAIL the local lane is invisible by default (the public side is clean):', localDefaultBad.violations); process.exit(1) }
+const localOnGood = lintPacks(LOCAL_GOOD, { local: true })
+if (localOnGood.violations.length || localOnGood.localChecked !== 1) {
+  console.error(`FAIL local-good --local should be clean and count 1 local pack: ${JSON.stringify(localOnGood)}`); process.exit(1)
+}
+const localOnBad = lintPacks(LOCAL_BAD, { local: true })
+const localViol = localOnBad.violations.filter(v => v.lane === 'local')
+if (localViol.length !== 1 || localViol[0].norm !== 'manifest-invalid' || localViol[0].pack !== 'wip-broken' || localOnBad.localChecked !== 1) {
+  console.error(`FAIL local-bad --local should surface ONE lane-tagged manifest-invalid refusal:\n${JSON.stringify(localOnBad.violations, null, 2)}`); process.exit(1)
+}
+const deepLocalGood = await deepLintPacks(LOCAL_GOOD, { local: true })
+if (deepLocalGood.violations.length || deepLocalGood.localChecked !== 1 || deepLocalGood.modulesProbed !== 2) {
+  console.error(`FAIL deep --local good should probe both lanes cleanly: ${JSON.stringify(deepLocalGood)}`); process.exit(1)
+}
+mark('local lane: assert done')
+
+// --- packstruct#13/#17/#18: the wrong-argument + unknown-flag lanes. The
+// natural first-time gestures (the public/ dir itself, one pack dir, the
+// repo root) answer with a `usage` hint naming the fix - never the
+// doubled-segment directory-contract nonsense that blamed the hypothetical
+// packs under the arg. A typo'd mode flag refuses with exit 2 instead of
+// silently running the wrong mode. ---
+mark('usage lanes: start')
+const cli = (args) => spawnSync(process.execPath, ['bin/cli.mjs', ...args], { encoding: 'utf8' })
+const hintCases = [
+  { args: ['lint', 'packs/public'], want: /public\/ directory itself/ },
+  { args: ['lint', `${GOOD}/public/demo-pack`], want: /single pack/ },
+  { args: ['lint', `${GOOD}/public/demo-pack/entry.mjs`], want: /is a file/ },
+  { args: ['lint', '.'], want: /repo root/ },
+]
+for (const c of hintCases) {
+  const r = cli(c.args)
+  if (r.status !== 1 || !r.stdout.includes('[usage]') || !c.want.test(r.stdout)) {
+    console.error(`FAIL usage hint for '${c.args.join(' ')}': exit ${r.status}\n${r.stdout}${r.stderr}`); process.exit(1)
+  }
+}
+const unknownFlag = cli(['lint', GOOD, '--jso'])
+if (unknownFlag.status !== 2 || !/unknown flag "--jso"/.test(unknownFlag.stderr)) {
+  console.error(`FAIL unknown flag should exit 2 naming it: exit ${unknownFlag.status}\n${unknownFlag.stderr}`); process.exit(1)
+}
+const unknownAuditFlag = cli(['audit-conformance', '--loader', 'true {packs}', '--jso'])
+if (unknownAuditFlag.status !== 2) { console.error(`FAIL unknown audit flag should exit 2: got ${unknownAuditFlag.status}`); process.exit(1) }
+mark('usage lanes: assert done')
+
+// --- wire-level --local JSON (additive key, lane-tagged rows) ---
+const wireLocalDefault = cli(['lint', LOCAL_BAD, '--json'])
+const localDefaultJson = JSON.parse(wireLocalDefault.stdout)
+if (wireLocalDefault.status !== 0 || localDefaultJson.localChecked !== 0 || localDefaultJson.violations.some(v => v.lane)) {
+  console.error(`FAIL wire --local default should stay public-only, exit 0:\n${wireLocalDefault.stdout}`); process.exit(1)
+}
+const wireLocal = cli(['lint', LOCAL_BAD, '--local', '--json'])
+const localJson = JSON.parse(wireLocal.stdout)
+if (wireLocal.status !== 1 || localJson.localChecked !== 1 || !localJson.violations.some(v => v.lane === 'local')) {
+  console.error(`FAIL wire --local should exit 1 with a lane-tagged local row:\n${wireLocal.stdout}`); process.exit(1)
 }
 
 // --- audit-conformance (M2, SPEC section 7): the bundled verdict-claiming
@@ -181,4 +250,4 @@ if (wireAuditUsage.status !== 2) {
   process.exit(1)
 }
 
-console.log(`packstruct self-test: good pack clean, bad pack caught (${bad.violations.length} violations), wire subcommand OK, deep pass/bad both ways (${deepGood.idsCensused} ids censused good-side, ${deepBad.violations.length} deep violations bad-side), --against both ways (${libGood.libraryIds} seeded clean, ${libBad.violations.filter(v => v.norm === 'id-library-collision').length} library collisions), audit-conformance both ways (${auditGood.honored}/${auditGood.caseCount} honored by our own loader, accept-all loader ${auditAllAccept.violations.length} audit failures, silent refuser ${auditNoName.violations.length}), edge probe isolation (exit-hijack and spin-lock refuse honestly, wire exit 1), audit caps (output flood ${auditFlood.violations.length}/8, hung loader ${auditHung.violations.length}/8) - PASS`)
+console.log(`packstruct self-test: good pack clean, bad pack caught (${bad.violations.length} violations), wire subcommand OK, deep pass/bad both ways (${deepGood.idsCensused} ids censused good-side, ${deepBad.violations.length} deep violations bad-side), --against both ways (${libGood.libraryIds} seeded clean, ${libBad.violations.filter(v => v.norm === 'id-library-collision').length} library collisions), local lane (${localOnGood.localChecked} opt-in pack clean, ${localViol.length} lane-tagged refusal both ways), usage lanes (${hintCases.length} wrong-arg hints, unknown flag exit 2), audit-conformance both ways (${auditGood.honored}/${auditGood.caseCount} honored by our own loader, accept-all loader ${auditAllAccept.violations.length} audit failures, silent refuser ${auditNoName.violations.length}), edge probe isolation (exit-hijack and spin-lock refuse honestly, wire exit 1), audit caps (output flood ${auditFlood.violations.length}/8, hung loader ${auditHung.violations.length}/8) - PASS`)

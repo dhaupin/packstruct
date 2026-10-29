@@ -10,56 +10,120 @@
 // PROBE ONLY: host module-shape norms stay host-owned (SPEC section 3) -
 // deep censes ids, it does not police the host's contract shapes.
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs'
-import { join, resolve } from 'node:path'
+import { join, resolve, dirname, basename } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { runCapped } from './run-capped.mjs'
 
-export function lintPacks(dir) {
+const LANES = ['public', 'local']
+
+// The wrong-argument lane (packstruct#13, #17): the packs ROOT is the
+// argument, but the natural first-time gestures - the `public/` dir itself
+// (that is exactly what the tree shows), one pack dir, the repo root - all
+// produced the same doubled-segment `directory-contract` nonsense that
+// blames the hypothetical packs under the arg instead of naming the fix.
+// Those shapes answer with a `usage` hint naming the probable intent; a
+// genuinely empty root still refuses `directory-contract` (the refusal
+// matrix's missing-public-dir row depends on it).
+function wrongArgHint(dir) {
+  const abs = resolve(dir)
+  if (existsSync(join(abs, 'pack.json'))) {
+    const parent = dirname(dir)
+    const root = /(^|[\\/])(public|local)$/.test(parent) ? dirname(parent) : parent
+    return `'${dir}' looks like a single pack (pack.json found inside) - pass the packs ROOT (the parent of public/), for example: packstruct lint ${root}`
+  }
+  let isFile = false
+  try { isFile = statSync(abs).isFile() } catch { /* missing path: the caller's existence check owns it */ }
+  if (isFile) {
+    return `'${dir}' is a file - pass the packs ROOT (the directory whose public/ holds the packs), for example: packstruct lint ${dirname(dir)}`
+  }
+  if (/(^|[\\/])(public|local)[\\/]?$/.test(String(dir))) {
+    const lane = basename(abs)
+    return `'${dir}' looks like a ${lane}/ directory itself - pass the packs ROOT (the parent of ${lane}/), for example: packstruct lint ${dirname(dir)}`
+  }
+  if (existsSync(join(abs, 'packs'))) {
+    return `'${dir}' looks like a repo root - the packs live in packs/, try: packstruct lint ${join(dir, 'packs')}`
+  }
+  return null
+}
+
+// Manifest validation for ONE pack dir (SPEC v1 section 2). Returns the
+// violations plus whether the pack counted as checked (a pack.json exists).
+// The caller tags lane and tallies; the checks never learn which lane they
+// run in - public and local packs obey the same frozen manifest contract.
+function manifestViolations(packDir, name) {
+  const violations = []
+  const manifestPath = join(packDir, 'pack.json')
+  if (!existsSync(manifestPath)) {
+    return { checked: false, violations: [{ pack: name, norm: 'manifest-missing', message: 'pack.json missing' }] }
+  }
+  let m
+  try { m = JSON.parse(readFileSync(manifestPath, 'utf8')) } catch (e) {
+    return { checked: true, violations: [{ pack: name, norm: 'manifest-invalid', message: `pack.json is not valid JSON: ${e.message}` }] }
+  }
+  if (m.schemaVersion !== 1) violations.push({ pack: name, norm: 'schemaVersion', message: `schemaVersion must be 1 (got ${JSON.stringify(m.schemaVersion)})` })
+  if (typeof m.name !== 'string' || !/^[a-z0-9][a-z0-9-]*$/.test(m.name)) violations.push({ pack: name, norm: 'name-kebab-case', message: `name must be kebab-case (got ${JSON.stringify(m.name)})` })
+  if (m.name !== name) violations.push({ pack: name, norm: 'name-dir-match', message: `name "${m.name}" does not match its directory "${name}"` })
+  if (typeof m.version !== 'string' || !/^\d+\.\d+(\.\d+)?$/.test(m.version)) violations.push({ pack: name, norm: 'version', message: `version must be dotted MAJOR.MINOR[.PATCH] (got ${JSON.stringify(m.version)})` })
+  if (typeof m.description !== 'string' || !m.description.trim()) violations.push({ pack: name, norm: 'description', message: 'description missing or empty' })
+  if (typeof m.entry !== 'string' || !m.entry.trim() || m.entry.includes('..')) {
+    violations.push({ pack: name, norm: 'entry', message: `entry must be a relative path inside the pack (got ${JSON.stringify(m.entry)})` })
+  } else if (!existsSync(join(packDir, m.entry))) {
+    violations.push({ pack: name, norm: 'entry', message: `entry file "${m.entry}" does not exist - instant refusal at load time (the crashtest#16 class)` })
+  }
+  // armedByKey: OPTIONAL string. Type-checked only - an EMPTY value is
+  // "present, not yet armed" and the host owns presence semantics
+  // (folded from crashtest#25: our non-empty refusal was a check the
+  // SPEC didn't promise; the engine treats empty as valid).
+  if (m.armedByKey !== undefined && typeof m.armedByKey !== 'string') {
+    violations.push({ pack: name, norm: 'armedByKey', message: `armedByKey, when present, must be a string (got ${typeof m.armedByKey})` })
+  }
+  return { checked: true, violations }
+}
+
+// List the pack directories of one lane (<root>/<lane>/<name>/). Anything
+// that is not a directory is skipped, as the public lane always has been.
+function lanePackDirs(dir, lane) {
+  const laneDir = join(dir, lane)
+  if (!existsSync(laneDir)) return []
+  const out = []
+  for (const name of readdirSync(laneDir).sort()) {
+    try { readdirSync(join(laneDir, name)) } catch { continue }
+    out.push({ name, packDir: join(laneDir, name) })
+  }
+  return out
+}
+
+// opts.local (packstruct#16): opt-in, contract-preserving. The v1 default
+// stays public-only; `--local` also lints the gitignored WIP lane every
+// consumer repo keeps. Local violations carry `lane: 'local'` so a CI
+// consumer can tell the lanes apart; public rows stay byte-identical.
+export function lintPacks(dir, opts = {}) {
   const violations = []
   let packsChecked = 0
+  let localChecked = 0
   if (!existsSync(dir)) {
-    return { packsChecked, violations: [{ pack: dir, norm: 'usage', message: `no such directory: ${dir}` }] }
+    return { packsChecked, localChecked, violations: [{ pack: dir, norm: 'usage', message: `no such directory: ${dir}` }] }
   }
   // Section 1 contract: packs live at <packs-root>/public/<name>/
   const publicDir = join(dir, 'public')
   if (!existsSync(publicDir)) {
-    return { packsChecked, violations: [{ pack: dir, norm: 'directory-contract', message: `missing ${dir}/public/ - packs live at <packs-root>/public/<name>/` }] }
+    const hint = wrongArgHint(dir)
+    if (hint) return { packsChecked, localChecked, violations: [{ pack: dir, norm: 'usage', message: hint }] }
+    return { packsChecked, localChecked, violations: [{ pack: dir, norm: 'directory-contract', message: `missing ${dir}/public/ - packs live at <packs-root>/public/<name>/` }] }
   }
-  for (const name of readdirSync(publicDir).sort()) {
-    const packDir = join(publicDir, name)
-    let isDir = true
-    try { readdirSync(packDir) } catch { isDir = false }
-    if (!isDir) continue
-    const manifestPath = join(packDir, 'pack.json')
-    if (!existsSync(manifestPath)) {
-      violations.push({ pack: name, norm: 'manifest-missing', message: 'pack.json missing' })
-      continue
-    }
-    packsChecked++
-    let m
-    try { m = JSON.parse(readFileSync(manifestPath, 'utf8')) } catch (e) {
-      violations.push({ pack: name, norm: 'manifest-invalid', message: `pack.json is not valid JSON: ${e.message}` })
-      continue
-    }
-    if (m.schemaVersion !== 1) violations.push({ pack: name, norm: 'schemaVersion', message: `schemaVersion must be 1 (got ${JSON.stringify(m.schemaVersion)})` })
-    if (typeof m.name !== 'string' || !/^[a-z0-9][a-z0-9-]*$/.test(m.name)) violations.push({ pack: name, norm: 'name-kebab-case', message: `name must be kebab-case (got ${JSON.stringify(m.name)})` })
-    if (m.name !== name) violations.push({ pack: name, norm: 'name-dir-match', message: `name "${m.name}" does not match its directory "${name}"` })
-    if (typeof m.version !== 'string' || !/^\d+\.\d+(\.\d+)?$/.test(m.version)) violations.push({ pack: name, norm: 'version', message: `version must be dotted MAJOR.MINOR[.PATCH] (got ${JSON.stringify(m.version)})` })
-    if (typeof m.description !== 'string' || !m.description.trim()) violations.push({ pack: name, norm: 'description', message: 'description missing or empty' })
-    if (typeof m.entry !== 'string' || !m.entry.trim() || m.entry.includes('..')) {
-      violations.push({ pack: name, norm: 'entry', message: `entry must be a relative path inside the pack (got ${JSON.stringify(m.entry)})` })
-    } else if (!existsSync(join(packDir, m.entry))) {
-      violations.push({ pack: name, norm: 'entry', message: `entry file "${m.entry}" does not exist - instant refusal at load time (the crashtest#16 class)` })
-    }
-    // armedByKey: OPTIONAL string. Type-checked only - an EMPTY value is
-    // "present, not yet armed" and the host owns presence semantics
-    // (folded from crashtest#25: our non-empty refusal was a check the
-    // SPEC didn't promise; the engine treats empty as valid).
-    if (m.armedByKey !== undefined && typeof m.armedByKey !== 'string') {
-      violations.push({ pack: name, norm: 'armedByKey', message: `armedByKey, when present, must be a string (got ${typeof m.armedByKey})` })
+  for (const { name, packDir } of lanePackDirs(dir, 'public')) {
+    const r = manifestViolations(packDir, name)
+    if (r.checked) packsChecked++
+    violations.push(...r.violations)
+  }
+  if (opts.local) {
+    for (const { name, packDir } of lanePackDirs(dir, 'local')) {
+      const r = manifestViolations(packDir, name)
+      if (r.checked) localChecked++
+      for (const v of r.violations) violations.push({ ...v, lane: 'local' })
     }
   }
-  return { packsChecked, violations }
+  return { packsChecked, localChecked, violations }
 }
 
 // Ids ONE default export carries (generic over the two house profiles:
@@ -201,15 +265,19 @@ async function collectLibraryUnits(ref, timeoutMs) {
 
 export async function deepLintPacks(dir, opts = {}) {
   const timeoutMs = Number.isFinite(opts.probeTimeoutMs) ? opts.probeTimeoutMs : PROBE_TIMEOUT_MS
-  const shallow = lintPacks(dir)
+  // Lanes to walk: public always, local only when asked (packstruct#16).
+  const lanes = opts.local ? LANES : ['public']
+  const tagLane = (v, lane) => (lane === 'local' ? { ...v, lane: 'local' } : v)
+  const shallow = lintPacks(dir, { local: opts.local })
   const violations = [...shallow.violations]
+  const localChecked = shallow.localChecked ?? 0
   const publicDir = join(dir, 'public')
   let libraryIds = 0
   if (!existsSync(publicDir)) {
-    return { packsChecked: shallow.packsChecked, violations, modulesProbed: 0, idsCensused: 0, libraryIds }
+    return { packsChecked: shallow.packsChecked, localChecked, violations, modulesProbed: 0, idsCensused: 0, libraryIds }
   }
   const shallowFlagged = new Map()
-  for (const v of shallow.violations) shallowFlagged.set(v.pack, v.norm)
+  for (const v of shallow.violations) shallowFlagged.set(`${v.lane ?? 'public'}/${v.pack}`, v.norm)
   const idSeen = new Map() // raw id -> first origin {pack, at}
   const nameSeen = new Map() // manifest pack name -> dir
   const MAX_IDS = 100000 // census floor: refuse pathological corpora loudly
@@ -230,68 +298,72 @@ export async function deepLintPacks(dir, opts = {}) {
       violations.push({ pack: DEEP_LIB_TAG, norm: 'library-ref', message: `--against "${opts.against}": ${err.message}` })
     }
   }
-  for (const name of readdirSync(publicDir).sort()) {
-    const packDir = join(publicDir, name)
-    let isDir = true
-    try { readdirSync(packDir) } catch { isDir = false }
-    if (!isDir) continue
-    // Manifest-level parity with the engine's seen map (loader.js:389-391):
-    // two packs claiming the same pack name = one loud error at author time.
-    const flagged = shallowFlagged.get(name)
-    if (flagged === 'manifest-missing' || flagged === 'manifest-invalid') continue
-    let m = null
-    try { m = JSON.parse(readFileSync(join(packDir, 'pack.json'), 'utf8')) } catch { continue }
-    if (typeof m.name === 'string') {
-      const before = nameSeen.get(m.name)
-      if (before !== undefined && before !== name) {
-        violations.push({ pack: name, norm: 'name-collision', message: `pack name "${m.name}" claimed by both ${before}/ and ${name}/ - one loud error (the engine's seen map at author time)` })
-      }
-      nameSeen.set(m.name, name)
-    }
-    // Entry probe (packstruct#2 ask 1): import once, in-process.
-    if (flagged === 'entry') continue // missing/invalid entry: shallow already refused
-    if (typeof m.entry !== 'string' || !existsSync(join(packDir, m.entry))) continue
-    let report
-    try {
-      report = await childProbe(resolve(packDir, m.entry), timeoutMs)
-    } catch (err) {
-      violations.push({ pack: name, norm: 'entry-import', message: `entry "${m.entry}": ${err.message}` })
-      continue
-    }
-    if (report.importError !== undefined) {
-      violations.push({ pack: name, norm: 'entry-import', message: `entry "${m.entry}" failed to import: ${report.importError}` })
-      continue
-    }
-    if (!report.defaultExport) {
-      violations.push({ pack: name, norm: 'entry-default-export', message: `entry "${m.entry}" has no default export - the loader would report it as an entry failure (SPEC section 3)` })
-      continue
-    }
-    modulesProbed++
-    // Census (packstruct#2 ask 2): raw ids across the pack corpus, plus
-    // within-pack duplicates - engine parity before the host ever loads.
-    for (const { id, at } of report.ids) {
-      idsCensused++
-      if (idsCensused > MAX_IDS) {
-        violations.push({ pack: name, norm: 'deep-floor', message: `census floor exceeded (>${MAX_IDS} ids) - refusing to walk further rather than pretending` })
-        return { packsChecked: shallow.packsChecked, violations, modulesProbed, idsCensused, libraryIds }
-      }
-      const first = idSeen.get(id)
-      if (first === undefined) { idSeen.set(id, { pack: name, at }); continue }
-      if (first.pack === name) {
-        if (!violations.some(v => v.norm === 'id-duplicate' && v.message.includes(`"${id}"`))) {
-          violations.push({ pack: name, norm: 'id-duplicate', message: `id "${id}" appears twice within the pack (first: ${first.at})` })
+  for (const lane of lanes) {
+    const laneDir = join(dir, lane)
+    if (!existsSync(laneDir)) continue
+    for (const name of readdirSync(laneDir).sort()) {
+      const packDir = join(laneDir, name)
+      let isDir = true
+      try { readdirSync(packDir) } catch { isDir = false }
+      if (!isDir) continue
+      // Manifest-level parity with the engine's seen map (loader.js:389-391):
+      // two packs claiming the same pack name = one loud error at author time.
+      const flagged = shallowFlagged.get(`${lane}/${name}`)
+      if (flagged === 'manifest-missing' || flagged === 'manifest-invalid') continue
+      let m = null
+      try { m = JSON.parse(readFileSync(join(packDir, 'pack.json'), 'utf8')) } catch { continue }
+      if (typeof m.name === 'string') {
+        const before = nameSeen.get(m.name)
+        if (before !== undefined && before !== name) {
+          violations.push(tagLane({ pack: name, norm: 'name-collision', message: `pack name "${m.name}" claimed by both ${before}/ and ${name}/ - one loud error (the engine's seen map at author time)` }, lane))
         }
-      } else {
-        const vsLibrary = first.pack === DEEP_LIB_TAG
-        const norm = vsLibrary ? 'id-library-collision' : 'id-collision'
-        if (!violations.some(v => v.norm === norm && v.message.includes(`"${id}"`))) {
-          const who = vsLibrary
-            ? `the host library (${first.at})` : `${first.pack}/ (${first.at})`
-          violations.push({ pack: name, norm, message: `id "${id}" claimed by both ${who} and ${name}/ (${at}) - the host id space cannot carry both` })
+        nameSeen.set(m.name, name)
+      }
+      // Entry probe (packstruct#2 ask 1): import once, in-process.
+      if (flagged === 'entry') continue // missing/invalid entry: shallow already refused
+      if (typeof m.entry !== 'string' || !existsSync(join(packDir, m.entry))) continue
+      let report
+      try {
+        report = await childProbe(resolve(packDir, m.entry), timeoutMs)
+      } catch (err) {
+        violations.push(tagLane({ pack: name, norm: 'entry-import', message: `entry "${m.entry}": ${err.message}` }, lane))
+        continue
+      }
+      if (report.importError !== undefined) {
+        violations.push(tagLane({ pack: name, norm: 'entry-import', message: `entry "${m.entry}" failed to import: ${report.importError}` }, lane))
+        continue
+      }
+      if (!report.defaultExport) {
+        violations.push(tagLane({ pack: name, norm: 'entry-default-export', message: `entry "${m.entry}" has no default export - the loader would report it as an entry failure (SPEC section 3)` }, lane))
+        continue
+      }
+      modulesProbed++
+      // Census (packstruct#2 ask 2): raw ids across the pack corpus, plus
+      // within-pack duplicates - engine parity before the host ever loads.
+      for (const { id, at } of report.ids) {
+        idsCensused++
+        if (idsCensused > MAX_IDS) {
+          violations.push(tagLane({ pack: name, norm: 'deep-floor', message: `census floor exceeded (>${MAX_IDS} ids) - refusing to walk further rather than pretending` }, lane))
+          return { packsChecked: shallow.packsChecked, localChecked, violations, modulesProbed, idsCensused, libraryIds }
+        }
+        const first = idSeen.get(id)
+        if (first === undefined) { idSeen.set(id, { pack: name, at }); continue }
+        if (first.pack === name) {
+          if (!violations.some(v => v.norm === 'id-duplicate' && v.message.includes(`"${id}"`))) {
+            violations.push(tagLane({ pack: name, norm: 'id-duplicate', message: `id "${id}" appears twice within the pack (first: ${first.at})` }, lane))
+          }
+        } else {
+          const vsLibrary = first.pack === DEEP_LIB_TAG
+          const norm = vsLibrary ? 'id-library-collision' : 'id-collision'
+          if (!violations.some(v => v.norm === norm && v.message.includes(`"${id}"`))) {
+            const who = vsLibrary
+              ? `the host library (${first.at})` : `${first.pack}/ (${first.at})`
+            violations.push(tagLane({ pack: name, norm, message: `id "${id}" claimed by both ${who} and ${name}/ (${at}) - the host id space cannot carry both` }, lane))
+          }
         }
       }
     }
   }
-  return { packsChecked: shallow.packsChecked, violations, modulesProbed, idsCensused, libraryIds }
+  return { packsChecked: shallow.packsChecked, localChecked, violations, modulesProbed, idsCensused, libraryIds }
 }
 

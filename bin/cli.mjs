@@ -45,22 +45,36 @@ const exitUsage = (msg, usage) => {
   process.exit(2)
 }
 
+// Usage strings, one per verb (the usage ladder's exit 2 surface).
+const USAGE_LINT = 'packstruct lint <packs-dir> [--json] [--deep] [--local] [--against <library-path>]'
+const USAGE_AUDIT = 'packstruct audit-conformance [<repo-dir>] --loader "<cmd> {packs}" [--json]'
+
+// Unknown-flag rejection (packstruct#18): a typo'd mode flag used to be
+// silently ignored, so `--jso` ran text mode and `--dep` ran shallow - the
+// wrong mode with no signal, the exact misfire class the tool exists to
+// kill. Every leading-dash token must now be a recognized flag or the run
+// refuses with the usage ladder's exit 2.
+const rejectUnknownFlag = (a, have, usage) => exitUsage(`unknown flag "${a}" (have: ${have})`, usage)
+
 if (verb === 'audit-conformance') {
   const loaderIdx = args.indexOf('--loader')
   let loader
   if (loaderIdx !== -1) {
     loader = args[loaderIdx + 1]
     if (loader === undefined || loader.startsWith('-')) {
-      exitUsage('--loader needs a value: --loader "<cmd> {packs}"', 'packstruct audit-conformance [<repo-dir>] --loader "<cmd> {packs}" [--json]')
+      exitUsage('--loader needs a value: --loader "<cmd> {packs}"', USAGE_AUDIT)
     }
   }
   const positional = []
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--loader') { i++; continue }
-    if (!args[i].startsWith('-')) positional.push(args[i])
+    const a = args[i]
+    if (a === '--loader') { i++; continue }
+    if (a === '--json') continue
+    if (a.startsWith('-')) rejectUnknownFlag(a, '--loader <cmd>, --json', USAGE_AUDIT)
+    positional.push(a)
   }
   if (loader === undefined) {
-    exitUsage(undefined, 'packstruct audit-conformance [<repo-dir>] --loader "<cmd> {packs}" [--json]')
+    exitUsage(undefined, USAGE_AUDIT)
   }
   const repo = positional[0] ?? '.'
   const json = args.includes('--json')
@@ -80,30 +94,35 @@ let against
 if (againstIdx !== -1) {
   against = args[againstIdx + 1]
   if (against === undefined || against.startsWith('-')) {
-    exitUsage(undefined, 'packstruct lint <packs-dir> [--json] [--deep] [--against <library-path>]')
+    exitUsage(undefined, USAGE_LINT)
   }
 }
 const dirArgs = []
 for (let i = 0; i < args.length; i++) {
-  if (args[i] === '--against') { i++; continue }
-  dirArgs.push(args[i])
+  const a = args[i]
+  if (a === '--against') { i++; continue }
+  if (a === '--deep' || a === '--json' || a === '--local') continue
+  if (a.startsWith('-')) rejectUnknownFlag(a, '--deep, --json, --local, --against <path>', USAGE_LINT)
+  dirArgs.push(a)
 }
 
-const dir = dirArgs.find(a => !a.startsWith('-'))
-if (!dir) exitUsage(undefined, 'packstruct lint <packs-dir> [--json] [--deep] [--against <library-path>]')
-const deep = dirArgs.includes('--deep') || args.includes('--deep')
+const dir = dirArgs[0]
+if (!dir) exitUsage(undefined, USAGE_LINT)
+const deep = args.includes('--deep')
+const local = args.includes('--local')
 if (against !== undefined && !deep) {
-  exitUsage('--against requires --deep (the host-library census runs on the deep pass)', 'packstruct lint <packs-dir> [--json] [--deep] [--against <library-path>]')
+  exitUsage('--against requires --deep (the host-library census runs on the deep pass)', USAGE_LINT)
 }
 
 const r = deep
-  ? await deepLintPacks(dir, { against })
-  : lintPacks(dir)
-if (dirArgs.includes('--json') || args.includes('--json')) {
+  ? await deepLintPacks(dir, { against, local })
+  : lintPacks(dir, { local })
+if (args.includes('--json')) {
   console.log(JSON.stringify({
     schema: 1,
     mode: deep ? 'deep' : 'manifest',
     packsChecked: r.packsChecked,
+    localChecked: r.localChecked ?? 0,
     modulesProbed: r.modulesProbed,
     idsCensused: r.idsCensused,
     libraryIds: r.libraryIds ?? 0,
@@ -116,6 +135,7 @@ const probe = deep
   ? ` - ${r.modulesProbed} module(s) probed, ${r.idsCensused} id(s) censused` +
     (against !== undefined ? `, ${r.libraryIds ?? 0} library id(s) seeded` : '')
   : ''
-console.log(`packstruct ${mode}: ${r.packsChecked} pack(s) checked in ${dir}${probe}`)
-for (const v of r.violations) console.log(`  VIOLATION ${v.pack} [${v.norm}]: ${v.message}`)
+const localNote = local ? `, ${r.localChecked ?? 0} local pack(s)` : ''
+console.log(`packstruct ${mode}: ${r.packsChecked} pack(s) checked in ${dir}${localNote}${probe}`)
+for (const v of r.violations) console.log(`  VIOLATION ${v.pack}${v.lane === 'local' ? ' [local]' : ''} [${v.norm}]: ${v.message}`)
 process.exit(r.violations.length ? 1 : 0)

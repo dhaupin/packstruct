@@ -1,0 +1,1 @@
+{ "schemaVersion": 1, "name": "wip-broken", "description": "Local WIP pack with a manifest that is NOT JSON (packstruct#16 - invisible until --local).", "version": "0.0.1", "entry":

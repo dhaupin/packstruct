@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "wip-good",
+  "description": "Conforming local WIP pack - clean under --local.",
+  "version": "0.0.1",
+  "entry": "index.mjs"
+}

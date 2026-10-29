@@ -20,14 +20,58 @@ entry file physically exists - the crashtest#16 class, killed at author time.
 
 ```bash
 npx packstruct lint packs/          # human, exit 0/1/2
-npx packstruct lint packs/ --json   # { schema, packsChecked, violations }
+npx packstruct lint packs/ --json   # { schema, packsChecked, localChecked, violations }
 
 npx packstruct lint packs/ --deep   # + entry import + id census, exit 0/1/2
 npx packstruct lint packs/ --deep --json
-                                    # { schema, mode, packsChecked, modulesProbed, idsCensused, libraryIds, violations }
+                                    # { schema, mode, packsChecked, localChecked, modulesProbed, idsCensused, libraryIds, violations }
 
 npx packstruct lint packs/ --deep --against lib/   # + host-library id census
+
+npx packstruct lint packs/ --local  # + the gitignored local/ WIP lane
 ```
+
+## Exit codes (the contract CI pins)
+
+- **exit 0** - zero violations, clean authoring surface;
+- **exit 1** - at least one `VIOLATION` row (the CI gate red). One line per
+  violation, `VIOLATION <unit> [<norm>]: <message>` shape stable, grep-able
+  and diff-able in CI logs;
+- **exit 2** - usage error: a missing directory argument, a typo'd flag
+  (packstruct#18), or `--against` without `--deep`. The runs lane stays
+  0/1-only.
+
+The `--json` shape is a stable contract too: additive-only evolving (new
+keys may appear, existing keys are never repurposed), matching the
+MIGRATION-NOTE convention.
+
+## Wrong-argument hints (packstruct#13, #17)
+
+The packs ROOT is the argument, but the natural first gestures - the
+`public/` dir itself, one pack dir, the repo root - used to draw a
+doubled-segment `directory-contract` refusal (`packs/public/public/...`)
+that blamed the hypothetical packs under the argument instead of naming the
+fix. Those shapes now answer a `usage` hint that names the probable intent:
+
+```bash
+npx packstruct lint packs/public
+# VIOLATION packs/public [usage]: 'packs/public' looks like a public/
+#   directory itself - pass the packs ROOT (the parent of public/),
+#   for example: packstruct lint packs
+```
+
+The hint rides the `usage` norm (never `directory-contract`), so it never
+reads as a pack defect. A genuinely empty root still refuses
+`directory-contract` - the missing-public-dir row of the refusal matrix.
+
+## --local: the WIP lane (packstruct#16)
+
+The default stays public-only. `--local` also lints the gitignored `local/`
+lane every consumer repo keeps - the manifests an author is actively
+editing, and the ones a public-only walk leaves invisible. Local violations
+carry `lane: "local"` in `--json` (and `[local]` in the human readout) so a
+CI consumer can tell the lanes apart; public rows stay byte-identical, and
+the JSON gains a `localChecked` count alongside `packsChecked`.
 
 ## --deep: load-level parity (probe only)
 
