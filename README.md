@@ -80,7 +80,7 @@ companion pin and the receipt moves in the same change, never silently
 | Host | Pin (engine @ source sha) | Result | Cut |
 |---|---|---|---|
 | crashtest | `crashtest@1.1.0` @ `2d1fe79` (npm tag v1.1.0) | 8/8 packs clean shallow + deep, 44 ids, 63 library ids, zero collisions (`labs/corpus-receipt.md`) | 2026-10-29 |
-| crashtest (dogfood) | `crashtest@1.1.0` @ `2d1fe79` | `packstruct-lint-shapes` 34/34 REFUSED, 0 EXPLOITED, 0 BOUNDED | 2026-10-29 |
+| crashtest (dogfood) | `crashtest@1.1.0` @ `2d1fe79` | `crashtest run`: 53/53 catalog findings REFUSED (4 from `packstruct-lint-shapes`), 0 EXPLOITED, 0 BOUNDED (`labs/crashledger.json`) | 2026-10-29 |
 | eyestruct | `eyestruct@1.0.0` @ `4b979c0` (tag v1.0.0) | 5/5 packs (eye-adapter, eye-bundle, eye-ci-gate, eye-shapes, eye-text-leg) clean shallow + deep through the packstruct@1 lane | 2026-10-29 |
 | poststruct | staging in flight | row reserved - activates when it settles (honest absence, not padding) | - |
 

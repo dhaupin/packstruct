@@ -85,8 +85,17 @@ try {
     const observed = shapeViolations.length
       ? { refused: true, norms: shapeViolations.map(v => v.norm) }
       : { refused: false, norms: [] }
+    // EXACT match, BOTH directions. A subset check (observed ⊇ expected)
+    // would pass a linter that grew STRICTER than the SPEC promises - an
+    // extra norm on a shape the SPEC says is fine is the "ship a check the
+    // SPEC never promised" defect, and it must fail the matrix exactly as
+    // loudly as a missing one. Sorted set compare, so norm order never
+    // matters.
+    const expectedNorms = [...(shape.expect.norms ?? [])].sort()
+    const observedNorms = [...observed.norms].sort()
     const honest = observed.refused === shape.expect.refused
-      && (shape.expect.norms ?? []).every(n => observed.norms.includes(n))
+      && expectedNorms.length === observedNorms.length
+      && expectedNorms.every((n, i) => n === observedNorms[i])
     if (!honest) {
       failures++
       console.error(`MATRIX DISAGREES! shape ${shape.id}:\n  expected ${JSON.stringify(shape.expect)}\n  observed ${JSON.stringify(observed)}\n  raw: ${JSON.stringify(r.violations)}`)
@@ -111,21 +120,55 @@ try {
     console.error(`refusal matrix: ${failures} row(s) dishonest - refusing to write the matrix (fix the linter or the expectation, never the check)`)
     process.exit(1)
   }
-  // Portable battery for host columns (crashtest next; poststruct when online).
+  const matrixPath = join(ROOT, 'labs', 'refusal-matrix.packstruct.json')
   const batteryDir = join(ROOT, 'labs', 'refusal-battery')
-  mkdirSync(batteryDir, { recursive: true })
+
+  // Every artifact is computed as {path, contents} FIRST, so generate, check,
+  // and write share one code path - the bytes checked are the bytes written.
+  const artifacts = [{
+    path: matrixPath,
+    contents: JSON.stringify({ schema: 1, tool: 'packstruct lint', version: PKG_VERSION, rows }, null, 2) + '\n',
+  }]
+  // Portable battery for host columns (crashtest next; poststruct when online).
   for (const shape of BATTERY) {
-    writeFileSync(join(batteryDir, `${shape.id}.json`), JSON.stringify({
-      id: shape.id,
-      dirName: 'shape-pack',
-      manifest: manifestFor(shape),
-      writeEntryFile: !(shape.mutate?.entry ?? '').includes('..') && shape.mutate?.entry !== 'ghost.js' && !shape.noManifest && !shape.malformed,
-      expect: { refused: shape.expect.refused, norms: shape.expect.norms },
-      note: 'Hosts: materialize dirName/pack.json (create pack.json only when manifest is non-null; substitute the placeholder bytes for malformed), run YOUR validator over it, return { id, host: refused, norms }. Column 3 of the golden matrix (dhaupin/packstruct#3).',
-    }, null, 2) + '\n')
+    artifacts.push({
+      path: join(batteryDir, `${shape.id}.json`),
+      contents: JSON.stringify({
+        id: shape.id,
+        dirName: 'shape-pack',
+        manifest: manifestFor(shape),
+        writeEntryFile: !(shape.mutate?.entry ?? '').includes('..') && shape.mutate?.entry !== 'ghost.js' && !shape.noManifest && !shape.malformed,
+        expect: { refused: shape.expect.refused, norms: shape.expect.norms },
+        note: 'Hosts: materialize dirName/pack.json (create pack.json only when manifest is non-null; substitute the placeholder bytes for malformed), run YOUR validator over it, return { id, host: refused, norms }. Column 3 of the golden matrix (dhaupin/packstruct#3).',
+      }, null, 2) + '\n',
+    })
   }
-  writeFileSync(join(batteryDir, 'missing-public-dir.json'), JSON.stringify({ id: 'missing-public-dir', note: 'empty packs root (no public/) - expect a directory-contract refusal' }, null, 2) + '\n')
-  writeFileSync(join(ROOT, 'labs', 'refusal-matrix.packstruct.json'), JSON.stringify({ schema: 1, tool: 'packstruct lint', version: PKG_VERSION, rows }, null, 2) + '\n')
+  artifacts.push({
+    path: join(batteryDir, 'missing-public-dir.json'),
+    contents: JSON.stringify({ id: 'missing-public-dir', note: 'empty packs root (no public/) - expect a directory-contract refusal' }, null, 2) + '\n',
+  })
+
+  // --check: every receipt must MATCH what the linter does right now. Without
+  // this the generator still exits 0 while rewriting its files, so a linter
+  // change that flips a row ships a stale receipt green (the "can never
+  // silently go stale" promise was unenforced in CI). Read-only: it exits
+  // before any write, so a stale tree is left exactly as found.
+  if (process.argv.includes('--check')) {
+    const stale = artifacts.filter((a) => {
+      try { return readFileSync(a.path, 'utf8') !== a.contents } catch { return true }
+    })
+    if (stale.length) {
+      console.error(`refusal matrix is STALE: ${stale.length} receipt file(s) do not match the linter`)
+      for (const a of stale) console.error(`  ${a.path.replace(ROOT + '/', '')}`)
+      console.error('  regenerate with: node scripts/gen-refusal-matrix.mjs')
+      process.exit(1)
+    }
+    console.log(`refusal matrix: ${rows.length} row(s), all honest, all ${artifacts.length} receipt file(s) in sync`)
+    process.exit(0)
+  }
+
+  mkdirSync(batteryDir, { recursive: true })
+  for (const a of artifacts) writeFileSync(a.path, a.contents)
   console.log(`refusal matrix: ${rows.length} row(s), all honest - labs/refusal-matrix.packstruct.json + labs/refusal-battery/ written`)
 } finally {
   rmSync(tmp, { recursive: true, force: true })

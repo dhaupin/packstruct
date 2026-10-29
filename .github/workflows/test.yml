@@ -29,8 +29,10 @@ jobs:
           if node bin/cli.mjs lint test/fixtures/bad/packs >/dev/null 2>&1; then
             echo "lint should have failed on broken fixtures"; exit 1
           fi
-      # The refusal matrix must stay honest: any linter change that flips a
-      # battery row's verdict fails here loudly (scripts/gen-refusal-matrix.mjs
-      # refuses to write a lying matrix).
-      - name: Verify the refusal matrix stays honest (packstruct#3)
-        run: node scripts/gen-refusal-matrix.mjs
+      # The refusal matrix must stay honest AND in sync. `--check` regenerates
+      # in memory and diffs against the committed receipt, exiting 1 on any
+      # delta - so a linter change that flips a row (or grows stricter than
+      # the SPEC promises) fails here instead of shipping a stale matrix green.
+      # It is also a leg of `npm run check`, the prepublishOnly gate.
+      - name: Verify the refusal matrix stays honest and in sync (packstruct#3)
+        run: node scripts/gen-refusal-matrix.mjs --check
