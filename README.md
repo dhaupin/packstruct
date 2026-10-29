@@ -24,11 +24,12 @@ packs/
 
 ```bash
 npx packstruct lint packs/          # human, exit 0 clean / 1 violations / 2 usage
-npx packstruct lint packs/ --json   # machine-readable: {schema, packsChecked, violations}
+npx packstruct lint packs/ --json   # machine-readable: {schema, packsChecked, localChecked, violations}
 
 npx packstruct lint packs/ --deep   # + entry import, default-export check, id census
 npx packstruct lint packs/ --deep --json   # adds mode, modulesProbed, idsCensused, libraryIds
 npx packstruct lint packs/ --deep --against lib/   # + host-library id census (id-library-collision)
+npx packstruct lint packs/ --local  # + the gitignored local/ WIP lane (lane-tagged rows)
 
 npx packstruct audit-conformance . \
     --loader "node bin/load-packs.js {packs}"   # audit a HOST loader (SPEC section 7)

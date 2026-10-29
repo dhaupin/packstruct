@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "pub-good",
+  "description": "Conforming public pack beside a broken local WIP pack (the --local fixture).",
+  "version": "0.1.0",
+  "entry": "index.mjs"
+}

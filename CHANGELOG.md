@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`lint --local` (packstruct#16): the gitignored `local/` WIP lane is now
+  lintable, opt-in.** The default stays public-only and byte-compatible; the
+  flag also walks `<packs-root>/local/` - the manifests an author is actively
+  editing and the ones a public-only walk left invisible (a broken local
+  manifest sailed clean until engine-load time). Local rows carry
+  `lane: "local"` in `--json` (and `[local]` in the human readout), the JSON
+  gains a `localChecked` count, and `--deep` pairs with it (probing local
+  entries the same way). Fixtures both ways under `test/fixtures/local/`.
+### Changed
+- **Wrong-argument hints (packstruct#13, #17): the natural first gestures now
+  name the fix instead of doubling a segment.** Passing the `public/` dir
+  itself, one pack dir (`public/<name>`), or the repo root used to draw a
+  `directory-contract` refusal like `missing packs/public/public/` - faithful
+  to the parser, nonsense at the interface, and graded as a pack DEFECT.
+  Those shapes now answer a `usage`-norm hint naming the probable intent
+  ("looks like a public/ directory itself - pass the packs ROOT, ...",
+  "looks like a repo root - ... try: packstruct lint packs"). A genuinely
+  empty root still refuses `directory-contract` (the missing-public-dir
+  matrix row is unchanged).
+### Fixed
+- **Unknown flags are refused, not silently ignored (packstruct#18).** The
+  arg scan special-cased only `--deep`/`--json`/`--against`, so a typo'd
+  mode flag ran the WRONG mode with no signal - `lint packs --jso` emitted
+  text mode and exited 0, `--dep` ran shallow. Every leading-dash token must
+  now be a recognized flag or the run exits 2 naming it (the usage ladder),
+  for both `lint` and `audit-conformance`.
+
 ## [1.0.0] - 2026-10-25
 
 ### Changed
