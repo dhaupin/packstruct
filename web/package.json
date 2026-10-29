@@ -6,8 +6,9 @@
   "description": "packstruct site - the shared /packs spec (prestruct prerender + CF Pages)",
   "scripts": {
     "dev": "vite",
-    "build": "prestruct build",
-    "preview": "vite preview"
+    "build": "node scripts/build-status.mjs && prestruct build",
+    "preview": "vite preview",
+    "status:build": "node scripts/build-status.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",

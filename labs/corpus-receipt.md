@@ -58,3 +58,21 @@ refusing the live corpus becomes visible in lint-CI immediately.
 - The refusal matrix (which side refuses which hostile shape, in one golden
   fixture set) is the larger half of #3 and stays open; this lane is the
   non-hostile half landing first.
+
+
+## Re-audit at crashtest v1.1.0 (packstruct#29, 2026-10-29)
+
+- Command: `node bin/cli.mjs lint /tmp/corpus-ct/packs [--deep] [--deep --against /tmp/corpus-ct/src/scenarios/library]`
+- Corpus tree re-pinned: `dhaupin/crashtest` tag `v1.1.0` =
+  `2d1fe793e2d4732b9eea52cc4199d54c6e3b0091` (the tag that is live on npm;
+  crashtest `main` carries `1.2.0` unreleased, tag pending).
+- Output: shallow 8/8 clean exit 0; deep `8 module(s) probed, 44 id(s)
+  censused`, exit 0; `--against` `44 id(s) censused, 63 library id(s) seeded`,
+  zero collisions, exit 0.
+- Reading: the walk train between `fc93ca6` and `v1.1.0` (honest-skip flags,
+  the shipped `lint-packs --against` lane, fixture/adapter rounds) left the
+  manifest and id space untouched - the same 8 packs, the same 44 ids, the
+  same 63 library ids, still zero collisions. The pin moved and the receipt
+  moved with it (bump pin + receipt together, never silently).
+- CI: `.github/workflows/corpus.yml` now pins `ref: v1.1.0`; this receipt is
+  its truth.

@@ -57,6 +57,51 @@ exactly:
   with a listing-file guardrail (shipped surfaces present, repo-bound
   internals like web/, docs/, labs/, test/ absent), generated notes.
 
+## Phone publish lane (packstruct#35)
+
+`scripts/ship-from-download.cjs` is the family's generic phone publish recipe
+(copied as-is from eyestruct@9744c76, behavior test in
+`tests/ship-from-download.test.cjs`). It stages a git-less zip-extracted tree
+into the Termux home (where symlinks work), runs `npm ci`, and `npm publish`,
+with the repo's own `prepublishOnly` gate riding unchanged - the script only
+reaches the launchpad, the gate still rules.
+
+```
+NPM_TOKEN=npm_xxx node scripts/ship-from-download.cjs \
+  --target /storage/emulated/0/Download/packstruct-main/packstruct-main \
+  --root ~/web/packstruct-main          # [--dry-run] [--clean]
+```
+
+The token comes from `NPM_TOKEN` (or `--token-file`), expands from env into a
+staged one-line `.npmrc`, and never lands in argv, on disk, or in the log
+(unlinked in a finally, publish failing or not). Named refusals only, exit
+0/1/2: wrong/unnamed tree, shared-storage roots, occupied roots (rm advice,
+never deletion), non-`npm_` tokens, pre-existing `.npmrc`. `--clean` (opt-in)
+removes the staged root on every exit after staging.
+
+## Local docs preview (packstruct#32)
+
+An agent sandbox has no sudo and no system Ruby; the Jekyll stack runs from a
+prebuilt, platform-matched Ruby unpacked under `$HOME` (never the repo), and
+the build runs from a scratch COPY of `docs/` so no product lands in-tree:
+
+1. Download the official ruby/setup-ruby toolchain asset for the platform
+   (tag `ruby-<ver>`, asset `ruby-<ver>-<os>-x64.tar.gz`; the tag is the
+   VERSION - a `toolcache` tag 404s) and unpack into `~/rubies`.
+2. `LD_LIBRARY_PATH=~/rubies/x64/lib`; shim the binstubs through the
+   interpreter (`#!/bin/sh` + `exec ~/rubies/x64/bin/ruby ...`) because the
+   shipped shebangs bake `/opt/hostedtoolcache/...`.
+3. Point `GEM_HOME`/`GEM_PATH` at the unpacked gem dir; set `RUBYLIB` to the
+   stdlib + arch dirs when the prefix moves.
+4. `BUNDLE_PATH` outside the repo; build from `/tmp/docs-preview` (a copy of
+   `docs/`), never from `docs/` itself.
+5. Serve `_site` under the real baseurl (symlink `<webroot>/packstruct` to
+   `_site`, `python3 -m http.server`) so baseurl'd links resolve.
+
+`.gitignore` carries the belt-and-suspenders block (`docs/.bundle/`,
+`docs/vendor/`, `docs/_site/`, `docs/Gemfile.lock`) so an accidental in-tree
+build taints nothing.
+
 ## Key facts baked in
 
 - `package.json`: `"files"` whitelists `bin/`, `src/`, `spec/`,

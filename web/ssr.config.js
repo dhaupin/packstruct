@@ -40,6 +40,15 @@ export default {
       },
     },
     {
+      path: '/status',
+      priority: '0.5',
+      changefreq: 'weekly',
+      meta: {
+        title: 'Family status | Packstruct',
+        description: 'The family-status@1 dialect: every struct-family member serves its committed-ledger verdicts at /status.json, generated on every web build, and reads the others with the same schema.',
+      },
+    },
+    {
       path: '/terms',
       priority: '0.3',
       changefreq: 'yearly',

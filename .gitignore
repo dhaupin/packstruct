@@ -33,6 +33,11 @@ web/node_modules/
 web/dist/
 web/.prestruct/
 
+# The served family-status file is generated on every web build from the
+# committed ledgers (packstruct#36) - committing it would recreate the
+# stale-copy drift class the dialect exists to prevent.
+web/public/status.json
+
 # Docs build products (family gitignore block, gistory#19 via eyestruct):
 # an accidental in-tree Jekyll build taints nothing; CI resolves the bundle
 # fresh. docs/Gemfile.lock is resolved per-run, never committed.

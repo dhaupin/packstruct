@@ -26,14 +26,14 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
 
-      # The audited corpus tree: crashtest fc93ca6e2c213ee296c65ed95c19d929148ff665,
-      # the loader revision the SPEC receipts (spec/SPEC.md section 2) cite.
+      # The audited corpus tree: crashtest tag v1.1.0
+      # (2d1fe793e2d4732b9eea52cc4199d54c6e3b0091) - the tag live on npm.
       # Bump pin + labs/corpus-receipt.md together, never silently.
       - name: Check out the crashtest corpus at the audited pin
         uses: actions/checkout@v4
         with:
           repository: dhaupin/crashtest
-          ref: fc93ca6e2c213ee296c65ed95c19d929148ff665
+          ref: v1.1.0
           path: corpus-crashtest
 
       - name: Lint the corpus manifests (8 packs, expect clean)

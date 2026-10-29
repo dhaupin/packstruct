@@ -47,4 +47,3 @@ The v1 field set is drawn from what crashtest's eight production packs already s
 - Source: [github.com/dhaupin/packstruct](https://github.com/dhaupin/packstruct)
 
 packstruct is made by [Creadev.org](https://creadev.org).
-
