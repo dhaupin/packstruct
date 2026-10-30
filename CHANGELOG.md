@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **The why / what / about pages, both surfaces.** The landing gains three
+  routes (`/why`, `/what`, `/about`) in the nav vocabulary and
+  `web/ssr.config.js`, each a real page in the family voice: the pack-shape-
+  per-host problem and the "frozen manifest, nameable refusal" thesis; the
+  v1 manifest, the scenario/check profiles, and the lint CLI + conformance
+  harness; who builds it and the family it anchors. The docs tree grows the
+  matching `docs/why.md`, `docs/what.md`, `docs/about.md`, reachable from the
+  docs nav. This closes the family-wide gap where no member carried a
+  supporting trio.
 - **The `/packs` surface.** The landing gains a `/packs` route (nav +
   `web/ssr.config.js` route + sitemap) that reads the live catalog the way
   eyestruct's does: a hero, the four `packstruct-lint-shapes` attacks, the

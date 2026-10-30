@@ -22,6 +22,33 @@ export default {
       },
     },
     {
+      path: '/why',
+      priority: '0.6',
+      changefreq: 'monthly',
+      meta: {
+        title: 'Why | Packstruct',
+        description: 'Many hosts, one pack grammar. Why a shared /packs spec exists: so an author who writes one pack knows how packs work everywhere, and a bad manifest is refused instantly and by name.',
+      },
+    },
+    {
+      path: '/what',
+      priority: '0.6',
+      changefreq: 'monthly',
+      meta: {
+        title: 'What | Packstruct',
+        description: 'One normative spec plus a zero-dependency lint CLI: the pack.json v1 manifest, the scenario and check entry profiles, and a conformance harness that proves a loader honors every case.',
+      },
+    },
+    {
+      path: '/about',
+      priority: '0.5',
+      changefreq: 'monthly',
+      meta: {
+        title: 'About | Packstruct',
+        description: 'Who builds packstruct, the struct family it anchors, the spec-frozen-at-v1 governance, and the MIT license and provenance terms.',
+      },
+    },
+    {
       path: '/packs',
       priority: '0.7',
       changefreq: 'weekly',

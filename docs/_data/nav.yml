@@ -5,6 +5,10 @@
   items:
   - title: Overview
     url: /packstruct/
+  - title: Why Packstruct
+    url: /packstruct/why
+  - title: What Packstruct is
+    url: /packstruct/what
   - title: SPEC v1
     url: /packstruct/spec
   - title: Pack Catalog
@@ -37,6 +41,8 @@
 
 - title: About
   items:
+  - title: About Packstruct
+    url: /packstruct/about
   - title: Site Terms
     url: https://packstruct.creadev.org/terms
   - title: Site Privacy
