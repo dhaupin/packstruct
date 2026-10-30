@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **The family status table now reads the full family.** The `/status` island
+  (`family-status@1`) gained the `govstruct` and `monoforge` rows (both now
+  serve the dialect), and the `crashtest` row's page pointer moves
+  `/dashboard` -> `/status` (the family status left crashtest's dashboard for
+  its own route). The served CSP `connect-src` allows both new origins, so
+  their fetches pass.
+
 ### Fixed
 - **The `entry` check was a substring proxy, not a containment test
   (packstruct#2).** `entry.includes('..')` both over- and under-refused:
