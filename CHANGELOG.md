@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **The `/packs` surface.** The landing gains a `/packs` route (nav +
+  `web/ssr.config.js` route + sitemap) that reads the live catalog the way
+  eyestruct's does: a hero, the four `packstruct-lint-shapes` attacks, the
+  family hosts that load the spec (crashtest scenario; poststruct, eyestruct,
+  govstruct check; monoforge queued), and the run-a-packdir block. The docs
+  tree gains the matching `docs/packs.md`, reachable from the docs nav.
+
 ### Changed
 - **The family status table now reads the full family.** The `/status` island
   (`family-status@1`) gained the `govstruct` and `monoforge` rows (both now

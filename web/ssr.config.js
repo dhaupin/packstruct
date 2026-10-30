@@ -22,6 +22,15 @@ export default {
       },
     },
     {
+      path: '/packs',
+      priority: '0.7',
+      changefreq: 'weekly',
+      meta: {
+        title: 'Packs | Packstruct',
+        description: 'The live pack catalog: the packstruct-lint-shapes dogfood pack and the family hosts that load the spec - crashtest (scenario), poststruct, eyestruct, govstruct (check), and monoforge (queued).',
+      },
+    },
+    {
       path: '/spec',
       priority: '0.9',
       changefreq: 'monthly',

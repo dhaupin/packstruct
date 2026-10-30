@@ -7,6 +7,8 @@
     url: /packstruct/
   - title: SPEC v1
     url: /packstruct/spec
+  - title: Pack Catalog
+    url: /packstruct/packs
   - title: The Linter
     url: /packstruct/linter
   - title: Entry Profiles
