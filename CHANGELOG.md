@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **The contract-root rule is canon in the spec.** SPEC section 1 now states
+  the lint/audit contract root explicitly: it is the packs ROOT (`<dir>/` with
+  its `public/` and `local/` children), never `packs/public/` itself. Hosts
+  that mirror the rule in their own CLI references (crashtest's `lint-packs`
+  page is the first) cite this section instead of restating it, so the two
+  surfaces cannot drift (packstruct#28). The `docs/spec` and `docs/linter`
+  mirrors carry the same pointer.
 - **The why / what / about pages, both surfaces.** The landing gains three
   routes (`/why`, `/what`, `/about`) in the nav vocabulary and
   `web/ssr.config.js`, each a real page in the family voice: the pack-shape-

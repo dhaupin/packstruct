@@ -17,7 +17,11 @@ The normative document lives in the repo at
 [spec/SPEC.md](https://github.com/dhaupin/packstruct/blob/main/spec/SPEC.md) -
 this page mirrors its frame:
 
-1. Directory contract: `packs/public/<name>/` = `pack.json` + entry file
+1. Directory contract: `packs/public/<name>/` = `pack.json` + entry file.
+   The contract ROOT the lint takes as its argument is the packs root
+   (`<dir>/`, with its `public/` and `local/` children), never
+   `packs/public/` itself - the canonical statement is SPEC section 1, and
+   host CLI pages mirror it rather than restating it
 2. Manifest fields (frozen for v1) - crashtest's production reality,
    plus the four host-owned acknowledged keys (`env`, `plugins`, `package`,
    `implements`)
