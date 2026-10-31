@@ -92,7 +92,10 @@ host's business.
 
 ## Wrong-argument hints (packstruct#13, #17)
 
-The packs ROOT is the argument, but the natural first gestures - the
+The packs ROOT is the argument (SPEC section 1: the contract root is
+`<dir>/` with its `public/` and `local/` children, never `packs/public/`
+itself - the canonical statement lives in the spec, and this page mirrors
+it), but the natural first gestures - the
 `public/` dir itself, one pack dir, the repo root - used to draw a
 doubled-segment `directory-contract` refusal (`packs/public/public/...`)
 that blamed the hypothetical packs under the argument instead of naming the

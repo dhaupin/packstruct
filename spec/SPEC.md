@@ -27,6 +27,13 @@ packs/public/<pack-name>/
   <entry file>     # REQUIRED: the file pack.json's "entry" names
 ```
 
+**The contract root.** The lint/audit contract root is the packs ROOT -
+`<dir>/` with its `public/` (tracked) and `local/` (gitignored WIP) children -
+never `packs/public/` itself. This spec page is the canonical statement of
+that rule; a host that mirrors it in its own CLI reference cites this section
+rather than restating it (crashtest's `lint-packs` page is the first mirror,
+`docs/reference/cli.md`).
+
 ## 2. pack.json (frozen for v1)
 
 | Field | Rules |
