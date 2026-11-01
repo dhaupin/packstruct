@@ -229,6 +229,8 @@ table.spec-table code { color: var(--ink); }
 .legal ul { color: var(--ink-soft); padding-left: 22px; }
 .legal ul li { margin: 6px 0; }
 .legal ul li strong { color: var(--ink); }
+.legal-family { margin-top: 22px; font-size: 13px; color: var(--ink-soft); }
+.legal-family a { color: var(--accent); }
 .legal code { color: var(--ink); }
 
 .footer a.madeby { color: var(--accent); font-weight: 600; }
