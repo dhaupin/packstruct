@@ -12,7 +12,7 @@ export default function Status() {
   return (
     <section className="section" style={{ paddingTop: 56 }}>
       <div className="wrap">
-        <p className="eyebrow">One schema, four repos</p>
+        <p className="eyebrow">One schema, every member</p>
         <h2>Family status</h2>
         <p className="sub">
           packstruct serves its own adversarial verdicts at{' '}

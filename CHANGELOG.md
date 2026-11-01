@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **The contract-root rule is canon in the spec.** SPEC section 1 now states
+  the lint/audit contract root explicitly: it is the packs ROOT (`<dir>/` with
+  its `public/` and `local/` children), never `packs/public/` itself. Hosts
+  that mirror the rule in their own CLI references (crashtest's `lint-packs`
+  page is the first) cite this section instead of restating it, so the two
+  surfaces cannot drift (packstruct#28). The `docs/spec` and `docs/linter`
+  mirrors carry the same pointer.
+- **The why / what / about pages, both surfaces.** The landing gains three
+  routes (`/why`, `/what`, `/about`) in the nav vocabulary and
+  `web/ssr.config.js`, each a real page in the family voice: the pack-shape-
+  per-host problem and the "frozen manifest, nameable refusal" thesis; the
+  v1 manifest, the scenario/check profiles, and the lint CLI + conformance
+  harness; who builds it and the family it anchors. The docs tree grows the
+  matching `docs/why.md`, `docs/what.md`, `docs/about.md`, reachable from the
+  docs nav. This closes the family-wide gap where no member carried a
+  supporting trio.
+- **The `/packs` surface.** The landing gains a `/packs` route (nav +
+  `web/ssr.config.js` route + sitemap) that reads the live catalog the way
+  eyestruct's does: a hero, the four `packstruct-lint-shapes` attacks, the
+  family hosts that load the spec (crashtest scenario; poststruct, eyestruct,
+  govstruct check; monoforge queued), and the run-a-packdir block. The docs
+  tree gains the matching `docs/packs.md`, reachable from the docs nav.
+
+### Changed
+- **The family status table now reads the full family.** The `/status` island
+  (`family-status@1`) gained the `govstruct` and `monoforge` rows (both now
+  serve the dialect), and the `crashtest` row's page pointer moves
+  `/dashboard` -> `/status` (the family status left crashtest's dashboard for
+  its own route). The served CSP `connect-src` allows both new origins, so
+  their fetches pass.
+
 ### Fixed
 - **The `entry` check was a substring proxy, not a containment test
   (packstruct#2).** `entry.includes('..')` both over- and under-refused:

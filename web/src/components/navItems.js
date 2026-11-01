@@ -10,6 +10,10 @@
 export const NAV_ITEMS = [
   // primary app routes
   { label: 'Home', to: '/', end: true, group: 'site' },
+  { label: 'Why', to: '/why', group: 'site' },
+  { label: 'What', to: '/what', group: 'site' },
+  { label: 'About', to: '/about', group: 'site' },
+  { label: 'Packs', to: '/packs', group: 'site' },
   { label: 'Spec', to: '/spec', group: 'site' },
   { label: 'Lint', to: '/lint', group: 'site' },
   // outbound surfaces
