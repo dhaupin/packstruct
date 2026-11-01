@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- the Terms + Privacy pages carry a footer crosslink naming the sibling sites
+  that ship the same plain-language legal form (crashtest, eyestruct,
+  monoforge, poststruct), so the family parity is visible to a reader who
+  arrives from any member (crashtest#45, the family tracking issue).
+
 - **The contract-root rule is canon in the spec.** SPEC section 1 now states
   the lint/audit contract root explicitly: it is the packs ROOT (`<dir>/` with
   its `public/` and `local/` children), never `packs/public/` itself. Hosts
