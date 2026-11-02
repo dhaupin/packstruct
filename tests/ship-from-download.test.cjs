@@ -152,6 +152,7 @@ test('.npmrc content pattern: ${NPM_TOKEN} placeholder, not secret', () => {
     fs.writeFileSync = origWrite
   }
   assert.ok(captured && captured.includes(`\${${TOKEN_ENV}}`), 'the .npmrc carries the env placeholder')
+  assert.ok(captured && !captured.includes('always-auth'), 'the deprecated always-auth line is never staged (npm >=9 warns on it)')
   assert.ok(captured && !captured.includes(GOOD_ENV[TOKEN_ENV]), 'the raw token never hits the staged file')
   fs.rmSync(base, { recursive: true, force: true })
 })
