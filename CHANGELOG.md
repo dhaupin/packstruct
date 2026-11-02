@@ -8,6 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **The publish lane adopts the family release ladder (eyestruct@4e2b552).**
+  The old `publish` + `github-release` pair becomes three jobs: `publish`
+  (0.x refused, tag==version gate, `npm publish --provenance` over OIDC) →
+  `release` (the GH release body extracted from the changelog via
+  `scripts/release-notes.cjs`, refused if empty, plus the served tarball
+  attached as the release asset) → `verify` (`scripts/verify-release.cjs`
+  re-asserts the served tarball's sha512 against the registry integrity,
+  provenance presence, the full pack ladder, the release object's target
+  commit, and the asset's sha512). The release asset is now the EXACT tarball
+  the registry serves (`npm pack packstruct@<version>`), not the old
+  re-pack the retired `github-release` job admitted was not byte-identical.
+  The bin answers `--version` (reads `package.json`), so the ladder's
+  installed-bin probe passes. The pack ladder also runs offline every push
+  (`tests/release-verify.test.cjs`).
 - the Terms + Privacy pages carry a footer crosslink naming the sibling sites
   that ship the same plain-language legal form (crashtest, eyestruct,
   monoforge, poststruct), so the family parity is visible to a reader who

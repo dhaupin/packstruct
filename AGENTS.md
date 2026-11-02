@@ -55,9 +55,12 @@
   as loudly as a looser one). Regenerate with `npm run matrix:gen`.
 
 ## Release
-- 1.0.0 and later = the governed ladder: tag v1.x.0 → publish.yml runs
-  (same OIDC trusted publishing as prestruct, refuses 0.x versions; 0.9.0
-  was the manual npm release that seeded the package).
+- 1.0.0 and later = the governed ladder: tag v1.x.0 → publish.yml runs the
+  three-job family ladder (eyestruct@4e2b552): `publish` (OIDC trusted
+  publishing, refuses 0.x, tag==version) → `release` (notes from the
+  CHANGELOG + the served tarball attached) → `verify` (post-publish trust
+  ladder over the served tarball and the release object). 0.9.0 was the
+  manual npm release that seeded the package.
 - CHANGELOG.md is Keep-a-Changelog; every PR adds an Unreleased item.
 
 ## Branches (packstruct#42)

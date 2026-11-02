@@ -23,11 +23,27 @@ exactly:
 
 1. Bump `package.json` + `CHANGELOG.md` to 1.0.0 (Unreleased → Dated).
 2. Run `npm test` + `npm pack --dry-run` locally. Tag `v1.0.0` and push.
-3. `publish.yml`: `push: tags: ['v*']` + `workflow_dispatch`; tag-match
-   + 0.x-refuse + idempotent already-published gates (`npm view
-   packstruct@<version>`); `npm install` + `npm test`; publishes via
-   OIDC trusted publishing (`id-token: write`, NO NPM_TOKEN secret).
+3. `publish.yml` — the family release ladder (eyestruct@4e2b552), three
+   jobs:
+   - **publish** — the gate refuses 0.x and any tag that does not equal the
+     packaged version, then `npm install` + `npm publish --provenance` via
+     OIDC trusted publishing (`id-token: write`, NO NPM_TOKEN secret; the
+     `prepublishOnly` battery rides automatically).
+   - **release** — `scripts/release-notes.cjs` extracts the release body
+     from the changelog's own `[version]` section (refuses empty), cuts the
+     GH release from the tag (idempotent), and attaches the served tarball
+     (`npm pack packstruct@<version>`) so the GH release and npm serve the
+     same bytes.
+   - **verify** — `scripts/verify-release.cjs` re-asserts the truth after
+     the cut: the served tarball's sha512 == registry integrity, provenance
+     present, the full pack ladder, the release object's target commit, and
+     the attached asset's sha512 == registry integrity.
+   - Triggers: `push: tags: ['v*']` + a `workflow_dispatch` with a
+     `verify-only` mode (re-runs the trust ladder against what is already
+     served).
 4. Thereafter: change files, bump version, tag vX.Y.Z. Done.
+
+The pack ladder also runs offline on every push (`tests/release-verify.test.cjs`).
 
 ## npm prep
 
