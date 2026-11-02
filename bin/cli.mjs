@@ -35,8 +35,16 @@
 import { lintPacks, deepLintPacks } from '../src/lint.mjs'
 import { auditConformance } from '../src/audit.mjs'
 import { newPack } from '../src/new.mjs'
+import { readFileSync } from 'node:fs'
 
 let args = process.argv.slice(2)
+// The version truth is package.json (the family rule): the publish lane's
+// verify job probes the INSTALLED bin with --version, so the answer must
+// come from the packaged tree, never a hardcoded literal that can drift.
+if (args[0] === '--version') {
+  console.log(JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version)
+  process.exit(0)
+}
 const verb = args[0] === 'audit-conformance' ? 'audit-conformance'
   : args[0] === 'new' ? 'new'
   : 'lint'
