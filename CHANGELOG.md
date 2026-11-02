@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **The release ladder no longer races registry propagation, nor false-flags a
+  branch-name `target_commitish`** - both surfaced by the crashtest 1.2.0 live
+  cut. `scripts/verify-release.cjs` polls `dist-tags.latest` **and** the version
+  entry through npm's post-publish propagation window instead of reading once
+  (the first read saw the old `latest`), and the `release` job retries
+  `npm pack <pkg>@<ver>` the same way (it read `ETARGET: no matching version`
+  seconds after publish). The release check now accepts GitHub's
+  `target_commitish` default-branch name and treats only a 40-hex SHA as a
+  commit claim (a branch name is not drift; the tag is the identity). Two pins
+  in the release-verify leg hold both fixes.
+
 ### Added
 - **The publish lane adopts the family release ladder (eyestruct@4e2b552).**
   The old `publish` + `github-release` pair becomes three jobs: `publish`
