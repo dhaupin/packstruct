@@ -21,12 +21,13 @@
     "LICENSE"
   ],
   "scripts": {
-    "test": "node test/run.mjs && node --test test/status.test.mjs test/refusal-matrix.test.mjs tests/ship-from-download.test.cjs tests/release-verify.test.cjs",
+    "test": "node test/run.mjs && node --test test/status.test.mjs test/refusal-matrix.test.mjs tests/ship-from-download.test.cjs tests/release-verify.test.cjs tests/check-action-pins.test.cjs",
     "test:ship": "node --test tests/ship-from-download.test.cjs",
     "lint:docs": "node scripts/check-docs-frontmatter.cjs && node scripts/check-docs-links.cjs && node scripts/check-docs-style.cjs && node scripts/check-jekyll-filters.cjs && node scripts/check-language.cjs",
+    "lint:pins": "node scripts/check-action-pins.cjs",
     "lint:packs": "node bin/cli.mjs lint packs --deep",
     "conform:packs": "node bin/cli.mjs audit-conformance . --loader \"node bin/cli.mjs lint {packs}\"",
-    "check": "npm run lint:docs && node scripts/check-legal.cjs && npm run matrix:check && npm run lint:packs && npm run conform:packs",
+    "check": "npm run lint:docs && npm run lint:pins && node scripts/check-legal.cjs && npm run matrix:check && npm run lint:packs && npm run conform:packs",
     "prepublishOnly": "npm test && npm run check",
     "matrix:check": "node scripts/gen-refusal-matrix.mjs --check",
     "matrix:gen": "node scripts/gen-refusal-matrix.mjs"

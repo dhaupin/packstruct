@@ -17,9 +17,15 @@
   a broken pack manifest pointing at a missing entry. `npm test` before
   touching anything in `src/`.
 - The gate is `npm test && npm run check` (`prepublishOnly`, packstruct#33):
-  `check` = `lint:docs` (4 docs gates) + `lint:packs` (the shipped pack
-  deep) + `conform:packs` (the 8/8 conformance audit). The registry cut
-  cannot happen without it. Run `npm run check` before merges too.
+  `check` = `lint:docs` (4 docs gates) + `lint:pins` (every Action ref is a
+  SHA) + `lint:packs` (the shipped pack deep) + `conform:packs` (the 8/8
+  conformance audit). The registry cut cannot happen without it. Run
+  `npm run check` before merges too.
+- **Pins, never floats.** Every GitHub Action `uses:` names a 40-hex commit
+  SHA (tag in the trailing comment), never `@v4`/`@v1`. `npm run lint:pins`
+  (`scripts/check-action-pins.cjs`) refuses a floating ref, so the rule is
+  mechanical. New pins take the family canon SHA the sibling repos already
+  carry; `publish.yml` + the four CI workflows share one pin per action.
 - Generated files never travel: `node_modules/`, `web/dist/`,
   `web/.prestruct/`, `docs/_site/`, `docs/Gemfile.lock`, `labs/run-meta.json`
   (the one churn-by-design stamp), and `packs/local/` (the WIP lane) are in

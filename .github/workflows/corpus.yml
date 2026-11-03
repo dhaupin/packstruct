@@ -21,16 +21,16 @@ jobs:
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with: { node-version: 20 }
 
       # The audited corpus tree: crashtest tag v1.1.0
       # (2d1fe793e2d4732b9eea52cc4199d54c6e3b0091) - the tag live on npm.
       # Bump pin + labs/corpus-receipt.md together, never silently.
       - name: Check out the crashtest corpus at the audited pin
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           repository: dhaupin/crashtest
           ref: v1.1.0
