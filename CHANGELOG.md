@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- **Every GitHub Action ref is now SHA-pinned ("pins, never floats").**
+  `publish.yml` already pinned; `docs.yml`, `corpus.yml`, `crashtest.yml`, and
+  `test.yml` floated 13 refs (`actions/checkout@v4`, `actions/setup-node@v4`,
+  `ruby/setup-ruby@v1`, `actions/configure-pages@v4`,
+  `actions/upload-pages-artifact@v5`, `actions/deploy-pages@v4`). All 13 now
+  name the family canon commit SHA (tag kept in the trailing comment). A new
+  guard, `scripts/check-action-pins.cjs`, refuses any non-SHA `uses:` ref and
+  runs as `npm run lint:pins` inside `npm run check`, so a future float fails
+  in CI instead of drifting in silently.
+
 ### Fixed
 
 - **The release ladder no longer parses `npm pack --dry-run --json`.** The
