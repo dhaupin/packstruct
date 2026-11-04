@@ -13,31 +13,19 @@ permalink: /what
 
 # What packstruct is
 
-packstruct is two artifacts: the normative SPEC that defines a `/packs`
-directory, and a zero-dependency CLI that checks a manifest against it.
+packstruct is two artifacts: the normative SPEC that defines a `/packs` directory, and a zero-dependency CLI that checks a manifest against it.
 
 ## The manifest (pack.json, v1)
 
-A pack is a directory under `packs/public/<name>/` carrying a frozen
-`pack.json`: `schemaVersion: 1`, a kebab-case `name` matching its directory, a
-dotted `version`, a one-line `description`, a relative `entry` that must exist,
-and an optional `armedByKey`. Every field is checked, and every refusal names
-the field it refused.
+A pack is a directory under `packs/public/<name>/` carrying a frozen `pack.json`: `schemaVersion: 1`, a kebab-case `name` matching its directory, a dotted `version`, a one-line `description`, a relative `entry` that must exist, and an optional `armedByKey`. Every field is checked, and every refusal names the field it refused.
 
 ## The profiles
 
-A pack declares what it is for through a profile. The **scenario** profile is
-what crashtest loads: a module that returns attack verdicts. The **check**
-profile is what poststruct loads: a module that returns pass/fail findings. One
-grammar, two declared shapes, so a host knows what a pack will do before it
-runs it.
+A pack declares what it is for through a profile. The **scenario** profile is what crashtest loads: a module that returns attack verdicts. The **check** profile is what poststruct loads: a module that returns pass/fail findings. One grammar, two declared shapes, so a host knows what a pack will do before it runs it.
 
 ## The CLI and the conformance harness
 
-The linter walks a `/packs` directory and refuses a malformed manifest with a
-field-named message. The conformance harness goes further: it proves a loader
-honors every case in the spec, so a host cannot claim conformance it does not
-have.
+The linter walks a `/packs` directory and refuses a malformed manifest with a field-named message. The conformance harness goes further: it proves a loader honors every case in the spec, so a host cannot claim conformance it does not have.
 
 ```bash
 # lint a /packs dir against SPEC v1

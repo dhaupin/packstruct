@@ -13,13 +13,7 @@ permalink: /linter
 
 # packstruct lint
 
-Validates every pack under `packs/public/` against SPEC v1's manifest and
-directory contract: schemaVersion 1, kebab-case name matching its directory,
-dotted versions, non-empty description, entry paths that are relative AND
-physically contained inside the pack dir (an absolute path, a `..` escape, or
-a symlink whose target resolves outside the pack refuses), and that the entry
-is an existing FILE (a missing or directory entry refuses) - the crashtest#16
-class, killed at author time.
+Validates every pack under `packs/public/` against SPEC v1's manifest and directory contract: schemaVersion 1, kebab-case name matching its directory, dotted versions, non-empty description, entry paths that are relative AND physically contained inside the pack dir (an absolute path, a `..` escape, or a symlink whose target resolves outside the pack refuses), and that the entry is an existing FILE (a missing or directory entry refuses) - the crashtest#16 class, killed at author time.
 
 ```bash
 npx packstruct lint packs/          # human, exit 0/1/2
@@ -38,10 +32,7 @@ npx packstruct new my-shapes        # scaffold a conforming pack (packstruct#24)
 
 ## Scaffolding (packstruct#24)
 
-`packstruct new <name>` writes a conforming pack skeleton - a
-`<root>/public/<name>/pack.json` plus an ESM entry stub - that `lint`
-accepts clean the moment it lands, before the author writes a line of real
-code. Refusals are the net; the trampoline is cheaper.
+`packstruct new <name>` writes a conforming pack skeleton - a `<root>/public/<name>/pack.json` plus an ESM entry stub - that `lint` accepts clean the moment it lands, before the author writes a line of real code. Refusals are the net; the trampoline is cheaper.
 
 ```bash
 npx packstruct new my-shapes            # -> packs/public/my-shapes/{pack.json,index.js}
@@ -49,57 +40,29 @@ npx packstruct new my-shapes --dir packs   # write into an explicit packs root
 npx packstruct new my-shapes --json     # { schema, mode: 'new', name, dir, packDir, files, violations }
 ```
 
-- The packs root is discovered git-style (walk up for an existing
-  `packs/public/`); `--dir` overrides it. The skeleton always lands at
-  `<root>/public/<name>/`, never a bare pack dir the lint would refuse.
-- `name` must be kebab-case; an occupied target refuses by name and never
-  clobbers. Both refusals exit 1; a missing name or unknown flag exits 2.
-- `new` is pure convenience - its output is just another manifest the lint
-  grades, so the lint stays the one truth enforcer.
+- The packs root is discovered git-style (walk up for an existing `packs/public/`); `--dir` overrides it. The skeleton always lands at `<root>/public/<name>/`, never a bare pack dir the lint would refuse.
+- `name` must be kebab-case; an occupied target refuses by name and never clobbers. Both refusals exit 1; a missing name or unknown flag exits 2.
+- `new` is pure convenience - its output is just another manifest the lint grades, so the lint stays the one truth enforcer.
 
 ## Exit codes (the contract CI pins)
 
-- **exit 0** - zero violations, clean authoring surface. A run may still
-  print `WARNING` rows (advisory, never fatal - see below);
-- **exit 1** - at least one `VIOLATION` row (the CI gate red). One line per
-  violation, `VIOLATION <unit> [<norm>]: <message>` shape stable, grep-able
-  and diff-able in CI logs;
-- **exit 2** - usage error: a missing directory argument, a typo'd flag
-  (packstruct#18), or `--against` without `--deep`. The runs lane stays
-  0/1-only.
+- **exit 0** - zero violations, clean authoring surface. A run may still print `WARNING` rows (advisory, never fatal - see below);
+- **exit 1** - at least one `VIOLATION` row (the CI gate red). One line per violation, `VIOLATION <unit> [<norm>]: <message>` shape stable, grep-able and diff-able in CI logs;
+- **exit 2** - usage error: a missing directory argument, a typo'd flag (packstruct#18), or `--against` without `--deep`. The runs lane stays 0/1-only.
 
-The `--json` shape is a stable contract too: additive-only evolving (new
-keys may appear, existing keys are never repurposed), matching the
-MIGRATION-NOTE convention. v1.1.0 adds a `warnings[]` array alongside
-`violations[]`.
+The `--json` shape is a stable contract too: additive-only evolving (new keys may appear, existing keys are never repurposed), matching the MIGRATION-NOTE convention. v1.1.0 adds a `warnings[]` array alongside `violations[]`.
 
 ## Warnings (advisory, SPEC v1.1 section 2)
 
-A `WARNING` row never changes the exit code. The first warning shape is the
-`implements` key: when present it must be `packstruct@<major>` or an exact
-pin like `packstruct@1.0.0`, and a non-conforming shape is reported as
-`WARNING <pack> [implements]: ...` - never a refusal. Absence is the quiet
-default.
+A `WARNING` row never changes the exit code. The first warning shape is the `implements` key: when present it must be `packstruct@<major>` or an exact pin like `packstruct@1.0.0`, and a non-conforming shape is reported as `WARNING <pack> [implements]: ...` - never a refusal. Absence is the quiet default.
 
 ## armedCoverage (SPEC v1.1, packstruct#27)
 
-A pack MAY declare `armedCoverage` - a relative path to its armed
-end-to-end row (the test that simulates the pack's target with its
-vocabulary armed). The lint CONFIRMS the declared file ships; a
-declaration naming a missing file refuses as `armed-coverage` (the
-vacuous-green class made loud). The lint never RUNS the row - runs are the
-host's business.
+A pack MAY declare `armedCoverage` - a relative path to its armed end-to-end row (the test that simulates the pack's target with its vocabulary armed). The lint CONFIRMS the declared file ships; a declaration naming a missing file refuses as `armed-coverage` (the vacuous-green class made loud). The lint never RUNS the row - runs are the host's business.
 
 ## Wrong-argument hints (packstruct#13, #17)
 
-The packs ROOT is the argument (SPEC section 1: the contract root is
-`<dir>/` with its `public/` and `local/` children, never `packs/public/`
-itself - the canonical statement lives in the spec, and this page mirrors
-it), but the natural first gestures - the
-`public/` dir itself, one pack dir, the repo root - used to draw a
-doubled-segment `directory-contract` refusal (`packs/public/public/...`)
-that blamed the hypothetical packs under the argument instead of naming the
-fix. Those shapes now answer a `usage` hint that names the probable intent:
+The packs ROOT is the argument (SPEC section 1: the contract root is `<dir>/` with its `public/` and `local/` children, never `packs/public/` itself - the canonical statement lives in the spec, and this page mirrors it), but the natural first gestures - the `public/` dir itself, one pack dir, the repo root - used to draw a doubled-segment `directory-contract` refusal (`packs/public/public/...`) that blamed the hypothetical packs under the argument instead of naming the fix. Those shapes now answer a `usage` hint that names the probable intent:
 
 ```bash
 npx packstruct lint packs/public
@@ -108,64 +71,33 @@ npx packstruct lint packs/public
 #   for example: packstruct lint packs
 ```
 
-The hint rides the `usage` norm (never `directory-contract`), so it never
-reads as a pack defect. A genuinely empty root still refuses
-`directory-contract` - the missing-public-dir row of the refusal matrix.
+The hint rides the `usage` norm (never `directory-contract`), so it never reads as a pack defect. A genuinely empty root still refuses `directory-contract` - the missing-public-dir row of the refusal matrix.
 
 ## --local: the WIP lane (packstruct#16)
 
-The default stays public-only. `--local` also lints the gitignored `local/`
-lane every consumer repo keeps - the manifests an author is actively
-editing, and the ones a public-only walk leaves invisible. Local violations
-carry `lane: "local"` in `--json` (and `[local]` in the human readout) so a
-CI consumer can tell the lanes apart; public rows stay byte-identical, and
-the JSON gains a `localChecked` count alongside `packsChecked`.
+The default stays public-only. `--local` also lints the gitignored `local/` lane every consumer repo keeps - the manifests an author is actively editing, and the ones a public-only walk leaves invisible. Local violations carry `lane: "local"` in `--json` (and `[local]` in the human readout) so a CI consumer can tell the lanes apart; public rows stay byte-identical, and the JSON gains a `localChecked` count alongside `packsChecked`.
 
 ## --deep: load-level parity (probe only)
 
-The manifest pass stops at file existence. `--deep` goes as far as the
-linter can go without becoming a host:
+The manifest pass stops at file existence. `--deep` goes as far as the linter can go without becoming a host:
 
-1. **Probe** each declared entry in a disposable child process (its
-   top-level code runs there, never inside the linter - a crashing entry
-   cannot take the CLI's exit code with it, and a stalls-at-startup entry
-   is killed at the 5s probe timeout instead of hanging the CLI), and name
-   the failure the host's loader would have hit (`entry "..." failed to
-   import`, or an honest `entry-import` refusal when the entry terminates
-   or stalls the probe itself).
-2. **Check** the default export exists (SPEC section 3: entry is an ES
-   module with a default export).
-3. **Census ids** - module names and attack/step names (scenario shape) or
-   check names (check shape) - and refuse the same shapes the host's order
-   does: within-pack duplicates and cross-pack id collisions. The engine's
-   shared-`seen` refusal (crashtest `loader.js:389-391`) now happens at
-   author time.
+1. **Probe** each declared entry in a disposable child process (its top-level code runs there, never inside the linter - a crashing entry cannot take the CLI's exit code with it, and a stalls-at-startup entry is killed at the 5s probe timeout instead of hanging the CLI), and name the failure the host's loader would have hit (`entry "..." failed to import`, or an honest `entry-import` refusal when the entry terminates or stalls the probe itself).
+2. **Check** the default export exists (SPEC section 3: entry is an ES module with a default export).
+3. **Census ids** - module names and attack/step names (scenario shape) or check names (check shape) - and refuse the same shapes the host's order does: within-pack duplicates and cross-pack id collisions. The engine's shared-`seen` refusal (crashtest `loader.js:389-391`) now happens at author time.
 
 ## --against: the host-library census
 
-Packs collide not only with each other but with the host's own built-in
-library. `--against <path>` seeds the census with the library's ids before
-the pack walk, so a pack id that claims a library id refuses at author
-time (`id-library-collision`) - no host load needed:
+Packs collide not only with each other but with the host's own built-in library. `--against <path>` seeds the census with the library's ids before the pack walk, so a pack id that claims a library id refuses at author time (`id-library-collision`) - no host load needed:
 
 - `<path>` is a file (.json parses; ESM imports) or a directory of modules;
-- ids are probed generically (module/attack/step/check names), never
-  shape-judged - the library's internals stay the host's business;
-- a library that fails to load names the failure (`library-ref`) but still
-  lets the pack census run.
+- ids are probed generically (module/attack/step/check names), never shape-judged - the library's internals stay the host's business;
+- a library that fails to load names the failure (`library-ref`) but still lets the pack census run.
 
-Boundaries, spelled out: deep is a PROBE. Host module-shape norms stay
-host-owned (SPEC section 3) - deep censes ids, it does not police the
-host's contract shapes. Importing runs the entry's top-level code; data
-modules are inert, and hostile modules are the host's isolation domain,
-not the linter's.
+Boundaries, spelled out: deep is a PROBE. Host module-shape norms stay host-owned (SPEC section 3) - deep censes ids, it does not police the host's contract shapes. Importing runs the entry's top-level code; data modules are inert, and hostile modules are the host's isolation domain, not the linter's.
 
-Receipt: lints crashtest's 8 shipped packs deep-clean on the pinned corpus
-lane - 44 pack ids `--against` the 63 seeded library ids, zero collisions
-(see labs/corpus-receipt.md).
+Receipt: lints crashtest's 8 shipped packs deep-clean on the pinned corpus lane - 44 pack ids `--against` the 63 seeded library ids, zero collisions (see labs/corpus-receipt.md).
 
-Runs in both fleet repos' CI the day it works (dogfooding rule: replace
-hand-rolled manifest checks, don't fork the contract).
+Runs in both fleet repos' CI the day it works (dogfooding rule: replace hand-rolled manifest checks, don't fork the contract).
 
 <div class="crosslinks">
 <p><strong>More in these docs:</strong>

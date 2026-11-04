@@ -1,22 +1,12 @@
 # PRD rider: packstruct - the ISO 9001 / ISO 27001 compliance frame
 
-**Status:** rider v0.1, 2026-10-29 · Owner: dhaupin
-**Companion:** `prd-packstruct.md`, `spec/SPEC.md`; govstruct's
-`prd-govstruct-compliance.md` is the family's canonical frame.
-**The one law:** an evidence map, not a certificate. It names which ISO
-9001:2015 clauses and ISO 27001:2022 controls the packs spec and its linter can
-**evidence**, and the gate that proves each one.
+**Status:** rider v0.1, 2026-10-29 · Owner: dhaupin **Companion:** `prd-packstruct.md`, `spec/SPEC.md`; govstruct's `prd-govstruct-compliance.md` is the family's canonical frame. **The one law:** an evidence map, not a certificate. It names which ISO 9001:2015 clauses and ISO 27001:2022 controls the packs spec and its linter can **evidence**, and the gate that proves each one.
 
 ---
 
 ## 0. Why packstruct carries a frame
 
-packstruct is the family's **spec**: one `/packs` manifest contract, frozen at
-v1, with a STRICT linter. A frozen, versioned, machine-checked contract is the
-purest form of ISO 9001 clause 7.5 (documented information) and clause 8.5.1
-(control of production) a software repo can hold: the spec is normative, and the
-linter refuses anything the spec does not promise. This rider makes that
-mapping explicit.
+packstruct is the family's **spec**: one `/packs` manifest contract, frozen at v1, with a STRICT linter. A frozen, versioned, machine-checked contract is the purest form of ISO 9001 clause 7.5 (documented information) and clause 8.5.1 (control of production) a software repo can hold: the spec is normative, and the linter refuses anything the spec does not promise. This rider makes that mapping explicit.
 
 ---
 
@@ -63,17 +53,11 @@ mapping explicit.
 
 ## 3. Steps to stand the frame up
 
-1. **Freeze the spec.** `spec/SPEC.md` is normative; everything in `src/` and
-   `bin/` implements it. Evidence for 4.4, 7.5.2.
-2. **Wire the two-way fixtures.** `test/fixtures/` carry a clean sample pack plus
-   a broken manifest pointing at a missing entry. Adding a validate rule = added
-   cases both ways. Evidence for 8.5.1, 10.2.
-3. **Regenerate the refusal matrix.** `matrix:gen` then `matrix:check` in CI so
-   the golden matrix cannot drift. Evidence for 8.7, 9.1.
-4. **Dogfood with crashtest.** `npx crashtest run` attacks the lint contract via
-   an in-process double. Evidence for A.8.29.
-5. **Ship from download.** The `test:ship` lane proves the published tarball
-   behaves. Evidence for 8.6.
+1. **Freeze the spec.** `spec/SPEC.md` is normative; everything in `src/` and `bin/` implements it. Evidence for 4.4, 7.5.2.
+2. **Wire the two-way fixtures.** `test/fixtures/` carry a clean sample pack plus a broken manifest pointing at a missing entry. Adding a validate rule = added cases both ways. Evidence for 8.5.1, 10.2.
+3. **Regenerate the refusal matrix.** `matrix:gen` then `matrix:check` in CI so the golden matrix cannot drift. Evidence for 8.7, 9.1.
+4. **Dogfood with crashtest.** `npx crashtest run` attacks the lint contract via an in-process double. Evidence for A.8.29.
+5. **Ship from download.** The `test:ship` lane proves the published tarball behaves. Evidence for 8.6.
 6. **Attach the govstruct profile pack** for the family roll-up.
 
 ---
@@ -82,8 +66,5 @@ mapping explicit.
 
 - **No certification.** The frame emits evidence; a body decides.
 - **No physical or people controls** (ISO 27001 A.6/A.7).
-- **No spec promises beyond the SPEC.** The linter is STRICT against spec norms
-  and only those norms: a check the SPEC does not promise is a bug in the check.
-  That is the frame's integrity guarantee, not a claim of coverage.
-- **No version bump without a migration note** (SPEC §6) - a major bump that
-  breaks hosts without a note would be a nonconformity, and the frame says so.
+- **No spec promises beyond the SPEC.** The linter is STRICT against spec norms and only those norms: a check the SPEC does not promise is a bug in the check. That is the frame's integrity guarantee, not a claim of coverage.
+- **No version bump without a migration note** (SPEC §6) - a major bump that breaks hosts without a note would be a nonconformity, and the frame says so.

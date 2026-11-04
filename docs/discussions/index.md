@@ -15,6 +15,8 @@ permalink: /discussions
 
 One post per release, shaped like prestruct's and crashtest's posts - the format lineage is [prestruct's announcing-v1.0.0](https://github.com/dhaupin/prestruct/blob/main/docs/discussions/announcing-v1.0.0.md) and [crashtest's adopting batch](https://github.com/dhaupin/crashtest/blob/main/docs/discussions/index.md). The post lives in `docs/discussions/` as versioned source so the release trail sits in the same tree as the changelog it summarizes, and the file's raw markdown IS the GitHub Discussions announcement - view source, copy, strip the frontmatter, post.
 
+Prose on these pages flows - paragraphs keep their natural length, and nothing in the toolchain re-wraps them at commit time. Hard-wrapped prose is a commit-time artifact, and it dies at every reflow of an upstream forum renderer. Tables and frontmatter keep their own natural line lengths.
+
 ## The conventions
 
 - **One file per release, named after it.** `announcing-vX.Y.Z.md`, matching the npm version on the day the post is drafted. Never reuse a filename; a retried release folds its delta into the same post.

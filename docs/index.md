@@ -12,25 +12,18 @@ version: 1.0.0
 ---
 # packstruct
 
-The shared spec for `/packs` directories. One small normative document plus a
-zero-dependency lint CLI, so **crashtest** (scenario profile) and
-**poststruct** (check profile) ship the same pack system from their own repos.
+The shared spec for `/packs` directories. One small normative document plus a zero-dependency lint CLI, so **crashtest** (scenario profile) and **poststruct** (check profile) ship the same pack system from their own repos.
 
-The branded landing lives at <https://packstruct.creadev.org/>; these docs
-carry the normative detail.
+The branded landing lives at <https://packstruct.creadev.org/>; these docs carry the normative detail.
 
 ```bash
 npx packstruct lint packs/          # exit 0 clean / 1 violations / 2 usage
 npx packstruct lint packs/ --json   # machine-readable
 ```
 
-The v1 manifest is the formalized reality of crashtest's production packs:
-`schemaVersion: 1`, kebab-case name matching its directory, dotted version,
-one-line description, relative `entry` that **must exist**, optional
-`armedByKey`.
+The v1 manifest is the formalized reality of crashtest's production packs: `schemaVersion: 1`, kebab-case name matching its directory, dotted version, one-line description, relative `entry` that **must exist**, optional `armedByKey`.
 
-Published on npm as [`packstruct@1.1.0`](https://www.npmjs.com/package/packstruct)
-(zero dependencies; `npx` fetches it straight from that page).
+Published on npm as [`packstruct@1.1.0`](https://www.npmjs.com/package/packstruct) (zero dependencies; `npx` fetches it straight from that page).
 
 <div class="crosslinks">
 <p><strong>More in these docs:</strong>
