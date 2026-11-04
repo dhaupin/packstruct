@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### The docs-lane consolidation (2026-11-04)
+
+The family built docs from four topologies; the two reusable lanes had drifted (ruby 3.2 vs 3.4, pagefind `latest` scrape vs npm pin). The docs lane is now ONE canonical reusable workflow in `dhaupin/freestruct`, and this repo is a thin caller of it.
+
+- `.github/workflows/docs.yml` calls `dhaupin/freestruct/.github/workflows/docs-lane.yml@22bb7e9b2634d6cdd966963d9e25c7f892577276`, keeping only the trigger, permissions, concurrency, and this repo pins.
+- No `package-lock.json` here (a library), so the lane installs with `npm install` and skips the npm cache; no `crashtest.config.js`, so the dogfood leg is off.
+- No version bump; a workflow consolidation, not a released surface.
+
 ### Security
 
 - **Every GitHub Action ref is now SHA-pinned ("pins, never floats").** `publish.yml` already pinned; `docs.yml`, `corpus.yml`, `crashtest.yml`, and `test.yml` floated 13 refs (`actions/checkout@v4`, `actions/setup-node@v4`, `ruby/setup-ruby@v1`, `actions/configure-pages@v4`, `actions/upload-pages-artifact@v5`, `actions/deploy-pages@v4`). All 13 now name the family canon commit SHA (tag kept in the trailing comment). A new guard, `scripts/check-action-pins.cjs`, refuses any non-SHA `uses:` ref and runs as `npm run lint:pins` inside `npm run check`, so a future float fails in CI instead of drifting in silently.
