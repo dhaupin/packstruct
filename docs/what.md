@@ -33,6 +33,9 @@ npx packstruct lint packs --deep
 
 # prove a host loader honors every spec case
 npx packstruct audit-conformance . --loader "node loader.mjs {packs}"
+
+# ... and prove it carries the host-owned `env` claims, not just tolerates them
+npx packstruct audit-conformance . --loader "node loader.mjs {packs}" --claims
 ```
 
 <div class="crosslinks">

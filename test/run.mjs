@@ -156,20 +156,55 @@ if (wireLocal.status !== 1 || localJson.localChecked !== 1 || !localJson.violati
 mark('edge probe isolation: start')
 const conformingLoader = `${process.execPath} bin/cli.mjs lint {packs}`
 const auditGood = await auditConformance({ loader: `${process.execPath} test/fixtures/audit/loader-ok.mjs {packs}` })
-if (auditGood.caseCount !== 8 || auditGood.honored !== 8 || auditGood.violations.length) {
-  console.error(`FAIL audit-conformance: our own loader should honor all 8 bundled cases\ngot: honored=${auditGood.honored}/${auditGood.caseCount}\n${JSON.stringify(auditGood.violations, null, 2)}`)
+if (auditGood.caseCount !== 9 || auditGood.honored !== 9 || auditGood.violations.length) {
+  console.error(`FAIL audit-conformance: our own loader should honor all 9 bundled cases\ngot: honored=${auditGood.honored}/${auditGood.caseCount}\n${JSON.stringify(auditGood.violations, null, 2)}`)
   process.exit(1)
 }
 const auditAllAccept = await auditConformance({ loader: `${process.execPath} test/fixtures/audit/loader-always-ok.mjs {packs}` })
-if (auditAllAccept.honored !== 1 || auditAllAccept.violations.length !== 7) {
-  console.error(`FAIL audit-conformance accept-all loader should fail 7 refuse-cases: honored=${auditAllAccept.honored} violations=${auditAllAccept.violations.length}\n${JSON.stringify(auditAllAccept.violations, null, 2)}`)
+if (auditAllAccept.honored !== 2 || auditAllAccept.violations.length !== 7) {
+  console.error(`FAIL audit-conformance accept-all loader should honor only the 2 accept cases (clean + env-claims) and fail 7 refuse-cases: honored=${auditAllAccept.honored} violations=${auditAllAccept.violations.length}\n${JSON.stringify(auditAllAccept.violations, null, 2)}`)
   process.exit(1)
 }
 const auditNoName = await auditConformance({ loader: `${process.execPath} test/fixtures/audit/loader-no-name.mjs {packs}` })
-if (auditNoName.honored !== 0 || auditNoName.violations.length !== 8) {
-  console.error(`FAIL audit-conformance silent-refuser should fail all 8 (refusals must NAME the pack): honored=${auditNoName.honored}\n${JSON.stringify(auditNoName.violations, null, 2)}`)
+if (auditNoName.honored !== 0 || auditNoName.violations.length !== 9) {
+  console.error(`FAIL audit-conformance silent-refuser should fail all 9 (refusals must NAME the pack): honored=${auditNoName.honored}\n${JSON.stringify(auditNoName.violations, null, 2)}`)
   process.exit(1)
 }
+
+// --- packstruct#71: the env-claims leg. The bundled env-claims case proves a
+// conforming loader does not REFUSE the spec-allowed `env` block (covered by
+// the default audit above); `--claims` goes further and requires the loader
+// to ECHO the declared claims, so a loader that silently ignores `env` is
+// named instead of passing quietly. Both directions, per the house rule. ---
+const claimsLoader = `${process.execPath} test/fixtures/audit/loader-claims.mjs {packs}`
+const auditClaimsGood = await auditConformance({ loader: claimsLoader, claims: true })
+if (auditClaimsGood.caseCount !== 9 || auditClaimsGood.honored !== 9 || auditClaimsGood.violations.length) {
+  console.error(`FAIL audit-conformance --claims: an env-echoing loader should honor all 9 cases\ngot: honored=${auditClaimsGood.honored}/${auditClaimsGood.caseCount}\n${JSON.stringify(auditClaimsGood.violations, null, 2)}`)
+  process.exit(1)
+}
+// The default leg still passes for the same loader (the echo is simply not
+// required without --claims) - so the two legs are independent.
+const auditClaimsDefault = await auditConformance({ loader: claimsLoader })
+if (auditClaimsDefault.honored !== 9) {
+  console.error(`FAIL audit-conformance default leg should still honor the env-echoing loader 9/9: honored=${auditClaimsDefault.honored}\n${JSON.stringify(auditClaimsDefault.violations, null, 2)}`)
+  process.exit(1)
+}
+// The teeth: an accept-everything loader passes the default audit's accept
+// cases but FAILS --claims on env-claims ("accepted but did not echo").
+const auditClaimsSilent = await auditConformance({ loader: `${process.execPath} test/fixtures/audit/loader-always-ok.mjs {packs}`, claims: true })
+const silentEnv = auditClaimsSilent.violations.find(v => v.pack === 'env-claims')
+if (!(silentEnv && /did not echo/.test(silentEnv.message))) {
+  console.error(`FAIL audit-conformance --claims must name a loader that silently ignores env:\n${JSON.stringify(auditClaimsSilent.violations, null, 2)}`)
+  process.exit(1)
+}
+// A loader that REFUSES the env block is named as the spec'd-key refusal.
+const auditClaimsRefuse = await auditConformance({ loader: `${process.execPath} test/fixtures/audit/loader-no-name.mjs {packs}`, claims: true })
+const refuseEnv = auditClaimsRefuse.violations.find(v => v.pack === 'env-claims')
+if (!(refuseEnv && /spec-allowed `env` block/.test(refuseEnv.message))) {
+  console.error(`FAIL audit-conformance --claims must name a loader that refuses the env block:\n${JSON.stringify(auditClaimsRefuse.violations, null, 2)}`)
+  process.exit(1)
+}
+
 
 // --- QC edge/vuln pass: the probe crash classes. Pack code must never
 // drive the linter's own process - a top-level exit() hijacked the wire
@@ -205,13 +240,13 @@ if (!(edgeSpin.violations.length === 1 && edgeSpin.violations[0].norm === 'entry
 // specific path lives in runCapped; the contract lives here. ---
 const auditFlood = await auditConformance({ loader: `${process.execPath} test/fixtures/audit/loader-flood.mjs {packs}`, auditTimeoutMs: 5000 })
 const floodUnobservable = v => v.message.includes('audit buffer') || v.message.includes('audit timeout')
-if (!(auditFlood.violations.length === 8 && auditFlood.violations.every(floodUnobservable) && auditFlood.violations.some(v => v.message.includes('audit buffer') || v.message.includes('audit timeout')))) {
-  console.error(`FAIL audit flood loader must grade nothing on all 8 cases (cap or timeout, both honest):\n${JSON.stringify(auditFlood.violations, null, 2)}`)
+if (!(auditFlood.violations.length === 9 && auditFlood.violations.every(floodUnobservable) && auditFlood.violations.some(v => v.message.includes('audit buffer') || v.message.includes('audit timeout')))) {
+  console.error(`FAIL audit flood loader must grade nothing on all 9 cases (cap or timeout, both honest):\n${JSON.stringify(auditFlood.violations, null, 2)}`)
   process.exit(1)
 }
 const auditHung = await auditConformance({ loader: "sleep 9999 # {packs}", auditTimeoutMs: 400 })
-if (!(auditHung.violations.length === 8 && auditHung.violations.every(v => v.message.includes('audit timeout')))) {
-  console.error(`FAIL audit hung loader should fail all 8 cases with the timeout named:\n${JSON.stringify(auditHung.violations, null, 2)}`)
+if (!(auditHung.violations.length === 9 && auditHung.violations.every(v => v.message.includes('audit timeout')))) {
+  console.error(`FAIL audit hung loader should fail all 9 cases with the timeout named:\n${JSON.stringify(auditHung.violations, null, 2)}`)
   process.exit(1)
 }
 

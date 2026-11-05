@@ -2,7 +2,7 @@
 // bin/cli.mjs - the packstruct CLI, zero dependencies.
 //
 //   packstruct lint <packs-dir> [--json] [--deep] [--against <path>]
-//   packstruct audit-conformance [<repo-dir>] --loader "<cmd> {packs}" [--json]
+//   packstruct audit-conformance [<repo-dir>] --loader "<cmd> {packs}" [--json] [--claims]
 //
 // The lint subcommand token is stripped when present, and a bare
 // `packstruct <dir>` keeps working (the dir positionally implies lint; a
@@ -58,7 +58,7 @@ const exitUsage = (msg, usage) => {
 
 // Usage strings, one per verb (the usage ladder's exit 2 surface).
 const USAGE_LINT = 'packstruct lint <packs-dir> [--json] [--deep] [--local] [--against <library-path>]'
-const USAGE_AUDIT = 'packstruct audit-conformance [<repo-dir>] --loader "<cmd> {packs}" [--json]'
+const USAGE_AUDIT = 'packstruct audit-conformance [<repo-dir>] --loader "<cmd> {packs}" [--json] [--claims]'
 const USAGE_NEW = 'packstruct new <pack-name> [--dir <packs-root>] [--json]'
 
 // Unknown-flag rejection (packstruct#18): a typo'd mode flag used to be
@@ -120,8 +120,8 @@ if (verb === 'audit-conformance') {
   for (let i = 0; i < args.length; i++) {
     const a = args[i]
     if (a === '--loader') { i++; continue }
-    if (a === '--json') continue
-    if (a.startsWith('-')) rejectUnknownFlag(a, '--loader <cmd>, --json', USAGE_AUDIT)
+    if (a === '--json' || a === '--claims') continue
+    if (a.startsWith('-')) rejectUnknownFlag(a, '--loader <cmd>, --json, --claims', USAGE_AUDIT)
     positional.push(a)
   }
   if (loader === undefined) {
@@ -129,11 +129,12 @@ if (verb === 'audit-conformance') {
   }
   const repo = positional[0] ?? '.'
   const json = args.includes('--json')
-  const r = await auditConformance({ loader, repo, json })
+  const claims = args.includes('--claims')
+  const r = await auditConformance({ loader, repo, json, claims })
   if (json) {
-    console.log(JSON.stringify({ schema: 1, mode: 'audit', repo, cases: r.caseCount, honored: r.honored, violations: r.violations }, null, 2))
+    console.log(JSON.stringify({ schema: 1, mode: 'audit', repo, claims, cases: r.caseCount, honored: r.honored, violations: r.violations }, null, 2))
   } else {
-    console.log(`packstruct audit-conformance: ${r.honored}/${r.caseCount} case(s) honored by the loader over ${repo}`)
+    console.log(`packstruct audit-conformance${claims ? ' --claims' : ''}: ${r.honored}/${r.caseCount} case(s) honored by the loader over ${repo}`)
     for (const v of r.violations) console.log(`  AUDIT ${v.pack} [${v.norm}]: ${v.message}`)
   }
   process.exit(r.violations.length ? 1 : 0)

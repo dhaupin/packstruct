@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "name": "env-claims-pack",
+  "description": "SPEC v1.1 conformance pack - declares the host-owned env block (d1/kv/routes/seed). The accept case for packstruct#71: the block is spec'd, so a conforming loader must NOT refuse a pack for carrying it.",
+  "version": "1.0.0",
+  "entry": "entry.js",
+  "env": {
+    "d1": { "DB": { "tables": ["charges"] } },
+    "kv": { "UPLOADS": {} },
+    "routes": ["charge"],
+    "seed": {
+      "kv": { "UPLOADS": { "canary": "seed-value" } },
+      "d1": { "DB": { "charges": { "rows": [{ "id": 1 }] } } }
+    }
+  }
+}
