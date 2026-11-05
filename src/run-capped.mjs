@@ -77,18 +77,24 @@ export function runCapped({ cmd, args = [], shell = false, cwd, timeoutMs = 5000
     }
     // stdout is capped hard: past maxBuffer the child dies. stderr counts
     // against the same gate so a stderr flood cannot OOM the harness either.
-    p.stdout.on('data', (d) => {
+    // A chunk larger than the remaining budget is truncated to it and the
+    // child is killed - pushing it whole would return output past the cap
+    // (the honesty cap admits nothing it did not measure).
+    const absorb = (d, into) => {
       if (done || capped) return
+      const remaining = maxBuffer - total
+      if (d.length > remaining) {
+        if (remaining > 0) into.push(d.subarray(0, remaining))
+        total = maxBuffer
+        capped = true
+        killTree()
+        return
+      }
+      into.push(d)
       total += d.length
-      chunks.push(d)
-      if (total > maxBuffer) { capped = true; killTree() }
-    })
-    p.stderr.on('data', (d) => {
-      if (done) return
-      total += d.length
-      stderrChunks.push(d)
-      if (total > maxBuffer) { capped = true; killTree() }
-    })
+    }
+    p.stdout.on('data', (d) => absorb(d, chunks))
+    p.stderr.on('data', (d) => absorb(d, stderrChunks))
     p.on('error', (e) => { spawnError = e; finish() })
     p.on('exit', finish)
   })
