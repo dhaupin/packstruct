@@ -20,6 +20,8 @@ The family built docs from four topologies; the two reusable lanes had drifted (
 
 ### Fixed
 
+- **`runCapped` now honors `maxBuffer` on stderr, and truncates any chunk that straddles the cap.** The stderr data handler lacked the `capped` guard the stdout handler carried, and neither stream truncated an oversized chunk - so a loader flooding stderr returned output PAST `maxBuffer` (a single 1 MiB chunk against a 4 KiB cap returned ~146 KiB), the exact unaccounted bytes the honesty cap exists to refuse. Both streams now share one `absorb` that truncates to the remaining budget and kills the child; `test/run-capped.test.mjs` pins the cap on both streams and the combined budget.
+
 - **The release ladder no longer parses `npm pack --dry-run --json`.** The phone's npm answers that probe with empty stdout (a config warning, no JSON) even under `--loglevel=error`, so the ladder's `JSON.parse` failed and read as a capability failure - exit 2 - on a clean tree. The ladder now derives the expected set from a REAL `npm pack` of the checkout, listed by the same `tarList` the served tarball already goes through.
 
 - **The staged publish `.npmrc` no longer writes the deprecated `always-auth` line.** npm >=9 warns `Unknown project config "always-auth"` on it, and that warning reaches the child processes the `prepublishOnly` gate spawns. The staged file is now exactly one line (the `${NPM_TOKEN}` expansion).

@@ -21,7 +21,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "test": "node test/run.mjs && node --test test/status.test.mjs test/refusal-matrix.test.mjs tests/ship-from-download.test.cjs tests/release-verify.test.cjs tests/check-action-pins.test.cjs && node --test tests/check-prestruct-pins.test.cjs",
+    "test": "node test/run.mjs && node --test test/status.test.mjs test/refusal-matrix.test.mjs test/run-capped.test.mjs tests/ship-from-download.test.cjs tests/release-verify.test.cjs tests/check-action-pins.test.cjs && node --test tests/check-prestruct-pins.test.cjs",
     "test:ship": "node --test tests/ship-from-download.test.cjs",
     "lint:docs": "node scripts/check-docs-frontmatter.cjs && node scripts/check-docs-links.cjs && node scripts/check-docs-style.cjs && node scripts/check-jekyll-filters.cjs && node scripts/check-language.cjs",
     "lint:pins": "node scripts/check-action-pins.cjs",
