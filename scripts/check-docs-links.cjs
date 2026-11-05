@@ -2,15 +2,18 @@
 /**
  * Docs link checker (ported from dhaupin/vant scripts/check-docs-links.js).
  * Validates every markdown link in docs/:
- *   - /prestruct/<permalink> links must match a real frontmatter permalink
+ *   - /packstruct/<permalink> links must match a real frontmatter permalink
  *   - other absolute links must match a permalink or resolve under docs/
- *   - relative links must resolve on disk
+ *   - page-relative links are refused by name: they resolve against the SERVED
+ *     page URL, so on a no-trailing-slash permalink page '../x'/'./x' lands one
+ *     level off and 404s (internal links are root-absolute /packstruct/...)
  * Skips code fences, inline code, external URLs, and pure anchors.
  * Exit 1 on any broken link.
  */
 const fs = require('fs');
 const path = require('path');
 const DOCS = path.resolve(__dirname, '..', 'docs');
+const SITE_PREFIX = '/packstruct'; // the docs baseurl - mirror docs/_config.yml
 
 // normalize: leading slash, no trailing slash ('' -> '/')
 const norm = (s) => {
@@ -50,10 +53,10 @@ for (const f of files) {
                 u = anchor ? u.slice(0, u.length - anchor.length) : u;
                 if (!u) continue; // pure anchor
                 const rel = f.replace(DOCS + '/', '');
-                if (u.startsWith('/prestruct/') || u === '/prestruct') {
-                    const key = norm(u.replace(/^\/prestruct\/?/, ''));
+                if (u.startsWith(SITE_PREFIX + '/') || u === SITE_PREFIX) {
+                    const key = norm(u.replace(/^\/packstruct\/?/, ''));
                     if (!perm.has(key)) {
-                        console.log('BROKEN (bad /prestruct/ permalink) in', rel, '->', m[1]);
+                        console.log('BROKEN (bad ' + SITE_PREFIX + '/ permalink) in', rel, '->', m[1]);
                         broken++;
                     }
                     continue;
@@ -66,9 +69,11 @@ for (const f of files) {
                     }
                     continue;
                 }
-                const p = path.resolve(path.dirname(f), u.replace(/\.md$/, ''));
-                if (fs.existsSync(p + '.md') || fs.existsSync(path.join(p, 'index.md')) || fs.existsSync(p)) continue;
-                console.log('BROKEN (rel) in', rel, '->', m[1]);
+                // A page-relative link resolves against the SERVED page URL, not
+                // the source tree: on a no-trailing-slash permalink page the
+                // browser reads /packstruct/foo as a file, so '../x'/'./x' lands
+                // one level off and 404s. Internal links are root-absolute.
+                console.log('BROKEN (relative - use a root-absolute /packstruct link) in', rel, '->', m[1]);
                 broken++;
             }
         }
