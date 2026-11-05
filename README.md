@@ -33,7 +33,7 @@ npx packstruct new my-shapes        # scaffold a conforming pack skeleton (packs
 
 The linter validates `schemaVersion === 1`, kebab-case name matching its directory, dotted versions, non-empty description, relative entry paths, and that the entry file physically exists under the pack dir. Optional `armedByKey` string. Host-owned keys the engine also recognizes (`env`, `plugins`, `package`) are acknowledged by name and never refused. Everything else (extra manifest keys, snapshot files beside the entry) is minimum-spec and left alone.
 
-`audit-conformance` is the next half of conformance (SPEC section 7): it materializes bundled verdict-claiming fixture packs (one clean bundle, one per refusal norm, a name-collision pair) into scratch roots and runs YOUR loader command over each - a conforming loader exits 0 on clean and exits non-zero naming the pack on every violation (identity match, refusal wording stays host-owned). The `implements: packstruct@1` pin becomes verifiable, not honorary.
+`audit-conformance` is the next half of conformance (SPEC section 7): it materializes bundled verdict-claiming fixture packs (one clean bundle, one per refusal norm, a name-collision pair, and an `env-claims` bundle carrying the host-owned `env` block) into scratch roots and runs YOUR loader command over each - a conforming loader exits 0 on clean and exits non-zero naming the pack on every violation (identity match, refusal wording stays host-owned). `--claims` goes further on the `env-claims` bundle: the loader must echo the declared block, so a loader that silently ignores `env` is named instead of passing. The `implements: packstruct@1` pin becomes verifiable, not honorary.
 
 ## Profiles
 
@@ -74,7 +74,7 @@ Build the site locally: `cd web && npm install && npm run build` - `prestruct` r
 
 ## Development
 
-Zero runtime dependencies. The gate is `npm test && npm run check` - `check` composes the docs gates, a deep lint of the repo's own shipped pack, and the 8/8 conformance audit (the same command `prepublishOnly` runs, so a publish cannot ship an unverified SPEC or pack surface).
+Zero runtime dependencies. The gate is `npm test && npm run check` - `check` composes the docs gates, a deep lint of the repo's own shipped pack, and the 9/9 conformance audit (the same command `prepublishOnly` runs, so a publish cannot ship an unverified SPEC or pack surface).
 
 ```bash
 npm test        # the lint + deep + audit + edge contract suite
