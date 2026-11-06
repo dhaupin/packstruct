@@ -26,30 +26,30 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with: { node-version: 20 }
 
-      # The audited corpus tree: crashtest tag v1.1.0
-      # (2d1fe793e2d4732b9eea52cc4199d54c6e3b0091) - the tag live on npm.
+      # The audited corpus tree: crashtest tag v1.3.0
+      # (873828743d7cc715893619e6295cb0a81251a439) - the tag live on npm.
       # Bump pin + labs/corpus-receipt.md together, never silently.
       - name: Check out the crashtest corpus at the audited pin
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           repository: dhaupin/crashtest
-          ref: v1.1.0
+          ref: v1.3.0
           path: corpus-crashtest
 
-      - name: Lint the corpus manifests (8 packs, expect clean)
+      - name: Lint the corpus manifests (9 packs, expect clean)
         run: node bin/cli.mjs lint corpus-crashtest/packs
 
       # Deep probe over the SAME pinned tree: entries imported once
-      # in-process, ids censused. Receipt (labs/corpus-receipt.md deep run,
-      # 2026-10-24): 8/8 modules probed, 44 ids, zero violations - the #19
-      # audit's id space independently reproduced through our own linter.
+      # in-process, ids censused. Receipt (labs/corpus-receipt.md v1.3.0
+      # run): 9/9 modules probed, 47 ids, zero violations - the crashtest
+      # id space independently reproduced through our own linter.
       - name: Deep-probe the corpus (entry import + id census, expect clean)
         run: node bin/cli.mjs lint corpus-crashtest/packs --deep
 
       # Host-library census: the pack ids vs the built-in scenario library
-      # inside the same pinned tree. Receipt (labs/corpus-receipt.md,
-      # 2026-10-24): 63 library ids seeded (module + attack + step names;
-      # the #19 count of 49 counts attacks only - taxonomic difference,
-      # not a contradiction), zero collisions, exit 0.
+      # inside the same pinned tree. Receipt (labs/corpus-receipt.md v1.3.0
+      # run): 66 library ids seeded (module + attack + step names; the
+      # attack-only count is smaller - taxonomic difference, not a
+      # contradiction), zero collisions, exit 0.
       - name: Census pack ids against the built-in library (expect clean)
         run: node bin/cli.mjs lint corpus-crashtest/packs --deep --against corpus-crashtest/src/scenarios/library

@@ -76,3 +76,19 @@ refusing the live corpus becomes visible in lint-CI immediately.
   moved with it (bump pin + receipt together, never silently).
 - CI: `.github/workflows/corpus.yml` now pins `ref: v1.1.0`; this receipt is
   its truth.
+
+## Re-audit at crashtest v1.3.0 (2026-11-06)
+
+- Command: `node bin/cli.mjs lint /tmp/corpus-crashtest/packs [--deep] [--deep --against /tmp/corpus-crashtest/src/scenarios/library]`
+- Corpus tree re-pinned: `dhaupin/crashtest` tag `v1.3.0` =
+  `873828743d7cc715893619e6295cb0a81251a439` (the tag live on npm).
+- Output: shallow `9 pack(s) checked` exit 0; deep `9 module(s) probed, 47
+  id(s) censused`, exit 0; `--against` `47 id(s) censused, 66 library id(s)
+  seeded`, zero collisions, exit 0.
+- Reading: the walk train since `v1.1.0` (the SSRF-guard round on the
+  crashtest side, the `egress-guard-shapes` pack) moved the corpus from 8 to
+  9 packs and 44 to 47 pack ids, and the built-in library from 63 to 66 ids -
+  still zero collisions, still exit 0 at every depth. The pin moved and the
+  receipt moved with it (bump pin + receipt together, never silently).
+- CI: `.github/workflows/corpus.yml` now pins `ref: v1.3.0`; this receipt is
+  its truth.
