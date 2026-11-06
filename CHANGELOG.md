@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-29
+
 ### The docs-lane consolidation (2026-11-04)
 
 The family built docs from four topologies; the two reusable lanes had drifted (ruby 3.2 vs 3.4, pagefind `latest` scrape vs npm pin). The docs lane is now ONE canonical reusable workflow in `dhaupin/freestruct`, and this repo is a thin caller of it.
@@ -67,8 +69,6 @@ The family built docs from four topologies; the two reusable lanes had drifted (
 - **The crashtest pins re-audited (packstruct#29).** `corpus.yml` now pins crashtest tag `v1.1.0` (`2d1fe79`) and `crashtest.yml` installs `crashtest@1.1.0`; `labs/corpus-receipt.md` carries the re-audit (8/8 clean shallow + deep, 44 ids, 63 library ids, zero collisions) - the pin moved and the receipt moved with it.
 - **docs/discussions prose unwrapped (packstruct#38).** The 72-column commit-time hard-wrap retired via `scripts/unwrap-prose.cjs` (copied from eyestruct@3adda1d); `docs/discussions/index.md` flowed, no keeper doc states the column rule.
 - **`.gitignore` carries the web status file and the docs-preview block (packstruct#32).** `web/public/status.json` (generated) joins the docs belt-and-suspenders block; the local Jekyll preview recipe is recorded in DEPLOY.md.
-
-## [1.1.0] - 2026-10-29
 
 ### Added
 - **SPEC v1.1.0: the five additive rows (packstruct#19).** Engine-receipted, no `schemaVersion` move, no conforming host changes: the optional `implements` key (format-lint only, WARNING never refusal), the formalized `--loader` template contract, ESM-default entries stated plainly, interop routes as a lifecycle norm, and companion-pin receipts. Sections 8-11 of `spec/SPEC.md`.
