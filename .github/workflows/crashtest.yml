@@ -17,10 +17,10 @@ jobs:
         with: { node-version: 20 }
       - run: npm install --no-fund --no-audit
       - run: npm test
-      # npm registry pin (the pack contracts target the stable v1.1.0
-      # harness surface, 2d1fe79 - the tag live on npm; the crate's 1.2.0
-      # is unreleased on main). Bump pin + receipt together.
+      # npm registry pin (the pack contracts target the stable v1.3.0
+      # harness surface, 8738287 - the tag live on npm). Bump pin + receipt
+      # together.
       - name: Install crashtest
-        run: npm install --no-save --no-audit --no-fund crashtest@1.1.0
+        run: npm install --no-save --no-audit --no-fund crashtest@1.3.0
       - name: Run the lint-shapes pack
         run: npx crashtest run
