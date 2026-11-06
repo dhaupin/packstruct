@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- **The reciprocal corpus lane and the dogfood re-cut at crashtest v1.3.0.** `.github/workflows/corpus.yml` re-pins its audited clone to `ref: v1.3.0` (`8738287`) and `.github/workflows/crashtest.yml` installs `crashtest@1.3.0`. Re-running the lanes against the new tree: the corpus moved from 8 to 9 packs and 44 to 47 pack ids, and the built-in library from 63 to 66 ids - zero collisions, exit 0 at every depth; the dogfood tally moved from 53/53 to 56/56 REFUSED, 0 EXPLOITED, 0 BOUNDED. The README registry rows and `labs/corpus-receipt.md` carry the new numbers (bump pin + receipt together).
+- **The docs-lane caller SHA moves to freestruct v1.3.0 (`7dfb172`)** with `freestruct-version` `1.2.0 -> 1.3.0`.
+- **The family prestruct floor moves to `^1.3.0`.** `scripts/check-prestruct-pins.cjs` refuses any declaration below 1.3.0 (the SSRF-guard security round), and the guard's own battery gains the inverse case - the old `^1.2.0` floor now fails.
+
 ### Fixed
 
 - **The release ladder's `verify` job no longer races `release`.** `verify` now declares `needs: [publish, release]`, so it waits for the GH release object and its attached tarball before judging them. A bare `needs: publish` ran `verify` CONCURRENTLY with `release`: on a fresh cut the registry read replicas had not settled and the asset was not yet attached, so a publish that in fact succeeded failed red and needed a manual re-run (the packstruct 1.1.0 first cut). `verify` still stands alone in verify-only mode (`publish` and `release` both skipped). The propagation poll budgets also widened: the release-attach poll 120s -> 300s, and the registry poll in `scripts/verify-release.cjs` 120s -> 360s. `tests/release-verify.test.cjs` pins the dependency so a regression fails by name.

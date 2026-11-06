@@ -49,8 +49,8 @@ Every consuming host keeps a receipt row here: engine, the exact source sha the 
 
 | Host | Pin (engine @ source sha) | Result | Cut |
 |---|---|---|---|
-| crashtest | `crashtest@1.1.0` @ `2d1fe79` (npm tag v1.1.0) | 8/8 packs clean shallow + deep, 44 ids, 63 library ids, zero collisions (`labs/corpus-receipt.md`) | 2026-10-29 |
-| crashtest (dogfood) | `crashtest@1.1.0` @ `2d1fe79` | `crashtest run`: 53/53 catalog findings REFUSED (4 from `packstruct-lint-shapes`), 0 EXPLOITED, 0 BOUNDED (`labs/crashledger.json`) | 2026-10-29 |
+| crashtest | `crashtest@1.3.0` @ `8738287` (npm tag v1.3.0) | 9/9 packs clean shallow + deep, 47 ids, 66 library ids, zero collisions (`labs/corpus-receipt.md`) | 2026-11-06 |
+| crashtest (dogfood) | `crashtest@1.3.0` @ `8738287` | `crashtest run`: 56/56 catalog findings REFUSED (4 from `packstruct-lint-shapes`), 0 EXPLOITED, 0 BOUNDED (`labs/crashledger.json`) | 2026-11-06 |
 | eyestruct | `eyestruct@1.0.0` @ `4b979c0` (tag v1.0.0) | 5/5 packs (eye-adapter, eye-bundle, eye-ci-gate, eye-shapes, eye-text-leg) clean shallow + deep through the packstruct@1 lane | 2026-10-29 |
 | poststruct | staging in flight | row reserved - activates when it settles (honest absence, not padding) | - |
 
@@ -84,4 +84,4 @@ npx crashtest run   # the dogfood: hostile manifests through the CLI wire
 
 ## Crashtest dogfood
 
-`crashtest run` from the repo root drives `packs/public/packstruct-lint-shapes`: hostile pack.json corpora through an in-process lint double (the same CLI wire CI uses), asserting the SPEC v1 section 5 contract - instant nameable refusal, no crashes, no deep stacks, and strict tolerance for spec-allowed shapes. Pinned to dhaupin/crashtest v1.1.0.
+`crashtest run` from the repo root drives `packs/public/packstruct-lint-shapes`: hostile pack.json corpora through an in-process lint double (the same CLI wire CI uses), asserting the SPEC v1 section 5 contract - instant nameable refusal, no crashes, no deep stacks, and strict tolerance for spec-allowed shapes. Pinned to dhaupin/crashtest v1.3.0.

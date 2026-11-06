@@ -22,8 +22,8 @@
 - Site: `web/` is a Vite + React app built by `prestruct build` (identity in `web/ssr.config.js`). `web/src/islands.js` + `web/src/hooks/usePageMeta.js` are engine files - copy once, never edit. `web/src/App.jsx` keeps BrowserRouter alone; importing it anywhere the prerender loads makes every route render as the homepage.
 
 ## Companion pins & receipts
-- Never pin to a line npm does not serve. `prestruct` and `freestruct` publish 1.1.0; their react-router/basePath fixes sit on `main` as unreleased 1.2.0. `npm view <pkg> versions` before any bump - an `ETARGET` pin breaks the lane instead of fixing a bug.
-- The docs lane holds `freestruct@1.0.0` on purpose: published 1.1.0 resolves root-absolute hrefs literally, so on the `/packstruct` baseurl `--strict` fails every nav link. The pin moves when the fix publishes.
+- Never pin to a line npm does not serve. `npm view <pkg> versions` before any bump - an `ETARGET` pin breaks the lane instead of fixing a bug. `prestruct` and `freestruct` now publish 1.3.0 (the prestruct SSRF-guard round).
+- The docs lane pins `freestruct@1.3.0`: the release that resolves root-absolute hrefs correctly, so `--strict` passes on the `/packstruct` baseurl.
 - Registry rows (README "Family lanes") are receipts: re-run the lane against the pinned sha before trusting a row. A row that is wrong is worse than absent.
 - The dogfood ledger (`labs/crashledger.json` + `labs/hardening.md`) is cut by whatever crashtest is installed - it must be re-cut with the pinned `crashtest@<version>` in the workflow, and the registry row must cite that same version's tally. A row quoting vX over a ledger cut by vY is the receipt-error class.
 - The refusal matrix + `labs/refusal-battery/` are drift-gated: `npm run matrix:check` (`gen-refusal-matrix.mjs --check`) fails on any delta, and the honesty compare is exact both ways (a linter stricter than the SPEC fails as loudly as a looser one). Regenerate with `npm run matrix:gen`.
