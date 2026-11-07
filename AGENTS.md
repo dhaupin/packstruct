@@ -20,6 +20,8 @@
 - Don't version-bump the spec (major) without a migration note: §6.
 - All prose uses zero configured-voice words from poststruct's language pack.
 - Site: `web/` is a Vite + React app built by `prestruct build` (identity in `web/ssr.config.js`). `web/src/islands.js` + `web/src/hooks/usePageMeta.js` are engine files - copy once, never edit. `web/src/App.jsx` keeps BrowserRouter alone; importing it anywhere the prerender loads makes every route render as the homepage.
+- **The site speaks in three audience tiers** (`/start` beginner, `/extend` builder, `/enterprise` fleet), every claim grounded in SPEC v1 - never invent a rule a tier page asserts. A tier is a pair: the branded page (`web/src/pages/*.jsx`) AND its docs mirror (`docs/*.md`) ship in the same change, with the route in `web/ssr.config.js`, the nav row in `web/src/components/navItems.js`, and the docs row in `docs/_data/nav.yml`. The inline desktop header has a fixed 960px wrap: a new nav item that would overflow takes `header: false` (burger sidebar + footer + crosslinks still carry it) instead of breaking the row.
+- **Prefilled issue links, never a POST.** `web/src/issues.js` builds `github.com/dhaupin/packstruct/issues/new?template=<t>&title=...&body=...` URLs; the site opens them for the human to review and submit. Templates live in `.github/ISSUE_TEMPLATE/` (with `config.yml`), and a template's `labels:` must name a label that already exists in the repo.
 
 ## Companion pins & receipts
 - Never pin to a line npm does not serve. `npm view <pkg> versions` before any bump - an `ETARGET` pin breaks the lane instead of fixing a bug. `prestruct` and `freestruct` now publish 1.3.0 (the prestruct SSRF-guard round).
