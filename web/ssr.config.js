@@ -8,7 +8,13 @@ export default {
   siteName: 'Packstruct',
   author:   'dhaupin',
   tagline:  'One /packs system, many hosts.',
-  ogImage:  'https://packstruct.creadev.org/og-image.png',
+  ogImage:  {
+    url: 'https://packstruct.creadev.org/og-image.png',
+    width: 1200,
+    height: 630,
+    alt: 'packstruct - the shared /packs spec',
+    type: 'image/png',
+  },
   keywords: 'packstruct, packs spec, pack.json, manifest validation, linter, conformance, crashtest packs, poststruct packs, schemaVersion 1',
 
   routes: [
@@ -18,7 +24,7 @@ export default {
       changefreq: 'monthly',
       meta: {
         title: 'Packstruct - one /packs spec, many hosts',
-        description: 'The shared packs spec for the struct family: one manifest, entry, and lifecycle contract for crashtest and poststruct packs, plus a zero-dependency lint CLI that refuses broken manifests at author time.',
+        description: 'The shared packs spec: one manifest, entry, and lifecycle contract for a packs/ directory, plus a zero-dependency lint CLI that refuses broken manifests.',
       },
     },
     {
@@ -27,7 +33,7 @@ export default {
       changefreq: 'monthly',
       meta: {
         title: 'Why | Packstruct',
-        description: 'Many hosts, one pack grammar. Why a shared /packs spec exists: so an author who writes one pack knows how packs work everywhere, and a bad manifest is refused instantly and by name.',
+        description: 'Many hosts, one pack grammar: why a shared /packs spec exists, so an author writes one pack and knows how packs work everywhere.',
       },
     },
     {
@@ -36,7 +42,7 @@ export default {
       changefreq: 'monthly',
       meta: {
         title: 'What | Packstruct',
-        description: 'One normative spec plus a zero-dependency lint CLI: the pack.json v1 manifest, the scenario and check entry profiles, and a conformance harness that proves a loader honors every case.',
+        description: 'One normative spec plus a zero-dependency lint CLI: the pack.json v1 manifest, the scenario and check profiles, and a conformance harness.',
       },
     },
     {
@@ -54,7 +60,7 @@ export default {
       changefreq: 'weekly',
       meta: {
         title: 'Packs | Packstruct',
-        description: 'The live pack catalog: the packstruct-lint-shapes dogfood pack and the family hosts that load the spec - crashtest (scenario), poststruct, eyestruct, govstruct (check), and monoforge (queued).',
+        description: 'The live pack catalog: the packstruct-lint-shapes dogfood pack and the nine hosts that load the spec, every count a receipt from its own tree.',
       },
     },
     {
@@ -63,7 +69,7 @@ export default {
       changefreq: 'monthly',
       meta: {
         title: 'The spec | Packstruct',
-        description: 'The frozen v1 surface: packs/public/<name>/ with pack.json (schemaVersion 1, name matches directory, entry exists, armedByKey optional) plus the declarable scenario/check profiles.',
+        description: 'The frozen v1 surface: packs/public/<name>/ with pack.json (schemaVersion 1, name matches dir, entry exists) plus the scenario/check profiles.',
       },
     },
     {
@@ -72,7 +78,7 @@ export default {
       changefreq: 'monthly',
       meta: {
         title: 'Lint CLI | Packstruct',
-        description: 'npx packstruct lint packs/ - zero dependencies, kills the manifest-points-at-missing-entry class (crashtest#16) at author time, in any fleet repo. Try it in the browser right here.',
+        description: 'npx packstruct lint packs/ - zero dependencies, kills the manifest-points-at-missing-entry class at author time, in any repo. Try it in the browser.',
       },
     },
     {
@@ -81,7 +87,34 @@ export default {
       changefreq: 'weekly',
       meta: {
         title: 'Showcase | Packstruct',
-        description: 'The hosts that speak the packstruct grammar: crashtest, poststruct, govstruct, eyestruct, vant, gistory, monoforge, and prestruct - every pack count a receipt from the host\'s own packs/public/ directory.',
+        description: 'The hosts that speak the packstruct grammar: crashtest, vant, gistory, prestruct, poststruct, govstruct, eyestruct, monoforge - counts from each tree.',
+      },
+    },
+    {
+      path: '/start',
+      priority: '0.9',
+      changefreq: 'monthly',
+      meta: {
+        title: 'Start here | Packstruct',
+        description: 'New to packstruct? In five minutes: what a pack is, the one command that checks it, and how to write your first pack.json - no prior knowledge needed.',
+      },
+    },
+    {
+      path: '/extend',
+      priority: '0.8',
+      changefreq: 'monthly',
+      meta: {
+        title: 'Extend | Packstruct',
+        description: 'For builders: write a pack a host will run, point a host at your own packs, add a new host profile, and prove it with --deep lint and the conformance harness.',
+      },
+    },
+    {
+      path: '/enterprise',
+      priority: '0.8',
+      changefreq: 'monthly',
+      meta: {
+        title: 'Fleet & enterprise | Packstruct',
+        description: 'One grammar across many repos: exact-pin companion receipts, conformance as a CI gate, governance as portable packs, and open-source adoption - all MIT.',
       },
     },
     {
@@ -90,7 +123,7 @@ export default {
       changefreq: 'weekly',
       meta: {
         title: 'Family status | Packstruct',
-        description: 'The family-status@1 dialect: every struct-family member serves its committed-ledger verdicts at /status.json, generated on every web build, and reads the others with the same schema.',
+        description: 'The family-status@1 dialect: every struct-family member serves its committed-ledger verdicts at /status.json, generated on every web build.',
       },
     },
     {

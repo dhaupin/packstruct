@@ -13,7 +13,7 @@ export default function Lint() {
     <section className="section" style={{ paddingTop: 56 }}>
       <div className="wrap">
         <p className="eyebrow">Zero dependencies, exit-code contract</p>
-        <h2>The lint CLI</h2>
+        <h1>The lint CLI</h1>
         <p className="sub">
           Kills the whole class crashtest filed upstream (#16: scaffolded manifests
           pointing at entries that don't exist) at author time, in any fleet repo,

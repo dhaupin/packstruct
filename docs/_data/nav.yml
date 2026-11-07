@@ -5,6 +5,12 @@
   items:
   - title: Overview
     url: /packstruct/
+  - title: Start here
+    url: /packstruct/start
+  - title: Extend
+    url: /packstruct/extend
+  - title: Fleet and enterprise
+    url: /packstruct/enterprise
   - title: Why Packstruct
     url: /packstruct/why
   - title: What Packstruct is

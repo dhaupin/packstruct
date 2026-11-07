@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or general discussion
+    url: https://github.com/dhaupin/packstruct/discussions
+    about: Ask a question, share a pack, or talk through an idea before it becomes an issue.
+  - name: Read the spec first
+    url: https://github.com/dhaupin/packstruct/blob/main/spec/SPEC.md
+    about: SPEC v1 is the normative document - most "is this allowed?" questions are answered there.
+  - name: Adopting packstruct?
+    url: https://packstruct.creadev.org/enterprise
+    about: The fleet and enterprise page maps the adoption path and the prefilled issue forms.

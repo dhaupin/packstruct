@@ -27,6 +27,9 @@ Published on npm as [`packstruct@1.1.0`](https://www.npmjs.com/package/packstruc
 
 <div class="crosslinks">
 <p><strong>More in these docs:</strong>
+<a href="{{ '/start' | relative_url }}">start here</a> ·
+<a href="{{ '/extend' | relative_url }}">extend</a> ·
+<a href="{{ '/enterprise' | relative_url }}">fleet and enterprise</a> ·
 <a href="{{ '/spec' | relative_url }}">SPEC v1</a> ·
 <a href="{{ '/linter' | relative_url }}">linter</a> ·
 <a href="https://www.npmjs.com/package/packstruct">npm</a> ·

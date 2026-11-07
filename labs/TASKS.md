@@ -39,3 +39,21 @@ The proto site was accurate but abstract - it explained the manifest grammar bef
 - **README family-lanes registry** re-cut: rows for poststruct, govstruct, monoforge, vant, gistory, prestruct added; the stale eyestruct row (5/5) corrected to 6/6.
 - **Receipts:** web build 11/11 routes, prestruct audit 0 failures; `npm run check` green (frontmatter/links/style/jekyll/language, action pins, prestruct pins, legal, refusal matrix, lint:packs, conform:packs 9/9, conform:claims 9/9).
 - **No version bump yet** (Unreleased; the site is a served surface but the release ladder is tag-driven).
+
+---
+
+### 2026-11-03 - session: the spec learns to speak (three audience tiers + a human front door)
+
+The site explained the grammar to people who already knew it. A newcomer landed on a pitch about "one manifest, many hosts" with no on-ramp, no plain-language definition of what a pack even is, and no path from "curious" to "running the linter". This session adds three audience tiers and a human front door, all grounded in SPEC v1 (no invented rules).
+
+- **`/start` - the absolute beginner.** "A pack is a folder. This is the rulebook for it." Plain-words definition (a folder with a label file), a copy-paste first pack, the one command that checks it, a table of what the linter catches by name (leading with the crashtest#16 class), and four "where to go next" doors.
+- **`/extend` - the hobbyist/builder.** Pick a profile (scenario / check, with the real default-export shapes from SPEC section 3), `--deep` (entry import + id census, the four refusals it names), the `audit-conformance` loader contract, the "traveler" host on-ramp (SPEC section 10), and the four house rules.
+- **`/enterprise` - the fleet.** What enterprise needs (frozen and versioned, provable conformance, exact-pin receipts, governance as packs), a four-step adoption path, the MIT/OSS posture, and four prefilled issue forms.
+- **Prefilled issue links, built in the browser.** `web/src/issues.js` builds `issues/new?template=...&title=...&body=...` URLs and opens them in a new tab; nothing is POSTed from the site. Same shape as vant's contact composer (cited, not invented).
+- **Issue templates + chooser.** `.github/ISSUE_TEMPLATE/{bug_report,feature_request,adoption,new_host}.md` plus `config.yml` (blank issues off, contact links). Two new labels created: `adoption`, `host`. The web forms deep-link the templates by name.
+- **CONTRIBUTING.md.** The short path in (five forms, branch flow), the gate (`npm test && npm run check`), the two surprise rules (a new check ships with a breaking fixture; pins, never floats), and a pointer to AGENTS.md as canonical (vant's front-door pattern).
+- **SEO surface cleaned to zero warnings.** The three new pages + prestruct's structured `ogImage` object form (width/height/alt), every route description inside 70-165 chars, and page-level `<h1>` on `/spec`, `/lint`, `/status` (they were bare `<h2>`). Audit: **22 warnings -> 0**; prerender **14/14** routes.
+- **Nav kept inside the wrap.** `Extend`/`Enterprise`/`About` moved out of the inline desktop header (a `header: false` flag) into the burger sidebar at every viewport.
+- **Docs parity.** New `docs/start.md`, `docs/extend.md`, `docs/enterprise.md`; `docs/_data/nav.yml` and `docs/index.md` crosslinks updated.
+- **Receipts:** web build 14/14 routes, prestruct audit **0 failures / 0 warnings**; `npm run check` green (FRONTMATTER 19 pages, DOCS LINKS, DOCS STYLE, JEKYLL FILTERS, LANGUAGE, ACTION PINS 14 refs/5 workflows, PRESTRUCT PINS, LEGAL PAGES, refusal matrix 18 rows, lint:packs, conform:packs 9/9, conform:claims 9/9).
+- **No version bump** (Unreleased; the release ladder is tag-driven).

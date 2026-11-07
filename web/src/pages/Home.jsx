@@ -24,21 +24,41 @@ export default function Home() {
             <span className="accent">Load it in nine hosts.</span>
           </h1>
           <p className="lede">
-            packstruct is a tiny, frozen spec for one directory - a{' '}
-            <code>packs/</code> folder full of <code>pack.json</code> manifests
-            and the entry modules they name. It is the contract every host in
-            the struct family already agrees on, written down once. A bad
-            manifest is refused instantly and by name, so a pack that cannot
-            load says why before anything runs.
+            A pack is a folder with a tiny label file. packstruct is the one
+            written rule for what that label must say - so every tool agrees,
+            and a mistake is caught in a second instead of an hour. This page is
+            the tour; pick your door below and it starts where you are.
           </p>
           <div className="cta-row">
-            <Link className="btn btn-primary" to="/showcase">See who loads it</Link>
-            <Link className="btn btn-ghost" to="/spec">Read the spec</Link>
-            <Link className="btn btn-ghost" to="/lint">Lint your pack.json</Link>
-            <a className="btn btn-ghost" href="https://docs.creadev.org/packstruct/">Full docs</a>
-            <a className="btn btn-ghost" href="https://www.npmjs.com/package/packstruct" target="_blank" rel="noreferrer">npm package</a>
+            <Link className="btn btn-primary" to="/start">Start here - new to this?</Link>
+            <Link className="btn btn-ghost" to="/extend">I want to build on it</Link>
+            <Link className="btn btn-ghost" to="/enterprise">I run a fleet</Link>
           </div>
           <pre className="code"><span className="dim"># 30 seconds: lint a packs directory against SPEC v1</span>{'\n'}<span className="kw">npx</span> packstruct lint packs/{'\n'}{'\n'}<span className="dim"># the directory contract - the whole surface</span>{'\n'}packs/{'\n'}  public/{'\n'}    &lt;pack-name&gt;/{'\n'}      pack.json      <span className="dim"># REQUIRED: schemaVersion 1, name matches dir, entry exists</span>{'\n'}      &lt;entry&gt;        <span className="dim"># REQUIRED: the file pack.json "entry" names</span>{'\n\n'}<span className="ok">ok</span>  tg/data-boundary       <span className="dim">v1.0.0 - entry ships, name matches its dir</span>{'\n'}<span className="bad">ERR</span> tg/broken-ref          <span className="dim">entry "index.js" does not exist - instant nameable refusal (crashtest#16)</span></pre>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="wrap">
+          <h2>Pick your door</h2>
+          <p className="sub">Three audiences, three pages. Each assumes only what it says it does.</p>
+          <div className="grid">
+            <div className="card door-card">
+              <h3><span className="glyph">1</span>New here?</h3>
+              <p>You have a folder, you want to know what a pack is and how to check it. No jargon, five minutes.</p>
+              <Link className="btn btn-ghost" to="/start">Start here →</Link>
+            </div>
+            <div className="card door-card">
+              <h3><span className="glyph">2</span>Building on it?</h3>
+              <p>Write a pack a host will run, point a host at your own packs, add a profile, prove it with the harness.</p>
+              <Link className="btn btn-ghost" to="/extend">Extend packstruct →</Link>
+            </div>
+            <div className="card door-card">
+              <h3><span className="glyph">3</span>Running a fleet?</h3>
+              <p>One grammar across many repos: exact-pin receipts, conformance as a CI gate, governance as packs.</p>
+              <Link className="btn btn-ghost" to="/enterprise">Fleet & enterprise →</Link>
+            </div>
+          </div>
         </div>
       </section>
 
