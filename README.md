@@ -51,8 +51,13 @@ Every consuming host keeps a receipt row here: engine, the exact source sha the 
 |---|---|---|---|
 | crashtest | `crashtest@1.3.0` @ `8738287` (npm tag v1.3.0) | 9/9 packs clean shallow + deep, 47 ids, 66 library ids, zero collisions (`labs/corpus-receipt.md`) | 2026-11-06 |
 | crashtest (dogfood) | `crashtest@1.3.0` @ `8738287` | `crashtest run`: 56/56 catalog findings REFUSED (4 from `packstruct-lint-shapes`), 0 EXPLOITED, 0 BOUNDED (`labs/crashledger.json`) | 2026-11-06 |
-| eyestruct | `eyestruct@1.0.0` @ `4b979c0` (tag v1.0.0) | 5/5 packs (eye-adapter, eye-bundle, eye-ci-gate, eye-shapes, eye-text-leg) clean shallow + deep through the packstruct@1 lane | 2026-10-29 |
-| poststruct | staging in flight | row reserved - activates when it settles (honest absence, not padding) | - |
+| eyestruct | `eyestruct@1.1.0` | 6/6 packs (eye-adapter, eye-bundle, eye-ci-gate, eye-shapes, eye-spa-dist, eye-text-leg) clean shallow + deep through the packstruct@1 lane | 2026-11-07 |
+| poststruct | `poststruct@1.1.0` | 12/12 packs clean shallow + deep (11 baked-site shape packs + `eyes-reference`) | 2026-11-07 |
+| govstruct | `govstruct@1.1.0` | 14/14 check packs clean shallow + deep, 42 ids | 2026-11-07 |
+| monoforge | `monoforge@1.1.0` | `forge-shapes` clean shallow + deep, 6 ids; carries `implements: packstruct@1` | 2026-11-07 |
+| vant | `vant@0.8.6` | 24/24 packs clean shallow + deep, 290 ids (one entry-import violation in `vant-carriers`, a vant-side path, not a spec issue) | 2026-11-07 |
+| gistory | `gistory@1.1.0` | `sync-relay-shapes` clean shallow + deep, 15 ids | 2026-11-07 |
+| prestruct | `prestruct@1.3.0` | `prestruct-proxy` clean shallow + deep, 6 ids | 2026-11-07 |
 
 The registry is the natural home for companion-pin bump receipts (SPEC v1.1 section 8 row 5) and the checkable form of a traveler's onboarding (SPEC v1.1 section 10): a host exists when it holds a row, not when a session transcript mentions it. A non-additive schema event must update the affected rows (SPEC v1.1 section 11).
 

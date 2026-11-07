@@ -37,11 +37,13 @@ export default function Why() {
         <div className="wrap">
           <h2>The problem: a pack shape per host</h2>
           <p className="sub">
-            crashtest loads scenario packs; poststruct loads check packs; more
-            hosts are queued. If each one defines its own manifest fields, its
-            own entry rules, and its own refusals, then "a pack" means nothing
-            portable. The same directory loads here and fails there, and the
-            failure is a stack trace instead of a sentence.
+            Nine hosts load packs today - crashtest, vant, gistory, and
+            prestruct on the scenario profile; poststruct, govstruct,
+            eyestruct, and monoforge on the check profile. If each one defined
+            its own manifest fields, its own entry rules, and its own refusals,
+            then "a pack" would mean nothing portable. The same directory would
+            load here and fail there, and the failure would be a stack trace
+            instead of a sentence.
           </p>
         </div>
       </section>
@@ -75,6 +77,7 @@ export default function Why() {
             reaches a runner.
           </p>
           <p style={{ marginTop: 22 }}>
+            <Link to="/showcase" className="btn btn-ghost">See the hosts</Link>
             <Link to="/what" className="btn btn-ghost">Next: what packstruct is</Link>
             <a className="btn btn-ghost" href={`${DOCS}/`}>Read the docs</a>
           </p>
