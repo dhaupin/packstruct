@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import usePageMeta from '../hooks/usePageMeta.js'
+import { HOSTS, DOGFOOD, TOTAL_HOSTS, TOTAL_PACKS, hostsByProfile } from '../hosts.js'
 
 const SITE_URL = 'https://packstruct.creadev.org'
 const DOCS = 'https://docs.creadev.org/packstruct'
@@ -11,8 +12,10 @@ export default function Packs() {
     path: '/packs',
     title: 'Packs | Packstruct',
     description:
-      'The live pack catalog: the packstruct-lint-shapes dogfood pack and the family hosts that load the spec - crashtest (scenario), poststruct, eyestruct, govstruct (check), and monoforge (queued per the rule of three).',
+      'The live pack catalog: the packstruct-lint-shapes dogfood pack and the nine hosts that load the spec - crashtest and vant (scenario), poststruct, govstruct, eyestruct, monoforge (check), gistory, prestruct.',
   })
+  const scenario = hostsByProfile('scenario')
+  const check = hostsByProfile('check')
   return (
     <>
       <section className="hero">
@@ -25,13 +28,15 @@ export default function Packs() {
             A pack is a directory under <code>packs/public/&lt;name&gt;/</code>
             carrying a frozen <code>pack.json</code> and the entry it names.
             This page is the catalog of what actually ships: the dogfood pack
-            that attacks the linter, and the family hosts that load the same
-            SPEC v1 grammar.
+            that attacks the linter, and the {TOTAL_HOSTS} hosts that load the
+            same SPEC v1 grammar. Every count is a receipt from that host's own
+            tree. For crosslinks to each repo and site, see the{' '}
+            <Link to="/showcase">showcase</Link>.
           </p>
           <div className="cta-row">
             <Link className="btn btn-primary" to="/spec">Read the spec</Link>
             <Link className="btn btn-ghost" to="/lint">Lint a pack.json</Link>
-            <a className="btn btn-ghost" href={`${DOCS}/conformance`}>Conformance harness</a>
+            <Link className="btn btn-ghost" to="/showcase">The showcase</Link>
             <a className="btn btn-ghost" href="https://github.com/dhaupin/packstruct">GitHub</a>
           </div>
         </div>
@@ -69,7 +74,7 @@ export default function Packs() {
 
       <section className="section">
         <div className="wrap">
-          <h2>The family hosts</h2>
+          <h2>The hosts, by profile</h2>
           <p className="sub">
             One manifest surface, two execution profiles. A host declares which
             profile it loads; the manifest never forks. Every host below lints
@@ -78,17 +83,43 @@ export default function Packs() {
           <div className="table-wrap">
             <table className="spec-table">
               <thead>
-                <tr><th>host</th><th>profile</th><th>packs it loads</th></tr>
+                <tr><th>host</th><th>profile</th><th>packs</th><th>ids</th><th>what it loads packs for</th></tr>
               </thead>
               <tbody>
-                <tr><td className="mod">crashtest</td><td>scenario</td><td className="why">hostile scenarios against a transport, isolated; the dogfood double every member's <code>crashtest.config.js</code> drives</td></tr>
-                <tr><td className="mod">poststruct</td><td>check</td><td className="why">pure-reading verifiers over files on disk: the eleven baked-site shape packs plus <code>eyes-reference</code></td></tr>
-                <tr><td className="mod">eyestruct</td><td>check</td><td className="why">the capture and canon lanes (<code>eye-shapes</code>, <code>eye-text-leg</code>, <code>eye-ci-gate</code>), conformance-checked through packstruct 1.0.0</td></tr>
-                <tr><td className="mod">govstruct</td><td>check</td><td className="why">the source-consistency profile: ten check packs over its own tree, plus a hostile member-block lane over <code>govstruct lint</code></td></tr>
-                <tr><td className="mod">monoforge</td><td>queued</td><td className="why">none yet, per the factory's rule of three - a pack lands when a second real provider or a first real client pack appears</td></tr>
+                <tr>
+                  <td className="mod">packstruct <em>(dogfood)</em></td>
+                  <td>scenario</td>
+                  <td>{DOGFOOD.packs}</td>
+                  <td>{DOGFOOD.ids}</td>
+                  <td className="why">{DOGFOOD.blurb}</td>
+                </tr>
+                {scenario.map((host) => (
+                  <tr key={host.id}>
+                    <td className="mod">{host.name}</td>
+                    <td>scenario</td>
+                    <td>{host.packs}</td>
+                    <td>{host.ids || '-'}</td>
+                    <td className="why">{host.blurb}</td>
+                  </tr>
+                ))}
+                {check.map((host) => (
+                  <tr key={host.id}>
+                    <td className="mod">{host.name}</td>
+                    <td>check</td>
+                    <td>{host.packs}</td>
+                    <td>{host.ids || '-'}</td>
+                    <td className="why">{host.blurb}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
+          <p className="field-report">
+            <strong>{TOTAL_PACKS} packs</strong> across {TOTAL_HOSTS} hosts plus
+            the dogfood pack, all linted clean. <code>ids</code> is the declared-id
+            census from <code>lint --deep</code>; <code>-</code> means the packs
+            carry file checks rather than named ids.
+          </p>
         </div>
       </section>
 
@@ -103,12 +134,13 @@ export default function Packs() {
           </p>
           <pre className="code"><span className="dim"># manifest + entry + id-census grammar</span>{'\n'}<span className="kw">npx</span> packstruct lint packs/ <span className="kw">--deep</span>{'\n\n'}<span className="dim"># machine-readable verdict</span>{'\n'}<span className="kw">npx</span> packstruct lint packs/ <span className="kw">--json</span>{'\n\n'}<span className="dim"># verify a host loader honors the spec</span>{'\n'}<span className="kw">npx</span> packstruct audit-conformance .</pre>
           <p className="field-report">
-            <code>packstruct@1.0.0</code> is on npm; the in-tree release is
-            <code> 1.1.0</code>. The conformance harness ships with it, and the
-            dogfood pack above is the proof-of-work.
+            <code>packstruct@{DOGFOOD.pin}</code> is on npm; the conformance
+            harness ships with it, and the dogfood pack above is the
+            proof-of-work.
           </p>
           <div className="cta-row">
             <a className="btn btn-primary" href="https://www.npmjs.com/package/packstruct" target="_blank" rel="noreferrer">npm package</a>
+            <Link className="btn btn-ghost" to="/showcase">See the hosts</Link>
             <Link className="btn btn-ghost" to="/status">See the family verdicts</Link>
             <a className="btn btn-ghost" href={`${DOCS}/conformance`}>Conformance docs</a>
           </div>

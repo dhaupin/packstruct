@@ -12,6 +12,7 @@ import About from './pages/About.jsx'
 import Packs from './pages/Packs.jsx'
 import Spec from './pages/Spec.jsx'
 import Lint from './pages/Lint.jsx'
+import Showcase from './pages/Showcase.jsx'
 import Terms from './pages/Terms.jsx'
 import Privacy from './pages/Privacy.jsx'
 import Status from './pages/Status.jsx'
@@ -41,6 +42,7 @@ export default function AppLayout() {
           <Route path="/packs" element={<Packs />} />
           <Route path="/spec" element={<Spec />} />
           <Route path="/lint" element={<Lint />} />
+          <Route path="/showcase" element={<Showcase />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/status" element={<Status />} />

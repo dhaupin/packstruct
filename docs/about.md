@@ -23,7 +23,7 @@ The spec does not version-bump without a migration note: a major change to the f
 
 ## The struct family
 
-packstruct anchors the family's pack grammar. The hosts that load it are [crashtest](https://github.com/dhaupin/crashtest) (scenario profile) and [poststruct](https://github.com/dhaupin/poststruct) (check profile), with more queued. The rest of the family: [eyestruct](https://github.com/dhaupin/eyestruct), [govstruct](https://github.com/dhaupin/govstruct), and [monoforge](https://github.com/dhaupin/monoforge).
+packstruct anchors the family's pack grammar. The hosts that load it are [crashtest](https://github.com/dhaupin/crashtest) and [vant](https://github.com/dhaupin/vant) (scenario), and [poststruct](https://github.com/dhaupin/poststruct), [govstruct](https://github.com/dhaupin/govstruct), [eyestruct](https://github.com/dhaupin/eyestruct), and [monoforge](https://github.com/dhaupin/monoforge) (check), with [gistory](https://github.com/dhaupin/gistory) and [prestruct](https://github.com/dhaupin/prestruct) also on the scenario profile. The wider family adds [freestruct](https://github.com/dhaupin/freestruct) (the post-build SEO engine), [coreforge](https://github.com/dhaupin/coreforge) (the site shell), and [railyard](https://github.com/dhaupin/railyard) (the forge yard that composes them). See the [Showcase]({{ '/showcase' | relative_url }}) for the full board.
 
 ## License and provenance
 

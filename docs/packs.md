@@ -34,13 +34,18 @@ A new EXPLOITED verdict, or a regression of any recorded row, fails CI.
 
 One manifest surface, two execution profiles. A host declares which profile it loads; the manifest never forks. Every host below lints its packs through the same `packstruct lint --deep`.
 
-| Host | Profile | Packs it loads |
-|---|---|---|
-| crashtest | scenario | Hostile scenarios against a transport, isolated; the dogfood double every member's `crashtest.config.js` drives. |
-| poststruct | check | Pure-reading verifiers over files on disk: eleven baked-site shape packs plus `eyes-reference`. |
-| eyestruct | check | The capture and canon lanes (`eye-shapes`, `eye-text-leg`, `eye-ci-gate`), conformance-checked through packstruct 1.0.0. |
-| govstruct | check | The source-consistency profile: ten check packs over its own tree, plus a hostile member-block lane over `govstruct lint`. |
-| monoforge | queued | None yet, per the factory's rule of three. A pack lands when a second real provider or a first real client pack appears. |
+| Host | Profile | Packs | What it loads packs for |
+|---|---|---|---|
+| crashtest | scenario | 9 | Hostile scenarios against a transport, isolated; the dogfood double every member's `crashtest.config.js` drives. |
+| vant | scenario | 24 | The agent OS measures its own defenses: kernel, mcp, relay, brain, and walls, 290 declared ids. |
+| gistory | scenario | 1 | The chain-relay dialect pack attacks the push/pull sync surface in-process. |
+| prestruct | scenario | 1 | prestruct-proxy attacks the HTTP render proxy pair (VPS + Worker) over the real wire. |
+| poststruct | check | 12 | Pure-reading verifiers over files on disk: one shape pack per SSG, plus `eyes-reference`. |
+| govstruct | check | 14 | The source-consistency profile: check packs over its own tree, plus a hostile member-block lane over `govstruct lint`. |
+| eyestruct | check | 6 | The capture and canon lanes (`eye-shapes`, `eye-text-leg`, `eye-ci-gate`, `eye-adapter`, `eye-bundle`, `eye-spa-dist`). |
+| monoforge | check | 1 | `forge-shapes` verifies a stamped tree ships its receipt and holds the truth-slot law. |
+
+See the [Showcase]({{ '/showcase' | relative_url }}) page for the full crosslink board, including the dogfood pack that attacks the linter itself.
 
 ## Running a packdir
 

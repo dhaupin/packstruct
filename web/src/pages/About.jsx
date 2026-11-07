@@ -56,14 +56,23 @@ export default function About() {
           <p className="sub">
             packstruct anchors the family's pack grammar. The hosts that load
             it are <a href="https://github.com/dhaupin/crashtest">crashtest</a>{' '}
-            (scenario profile) and{' '}
-            <a href="https://github.com/dhaupin/poststruct">poststruct</a>{' '}
-            (check profile), with more queued. The rest of the family:{' '}
-            <a href="https://github.com/dhaupin/eyestruct">eyestruct</a>,{' '}
-            <a href="https://github.com/dhaupin/govstruct">govstruct</a>, and{' '}
-            <a href="https://github.com/dhaupin/monoforge">monoforge</a>.
+            and <a href="https://github.com/dhaupin/vant">vant</a> (scenario),
+            and <a href="https://github.com/dhaupin/poststruct">poststruct</a>,{' '}
+            <a href="https://github.com/dhaupin/govstruct">govstruct</a>,{' '}
+            <a href="https://github.com/dhaupin/eyestruct">eyestruct</a>, and{' '}
+            <a href="https://github.com/dhaupin/monoforge">monoforge</a> (check),
+            with <a href="https://github.com/dhaupin/gistory">gistory</a> and{' '}
+            <a href="https://github.com/dhaupin/prestruct">prestruct</a> also on
+            the scenario profile. The wider family adds{' '}
+            <a href="https://github.com/dhaupin/freestruct">freestruct</a> (the
+            post-build SEO engine),{' '}
+            <a href="https://github.com/dhaupin/coreforge">coreforge</a> (the
+            site shell), and{' '}
+            <a href="https://github.com/dhaupin/railyard">railyard</a> (the
+            forge yard that composes them).
           </p>
           <p style={{ marginTop: 22 }}>
+            <Link to="/showcase" className="btn btn-ghost">See the full showcase</Link>
             <Link to="/packs" className="btn btn-ghost">See the pack catalog</Link>
             <Link to="/status" className="btn btn-ghost">Family status</Link>
           </p>

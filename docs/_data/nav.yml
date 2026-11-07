@@ -17,6 +17,8 @@
     url: /packstruct/linter
   - title: Entry Profiles
     url: /packstruct/profiles
+  - title: Showcase
+    url: /packstruct/showcase
   - title: Conformance Harness
     url: /packstruct/conformance
   - title: Release Posts

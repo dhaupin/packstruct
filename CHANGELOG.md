@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- **The showcase page, and a reworked pack catalog.** The site now explains packstruct in one breath (a spec, a linter, a harness) and then shows the proof: a new `/showcase` page (and a matching docs page) lists every host that ships a `packs/` directory - crashtest, vant, gistory, prestruct on the scenario profile; poststruct, govstruct, eyestruct, monoforge on the check profile; plus packstruct's own dogfood pack - with crosslinks to each repo and site. Every count is a receipt: the numbers came from running `packstruct lint <repo>/packs --deep` over each host's live tree, and every pin was read from that repo's `package.json`. The hosts now live in one pure-data registry (`web/src/hosts.js`), so the Home, Packs, and Showcase pages render from a single source and cannot drift. The old `/packs` page listed five hosts and called monoforge "queued"; it now lists all nine with their real pack counts (69 packs total).
+
 ### Changed
 
 - **The reciprocal corpus lane and the dogfood re-cut at crashtest v1.3.0.** `.github/workflows/corpus.yml` re-pins its audited clone to `ref: v1.3.0` (`8738287`) and `.github/workflows/crashtest.yml` installs `crashtest@1.3.0`. Re-running the lanes against the new tree: the corpus moved from 8 to 9 packs and 44 to 47 pack ids, and the built-in library from 63 to 66 ids - zero collisions, exit 0 at every depth; the dogfood tally moved from 53/53 to 56/56 REFUSED, 0 EXPLOITED, 0 BOUNDED. The README registry rows and `labs/corpus-receipt.md` carry the new numbers (bump pin + receipt together).
@@ -15,7 +19,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 
 - **The release ladder's `verify` job no longer races `release`.** `verify` now declares `needs: [publish, release]`, so it waits for the GH release object and its attached tarball before judging them. A bare `needs: publish` ran `verify` CONCURRENTLY with `release`: on a fresh cut the registry read replicas had not settled and the asset was not yet attached, so a publish that in fact succeeded failed red and needed a manual re-run (the packstruct 1.1.0 first cut). `verify` still stands alone in verify-only mode (`publish` and `release` both skipped). The propagation poll budgets also widened: the release-attach poll 120s -> 300s, and the registry poll in `scripts/verify-release.cjs` 120s -> 360s. `tests/release-verify.test.cjs` pins the dependency so a regression fails by name.
-
 
 ## [1.1.0] - 2026-10-29
 

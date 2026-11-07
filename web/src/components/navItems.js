@@ -16,6 +16,7 @@ export const NAV_ITEMS = [
   { label: 'Packs', to: '/packs', group: 'site' },
   { label: 'Spec', to: '/spec', group: 'site' },
   { label: 'Lint', to: '/lint', group: 'site' },
+  { label: 'Showcase', to: '/showcase', group: 'site' },
   // outbound surfaces
   { label: 'Docs', href: 'https://docs.creadev.org/packstruct/', group: 'out' },
   { label: 'GitHub', href: 'https://github.com/dhaupin/packstruct', group: 'out' },

@@ -76,6 +76,15 @@ export default {
       },
     },
     {
+      path: '/showcase',
+      priority: '0.8',
+      changefreq: 'weekly',
+      meta: {
+        title: 'Showcase | Packstruct',
+        description: 'The hosts that speak the packstruct grammar: crashtest, poststruct, govstruct, eyestruct, vant, gistory, monoforge, and prestruct - every pack count a receipt from the host\'s own packs/public/ directory.',
+      },
+    },
+    {
       path: '/status',
       priority: '0.5',
       changefreq: 'weekly',

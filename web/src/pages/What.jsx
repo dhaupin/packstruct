@@ -53,11 +53,12 @@ export default function What() {
           <h2>The profiles</h2>
           <p className="sub">
             A pack declares what it is for through a profile. The{' '}
-            <strong>scenario</strong> profile is what crashtest loads: a module
-            that returns attack verdicts. The <strong>check</strong> profile is
-            what poststruct loads: a module that returns pass/fail findings.
-            One grammar, two declared shapes, so a host knows what a pack will
-            do before it runs it.
+            <strong>scenario</strong> profile is what crashtest, vant, gistory,
+            and prestruct load: a module that returns attack verdicts. The{' '}
+            <strong>check</strong> profile is what poststruct, govstruct,
+            eyestruct, and monoforge load: a module that returns pass/fail
+            findings. One grammar, two declared shapes, so a host knows what a
+            pack will do before it runs it.
           </p>
         </div>
       </section>
@@ -73,6 +74,7 @@ export default function What() {
           </p>
           <pre className="code"><span className="cm"># lint a /packs dir against SPEC v1</span>{'\n'}<span className="k">npx</span> packstruct lint packs --deep{'\n'}{'\n'}<span className="cm"># prove a host loader honors every spec case</span>{'\n'}<span className="k">npx</span> packstruct audit-conformance . --loader "node loader.mjs {'{packs}'}"</pre>
           <p style={{ marginTop: 22 }}>
+            <Link to="/showcase" className="btn btn-ghost">See who loads it</Link>
             <Link to="/about" className="btn btn-ghost">Next: about the project</Link>
             <a className="btn btn-ghost" href={`${DOCS}/conformance`}>Conformance harness docs</a>
           </p>
