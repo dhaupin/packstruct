@@ -178,6 +178,9 @@ html[data-theme="light"] .theme-switch .icon-moon { display: block; }
 /* --- sections / cards --- */
 .section { padding: 34px 0; }
 .section h2 { font-size: 22px; margin: 0 0 6px; }
+/* A page-level <h1> inside a .section (spec/lint/status use one for SEO h1
+   hygiene instead of the hero) reads as the page title, a touch larger. */
+.section > .wrap > h1 { font-size: 27px; margin: 0 0 6px; letter-spacing: -0.01em; }
 .section .sub { color: var(--ink-soft); margin: 0 0 20px; font-size: 14px; }
 .section .sub a, .legal a { color: var(--accent); }
 
@@ -282,6 +285,24 @@ table.spec-table code { color: var(--ink); }
 .host-stats code { color: var(--accent); font-size: 11.5px; }
 .host-links { display: flex; gap: 14px; font-size: 13px; }
 .host-links a { color: var(--accent); font-weight: 600; }
+
+/* --- audience doors (Home): the three-tier entry cards --- */
+.door-card { display: flex; flex-direction: column; gap: 10px; }
+.door-card p { flex: 1 1 auto; }
+.door-card .btn { align-self: flex-start; }
+
+/* --- inline "learn more" link (vant-shaped): quiet, accent, arrowed --- */
+.learn-more { color: var(--accent); font-size: 13px; font-weight: 600; text-decoration: none; }
+.learn-more:hover { text-decoration: underline; }
+
+/* --- callout: a plain-language emphasis block (Start page) --- */
+.callout {
+  background: var(--raised); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+  border-radius: 8px; padding: 14px 18px; margin: 18px 0;
+}
+.callout p { margin: 0; color: var(--ink-soft); font-size: 13.5px; }
+.callout strong { color: var(--ink); }
+.callout code { color: var(--accent); }
 
 /* --- lint demo (browser island) --- */
 pre-island { display: block; }

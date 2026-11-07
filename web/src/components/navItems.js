@@ -8,11 +8,17 @@
  * exists; it never arrived early).
  */
 export const NAV_ITEMS = [
-  // primary app routes
+  // primary app routes. `header: false` keeps an item out of the inline
+  // desktop header (which has a fixed 960px wrap) while leaving it in the
+  // burger sidebar at every viewport, the footer, and page crosslinks - so
+  // the header never overflows and nothing becomes unreachable.
   { label: 'Home', to: '/', end: true, group: 'site' },
+  { label: 'Start', to: '/start', group: 'site' },
   { label: 'Why', to: '/why', group: 'site' },
   { label: 'What', to: '/what', group: 'site' },
-  { label: 'About', to: '/about', group: 'site' },
+  { label: 'Extend', to: '/extend', group: 'site', header: false },
+  { label: 'Enterprise', to: '/enterprise', group: 'site', header: false },
+  { label: 'About', to: '/about', group: 'site', header: false },
   { label: 'Packs', to: '/packs', group: 'site' },
   { label: 'Spec', to: '/spec', group: 'site' },
   { label: 'Lint', to: '/lint', group: 'site' },

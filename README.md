@@ -2,6 +2,8 @@
 
 The shared `/packs` spec. **One manifest + entry + lifecycle contract, many hosts**, currently [crashtest](https://github.com/dhaupin/crashtest) (scenario profile) and [poststruct](https://github.com/dhaupin/poststruct) (check profile).
 
+**New here?** The site speaks to three audiences: [start here](https://packstruct.creadev.org/start) (absolute beginner - what a pack is, in plain words), [extend](https://packstruct.creadev.org/extend) (hobbyist - write a pack a host will run), and [fleet & enterprise](https://packstruct.creadev.org/enterprise) (many repos, conformance as a CI gate). The [showcase](https://packstruct.creadev.org/showcase) lists every host that ships a `packs/` directory.
+
 This repo ships the normative spec ([spec/SPEC.md](spec/SPEC.md)) plus a zero-dependency lint CLI that kills the worst pack-authoring class at author time: a manifest declaring an entry file that doesn't actually ship (crashtest#16). Every fleet repo uses the same core check.
 
 ## The directory contract

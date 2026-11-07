@@ -11,7 +11,7 @@ import ThemeSwitch from './ThemeSwitch.jsx'
 
 // The GitHub icon replaces the header's GitHub text link (the footer still
 // carries the text link); Docs stays as a labeled link in the menu.
-const HEADER_LINKS = NAV_ITEMS.filter(i => i.label !== 'GitHub')
+const HEADER_LINKS = NAV_ITEMS.filter(i => i.label !== 'GitHub' && i.header !== false)
 
 export default function Nav() {
   const [open, setOpen] = useState(false)
