@@ -12,7 +12,7 @@ version: 1.0.0
 ---
 # packstruct
 
-The shared spec for `/packs` directories. One small normative document plus a zero-dependency lint CLI, so **crashtest** (scenario profile) and **poststruct** (check profile) ship the same pack system from their own repos.
+The shared spec for `/packs` directories. One small normative document plus a zero-dependency lint CLI, so **crashtest** (scenario profile), **poststruct** (check profile), and the memstruct-bound **memory** (vant) and **sync** (gistory) profiles ship the same pack system from their own repos.
 
 The branded landing lives at <https://packstruct.creadev.org/>; these docs carry the normative detail.
 

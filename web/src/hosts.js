@@ -18,7 +18,7 @@
  * Host row shape:
  *   id        stable slug
  *   name      display name
- *   profile   the entry profile it loads: 'scenario' | 'check' | 'dogfood'
+ *   profile   the entry profile it loads: 'scenario' | 'check' | 'memory' | 'sync' | 'dogfood'
  *   packs     number of packs under its packs/public/ (lint-confirmed)
  *   ids       declared ids censused by lint --deep (0 = shape packs, no ids)
  *   pin       the packstruct version it carries (package.json devDependency)
@@ -27,7 +27,7 @@
  *   site      the live site (https), when one exists
  */
 
-// The two entry profiles, declared once. A host picks one; the manifest
+// The entry profiles, declared once. A host picks one; the manifest
 // never forks. See spec/SPEC.md section 3.
 export const PROFILES = {
   scenario: {
@@ -39,6 +39,16 @@ export const PROFILES = {
     label: 'check',
     host: 'poststruct',
     what: 'A module that returns pass/fail findings - declarative, pure-reading verifiers over files on disk. No transport, no network by default.',
+  },
+  memory: {
+    label: 'memory',
+    host: 'vant',
+    what: 'A module that carries a durable memory store - records under the host-owned memstruct grammar (vant\'s markdown brain). Declared; the memory tier.',
+  },
+  sync: {
+    label: 'sync',
+    host: 'gistory',
+    what: 'A module that reconciles two memory stores - a pure merge under the host-owned memstruct contract (gistory\'s merge). Declared; the replicated tier.',
   },
 }
 

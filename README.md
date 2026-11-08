@@ -1,6 +1,6 @@
 # packstruct 1.1.0
 
-The shared `/packs` spec. **One manifest + entry + lifecycle contract, many hosts**, currently [crashtest](https://github.com/dhaupin/crashtest) (scenario profile) and [poststruct](https://github.com/dhaupin/poststruct) (check profile).
+The shared `/packs` spec. **One manifest + entry + lifecycle contract, many hosts**: [crashtest](https://github.com/dhaupin/crashtest) (scenario), [poststruct](https://github.com/dhaupin/poststruct) (check), plus two profiles bound to the host-owned [memstruct](https://github.com/dhaupin/memstruct) standard - [`memory`](profiles/memory.md) (vant's markdown store) and [`sync`](profiles/sync.md) (gistory's merge).
 
 **New here?** The site speaks to three audiences: [start here](https://packstruct.creadev.org/start) (absolute beginner - what a pack is, in plain words), [extend](https://packstruct.creadev.org/extend) (hobbyist - write a pack a host will run), and [fleet & enterprise](https://packstruct.creadev.org/enterprise) (many repos, conformance as a CI gate). The [showcase](https://packstruct.creadev.org/showcase) lists every host that ships a `packs/` directory.
 
@@ -39,7 +39,7 @@ The linter validates `schemaVersion === 1`, kebab-case name matching its directo
 
 ## Profiles
 
-The two entry profiles are declared once, with the spec (one address per the crashtest#19 ruling): [profiles/scenario.md](profiles/scenario.md) (crashtest - links to the host-owned contract instead of copying it) and [profiles/check.md](profiles/check.md) (poststruct).
+The entry profiles are declared once, with the spec (one address per the crashtest#19 ruling): [profiles/scenario.md](profiles/scenario.md) (crashtest - links to the host-owned contract instead of copying it), [profiles/check.md](profiles/check.md) (poststruct), and the two memstruct-bound profiles [profiles/memory.md](profiles/memory.md) (vant's store) and [profiles/sync.md](profiles/sync.md) (gistory's merge). The `memory`/`sync` pages LINK to [memstruct](https://github.com/dhaupin/memstruct) for the record grammar and the merge contract, so the standard lives in one place.
 
 ## How the schema version was chosen
 

@@ -278,6 +278,8 @@ table.spec-table code { color: var(--ink); }
 }
 .host-badge-scenario { color: var(--err); border-color: var(--err); }
 .host-badge-check { color: var(--moss); border-color: var(--moss); }
+.host-badge-memory { color: var(--accent); border-color: var(--accent); }
+.host-badge-sync { color: var(--ink-soft); border-color: var(--ink-soft); }
 .host-badge-role { color: var(--accent); border-color: var(--accent); }
 .host-blurb { margin: 0; color: var(--ink-soft); font-size: 13.5px; flex: 1 1 auto; }
 .host-stats { display: flex; flex-wrap: wrap; gap: 14px; color: var(--ink-soft); font-size: 12.5px; }
