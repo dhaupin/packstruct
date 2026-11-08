@@ -1,6 +1,6 @@
 ---
 title: "The pack catalog"
-description: "What ships in packs/public/, the two entry profiles, and the family hosts that load the spec - the live companion to the normative SPEC v1."
+description: "What ships in packs/public/, the entry profiles (scenario, check, and the memstruct-bound memory and sync), and the family hosts that load the spec - the live companion to the normative SPEC v1."
 author: "Creadev.org"
 lang: "en"
 date: 2026-10-29

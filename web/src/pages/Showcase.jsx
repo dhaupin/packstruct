@@ -104,10 +104,10 @@ export default function Showcase() {
 
       <section className="section">
         <div className="wrap">
-          <h2>The two profiles</h2>
+          <h2>The entry profiles</h2>
           <p className="sub">
             Every pack declares what it is for through a profile the host owns.
-            One grammar, two declared shapes.
+            One grammar, four declared shapes.
           </p>
           <div className="grid">
             <div className="card">
@@ -117,6 +117,14 @@ export default function Showcase() {
             <div className="card">
               <h3><ProfileBadge profile="check" /> check</h3>
               <p>{PROFILES.check.what} Loaded by {['poststruct', 'govstruct', 'eyestruct', 'monoforge'].join(', ')}.</p>
+            </div>
+            <div className="card">
+              <h3><ProfileBadge profile="memory" /> memory</h3>
+              <p>{PROFILES.memory.what} Bound to <a href="https://github.com/dhaupin/memstruct" target="_blank" rel="noreferrer">memstruct</a>; engine receipt is vant's store.</p>
+            </div>
+            <div className="card">
+              <h3><ProfileBadge profile="sync" /> sync</h3>
+              <p>{PROFILES.sync.what} Bound to <a href="https://github.com/dhaupin/memstruct" target="_blank" rel="noreferrer">memstruct</a>; engine receipt is gistory's merge.</p>
             </div>
           </div>
         </div>
