@@ -15,7 +15,7 @@ permalink: /packs
 
 The normative contract lives in [SPEC v1]({{ '/spec' | relative_url }}) and the [Entry profiles]({{ '/profiles' | relative_url }}) page. This page is the live catalog: what ships in `packs/public/`, and which family hosts load the same grammar. The branded version is at [packstruct.creadev.org/packs](https://packstruct.creadev.org/packs).
 
-A pack is a directory under `packs/public/<name>/` carrying a frozen `pack.json` (schemaVersion 1, kebab-case name matching the directory, a relative `entry` that must exist, optional `armedByKey`) plus the entry module it names.
+A pack is a directory under `packs/public/<name>/` carrying a frozen `pack.json` (schemaVersion 1, kebab-case name matching the directory, a relative `entry` that must exist, optional `armedByKey`, optional `requires`) plus the entry module it names.
 
 ## What ships here
 

@@ -56,6 +56,10 @@ The `--json` shape is a stable contract too: additive-only evolving (new keys ma
 
 A `WARNING` row never changes the exit code. The first warning shape is the `implements` key: when present it must be `packstruct@<major>` or an exact pin like `packstruct@1.0.0`, and a non-conforming shape is reported as `WARNING <pack> [implements]: ...` - never a refusal. Absence is the quiet default.
 
+## requires (SPEC v1.3.0)
+
+A pack MAY declare `requires` - the host-owned capability tokens it needs from its run root (`requires: ["wordpress"]`). The lint shape-checks it as a REFUSAL, not a warning: when present it must be an array of unique kebab-case tokens. The tokens themselves are host-owned vocabulary - the linter assigns them no meaning, it only refuses a malformed shape (`requires: "wordpress"`, `requires: [""]`, `requires: ["WordPress"]`, or a duplicate token). The skip-before-import behavior the key drives is the loader's, graded by the host's own suite (crashtest's `test/pack-relevance.test.js`).
+
 ## armedCoverage (SPEC v1.1, packstruct#27)
 
 A pack MAY declare `armedCoverage` - a relative path to its armed end-to-end row (the test that simulates the pack's target with its vocabulary armed). The lint CONFIRMS the declared file ships; a declaration naming a missing file refuses as `armed-coverage` (the vacuous-green class made loud). The lint never RUNS the row - runs are the host's business.

@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "name": "requires-pack",
+  "description": "SPEC v1.3 conformance pack - declares the host-owned requires key (capability tokens the pack needs from a run root). The accept case: the key is spec'd, so a conforming loader must NOT refuse a pack for carrying it.",
+  "version": "1.0.0",
+  "entry": "entry.js",
+  "requires": ["wordpress", "d1"]
+}

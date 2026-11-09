@@ -24,7 +24,7 @@ npx packstruct audit-conformance . --loader "node bin/load-packs.js {packs}" --c
 
 ## How it works
 
-The CLI ships **verdict-claiming fixture cases** (bundled in the npm package under `conformance/cases/`): one clean bundle, one bundle per [SPEC section 5](https://github.com/dhaupin/packstruct/blob/main/spec/SPEC.md) refusal norm (schemaVersion, kebab-case name, name/dir match, missing entry, empty description, non-dotted version), a name-collision pair, and one **`env-claims`** bundle carrying the host-owned `env` block (SPEC section 2 - an accept case: a pack that merely declares claims is conforming, so a loader must never refuse it). For each case the harness:
+The CLI ships **verdict-claiming fixture cases** (bundled in the npm package under `conformance/cases/`): one clean bundle, one bundle per [SPEC section 5](https://github.com/dhaupin/packstruct/blob/main/spec/SPEC.md) refusal norm (schemaVersion, kebab-case name, name/dir match, missing entry, empty description, non-dotted version), a name-collision pair, one **`env-claims`** bundle carrying the host-owned `env` block, and one **`requires-claims`** bundle carrying the host-owned `requires` relevance key (SPEC section 2, added v1.3.0) - both accept cases: a pack that merely declares claims or capabilities is conforming, so a loader must never refuse it. For each case the harness:
 
 1. materializes the bundle into a fresh scratch root under the system temp dir;
 2. `{packs}` in the loader template becomes that bundle root (shell-quoted for you), and the **host's own loader command** runs over it;
@@ -33,7 +33,7 @@ The CLI ships **verdict-claiming fixture cases** (bundled in the npm package und
 Any other outcome is an audit violation naming the case:
 
 ```text
-npx packstruct audit-conformance: 5/9 case(s) honored by the loader over .
+npx packstruct audit-conformance: 6/10 case(s) honored by the loader over .
   AUDIT schema-version [audit-refuse]: loader exit 0 (loader accepted) on case "schema-version" - the spec verdict is refuse
   AUDIT clean [audit-accept]: loader exit 1 on case "clean" - the spec verdict is accept
 ```
@@ -52,11 +52,13 @@ The harness reads the expected claims straight from the case's own manifest, can
 
 ## What it deliberately does not check
 
+The `requires` relevance key is spec'd (SPEC section 2/4, added v1.3.0) but the SKIP behavior it drives is host-owned: a run root's `provides` and `ignore` are the host's own vocabulary and channel, which the language-neutral harness cannot supply, so `audit-conformance` proves only that a conforming loader does not REFUSE a pack for declaring `requires` (the accept case). The skip itself is graded by the host's own suite - crashtest's `test/pack-relevance.test.js` is the engine receipt (dhaupin/crashtest#104).
+
 The harness refuses to grade host cargo beyond the SPEC's promises: it never judges refusal wording, never evaluates the loader's output format (beyond the one opt-in `--claims` echo line), and never runs loader code itself - the host command runs in a shell the host owns. If your loader needs more wiring than a one-line command template, wrap it in a shim script and point `--loader` at that.
 
 ## Receipt
 
-The house rule (receipt ships in the same commit): packstruct's own CLI is the first audited loader - `npm test` runs the 9 bundled cases through `node bin/cli.mjs lint {packs}` and asserts 9/9 honored, plus both failure directions (a loader that accepts everything honors only the 2 accept cases and fails the 7 refuse cases; a loader that refuses without naming the pack fails all 9). The `--claims` leg has its own both-ways pins: an env-echoing loader honors 9/9 with `--claims` (and 9/9 without it), an accept-everything loader is named for accepting-but-not-echoing, and a refuser is named for refusing the spec-allowed block (packstruct#71).
+The house rule (receipt ships in the same commit): packstruct's own CLI is the first audited loader - `npm test` runs the 10 bundled cases through `node bin/cli.mjs lint {packs}` and asserts 10/10 honored, plus both failure directions (a loader that accepts everything honors only the 3 accept cases and fails the 7 refuse cases; a loader that refuses without naming the pack fails all 10). The `--claims` leg has its own both-ways pins: an env-echoing loader honors 10/10 with `--claims` (and 10/10 without it), an accept-everything loader is named for accepting-but-not-echoing, and a refuser is named for refusing the spec-allowed block (packstruct#71). The `requires-claims` accept case is pinned the same way: the conforming loader accepts it, a refuser is named (SPEC v1.3.0).
 
 <div class="crosslinks">
 <p><strong>More in these docs:</strong>
