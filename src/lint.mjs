@@ -203,18 +203,30 @@ export function lintPacks(dir, opts = {}) {
   return { packsChecked, localChecked, violations, warnings }
 }
 
-// Ids ONE default export carries (generic over the two house profiles:
-// scenario `attacks[]/steps[]`, check `checks[]` - host shapes stay
-// host-owned, this never assigns shared meaning to them). Runs in-process
-// ONLY on inert data (JSON libraries); code modules are probed in a child
-// process via childProbe below - their top-level code must never run inside
-// the linter (it could exit() the CLI or spin it forever).
+// The default-export keys that carry declared ids, per house profile:
+// scenario `attacks[]/steps[]`, check `checks[]`, memory `records[]`
+// (memstruct@1 - a store's record ids). ONE source of truth for BOTH the
+// in-process probeIds walk and the child probe script below, so a new
+// profile's key is added once and the two enumerations can never drift.
+// They drifted once: `records` was missing from both, so a memory pack's
+// duplicate record ids and cross-pack record collisions were invisible to
+// --deep (the SPEC section 7 census promise). Fixed, and pinned by
+// test/fixtures/deep/bad/packs/public/memstruct-dup.
+const ID_BEARING_KEYS = ['attacks', 'checks', 'scenarios', 'records']
+
+// Ids ONE default export carries (generic over the house profiles:
+// scenario `attacks[]/steps[]`, check `checks[]`, memory `records[]` -
+// host shapes stay host-owned, this never assigns shared meaning to them).
+// Runs in-process ONLY on inert data (JSON libraries); code modules are
+// probed in a child process via childProbe below - their top-level code
+// must never run inside the linter (it could exit() the CLI or spin it
+// forever).
 function probeIds(def, pack) {
   const out = []
   const push = (id, at) => { if (typeof id === 'string' && id) out.push({ id, pack, at }) }
   if (!def || typeof def !== 'object') return out
   push(def.name, 'module name')
-  for (const key of ['attacks', 'checks', 'scenarios']) {
+  for (const key of ID_BEARING_KEYS) {
     const arr = def[key]
     if (!Array.isArray(arr)) continue
     for (const item of arr) {
@@ -253,7 +265,7 @@ try {
   const push = (id, at) => { if (typeof id === 'string' && id) out.ids.push({ id, at }) };
   if (d && typeof d === 'object') {
     push(d.name, 'module name');
-    for (const key of ['attacks', 'checks', 'scenarios']) {
+    for (const key of ${JSON.stringify(ID_BEARING_KEYS)}) {
       const arr = d[key];
       if (!Array.isArray(arr)) continue;
       for (const item of arr) {

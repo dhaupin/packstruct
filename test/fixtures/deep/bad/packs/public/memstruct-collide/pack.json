@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "memstruct-collide",
+  "description": "Deep bad fixture: claims a memory record id its sibling pack also claims.",
+  "version": "0.1.0",
+  "entry": "index.mjs"
+}

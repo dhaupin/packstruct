@@ -67,6 +67,17 @@ for (const want of ['entry-default-export', 'id-collision', 'id-duplicate']) {
 if (!deepNorms.has('id-duplicate')) {
   console.error(`FAIL deep norms missing: id-duplicate\ngot: ${JSON.stringify(deepBad.violations, null, 2)}`); process.exit(1)
 }
+// A MEMORY-profile pack's record ids are declared ids too (memstruct@1,
+// profiles/memory.md). The census must walk `records[]` exactly like
+// `attacks[]`: before the fix it did not, so these two packs were a vacuous
+// green (no id-duplicate, no id-collision). DISCRIMINATING.
+const memDup = deepBad.violations.find(v => v.pack === 'memstruct-dup' && v.norm === 'id-duplicate')
+if (!memDup || !/records\[\]/.test(memDup.message)) {
+  console.error(`FAIL memory records[] id-duplicate not censused (the SPEC section 7 gap):\n${JSON.stringify(deepBad.violations, null, 2)}`); process.exit(1)
+}
+if (!deepBad.violations.some(v => v.norm === 'id-collision' && /shared-record\.md/.test(v.message))) {
+  console.error(`FAIL memory records[] cross-pack id-collision not censused:\n${JSON.stringify(deepBad.violations, null, 2)}`); process.exit(1)
+}
 
 // --- deep + --against (host-library census): clean library = 2 ids seeded,
 // no collisions; colliding library = id-library-collision rows ---
