@@ -40,6 +40,17 @@ export const CASES_DIR = fileURLToPath(new URL('../conformance/cases/', import.m
 export const ENV_CLAIM_CASES = new Set(['env-claims'])
 const CLAIM_MARKER = 'packstruct:env-claims '
 
+// Cases that carry the host-owned `requires` relevance key (SPEC section 2,
+// added v1.3.0) and exist to prove a loader does not REFUSE a pack for
+// declaring the capabilities it needs. Accept cases: the key is spec'd, so a
+// conforming loader must tolerate it (a loader that does not implement
+// relevance still loads the pack - it just never skips it). The SKIP behavior
+// itself is host-owned (a run root's `provides`/`ignore` are the host's
+// vocabulary and channel, which the language-neutral harness cannot supply),
+// so it is graded by the host's own suite - crashtest's
+// test/pack-relevance.test.js is the engine receipt.
+export const REQUIRES_CLAIM_CASES = new Set(['requires-claims'])
+
 // The bundled cases: <case>/public/<pack-dir>/, each with a verdict claim.
 // clean expects exit 0; every other case expects a refusing loader.
 export function listCases() {
@@ -104,10 +115,12 @@ export async function auditConformance(opts = {}) {
   const violations = []
   let honored = 0
   for (const c of cases) {
-    // Accept cases: the clean bundle and the env-claims bundle (a pack that
+    // Accept cases: the clean bundle, the env-claims bundle (a pack that
     // merely carries the spec-allowed `env` block is conforming - SPEC
-    // section 2). Every other case claims a refusal.
-    const acceptCase = c === 'clean' || ENV_CLAIM_CASES.has(c)
+    // section 2), and the requires-claims bundle (a pack that declares the
+    // spec-allowed `requires` relevance key is conforming too - SPEC section
+    // 2, added v1.3.0). Every other case claims a refusal.
+    const acceptCase = c === 'clean' || ENV_CLAIM_CASES.has(c) || REQUIRES_CLAIM_CASES.has(c)
     const expect = acceptCase ? 'accept' : 'refuse'
     const tmp = mkdtempSync(join(tmpdir(), 'packstruct-audit-'))
     try {

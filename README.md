@@ -81,7 +81,7 @@ Build the site locally: `cd web && npm install && npm run build` - `prestruct` r
 
 ## Development
 
-Zero runtime dependencies. The gate is `npm test && npm run check` - `check` composes the docs gates, a deep lint of the repo's own shipped pack, and the 9/9 conformance audit (the same command `prepublishOnly` runs, so a publish cannot ship an unverified SPEC or pack surface).
+Zero runtime dependencies. The gate is `npm test && npm run check` - `check` composes the docs gates, a deep lint of the repo's own shipped pack, and the 10/10 conformance audit (the same command `prepublishOnly` runs, so a publish cannot ship an unverified SPEC or pack surface).
 
 ```bash
 npm test        # the lint + deep + audit + edge contract suite

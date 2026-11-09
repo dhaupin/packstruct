@@ -62,7 +62,7 @@ A conforming loader exits `0` on the clean bundle and exits non-zero **and names
 
 A new engine joins the grammar by answering three questions the spec already structures, never by forking the manifest (SPEC section 10):
 
-1. **What does the manifest see?** The frozen v1 field table plus the host-owned acknowledged keys (`env`, `plugins`, `package`, `implements`). Nothing to fork.
+1. **What does the manifest see?** The frozen v1 field table plus the host-owned acknowledged keys (`env`, `plugins`, `package`, `implements`, `requires`). Nothing to fork.
 2. **What does the lint see?** The same `packstruct lint` and `audit-conformance` lanes. A new profile only extends the cases reported, never the manifest grammar.
 3. **What does run mean?** The only new thing you own: a profile row (your execution semantics), an engine receipt per adopted behavior, and cases in `audit-conformance` keyed to your profile id.
 

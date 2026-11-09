@@ -3,7 +3,8 @@
   "what": "The joined refusal matrix (dhaupin/packstruct#3) - column truth OBSERVED from both validators over the same battery bytes, never hand-derived.",
   "sources": [
     "packstruct column: scripts/gen-refusal-matrix.mjs (self-verifying battery; refuses its own run on dishonesty), regenerated 2026-10-24 after the crashtest#25 fold fixes",
-    "crashtest column: dhaupin/crashtest#25 fold comment (Rook, 2026-10-24T18:25Z) - every cell observed from src/packs/loader.js running the materialized battery bytes; one row observed against pre-fix battery bytes (annotated in-row)"
+    "crashtest column: dhaupin/crashtest#25 fold comment (Rook, 2026-10-24T18:25Z) - every cell observed from src/packs/loader.js running the materialized battery bytes; one row observed against pre-fix battery bytes (annotated in-row)",
+    "packstruct + crashtest columns: the five SPEC v1.3.0 requires rows (relevance key shape rules), observed from both validators this session (dhaupin/crashtest#104) - both refuse the same four malformed shapes and accept the valid one"
   ],
   "statusVocabulary": {
     "agree": "both validators give the same verdict",
@@ -199,6 +200,82 @@
       "note": "host-owned acknowledged key: presence is never a spec violation"
     },
     {
+      "id": "requires-ok",
+      "packstruct": {
+        "refused": false,
+        "norms": []
+      },
+      "crashtest": {
+        "refused": false,
+        "norms": []
+      },
+      "status": "agree"
+    },
+    {
+      "id": "requires-not-array",
+      "packstruct": {
+        "refused": true,
+        "norms": [
+          "requires"
+        ]
+      },
+      "crashtest": {
+        "refused": true,
+        "norms": [
+          "requires"
+        ]
+      },
+      "status": "agree"
+    },
+    {
+      "id": "requires-bad-token",
+      "packstruct": {
+        "refused": true,
+        "norms": [
+          "requires"
+        ]
+      },
+      "crashtest": {
+        "refused": true,
+        "norms": [
+          "requires"
+        ]
+      },
+      "status": "agree"
+    },
+    {
+      "id": "requires-empty-token",
+      "packstruct": {
+        "refused": true,
+        "norms": [
+          "requires"
+        ]
+      },
+      "crashtest": {
+        "refused": true,
+        "norms": [
+          "requires"
+        ]
+      },
+      "status": "agree"
+    },
+    {
+      "id": "requires-duplicate",
+      "packstruct": {
+        "refused": true,
+        "norms": [
+          "requires"
+        ]
+      },
+      "crashtest": {
+        "refused": true,
+        "norms": [
+          "requires"
+        ]
+      },
+      "status": "agree"
+    },
+    {
       "id": "manifest-invalid-json",
       "packstruct": {
         "refused": true,
@@ -285,9 +362,9 @@
     }
   ],
   "tally": {
-    "agree": 12,
+    "agree": 17,
     "documented-divergence": 6,
     "re-verified-after-fix": 0,
-    "reading": "Every divergence row is a PACK-STRUCT STRICTNESS the engine does not share (author-time authoring gates vs load-time reality), except armedByKey-non-string which is the SPEC's string-type rule. No divergence is a spec violation on either side - which is exactly what this matrix exists to prove."
+    "reading": "Every divergence row is a PACK-STRUCT STRICTNESS the engine does not share (author-time authoring gates vs load-time reality), except armedByKey-non-string which is the SPEC's string-type rule. No divergence is a spec violation on either side - which is exactly what this matrix exists to prove. The v1.3.0 requires rows agree on both sides (shape-check only; the vocabulary is host-owned)."
   }
 }

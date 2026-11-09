@@ -156,18 +156,18 @@ if (wireLocal.status !== 1 || localJson.localChecked !== 1 || !localJson.violati
 mark('edge probe isolation: start')
 const conformingLoader = `${process.execPath} bin/cli.mjs lint {packs}`
 const auditGood = await auditConformance({ loader: `${process.execPath} test/fixtures/audit/loader-ok.mjs {packs}` })
-if (auditGood.caseCount !== 9 || auditGood.honored !== 9 || auditGood.violations.length) {
-  console.error(`FAIL audit-conformance: our own loader should honor all 9 bundled cases\ngot: honored=${auditGood.honored}/${auditGood.caseCount}\n${JSON.stringify(auditGood.violations, null, 2)}`)
+if (auditGood.caseCount !== 10 || auditGood.honored !== 10 || auditGood.violations.length) {
+  console.error(`FAIL audit-conformance: our own loader should honor all 10 bundled cases\ngot: honored=${auditGood.honored}/${auditGood.caseCount}\n${JSON.stringify(auditGood.violations, null, 2)}`)
   process.exit(1)
 }
 const auditAllAccept = await auditConformance({ loader: `${process.execPath} test/fixtures/audit/loader-always-ok.mjs {packs}` })
-if (auditAllAccept.honored !== 2 || auditAllAccept.violations.length !== 7) {
-  console.error(`FAIL audit-conformance accept-all loader should honor only the 2 accept cases (clean + env-claims) and fail 7 refuse-cases: honored=${auditAllAccept.honored} violations=${auditAllAccept.violations.length}\n${JSON.stringify(auditAllAccept.violations, null, 2)}`)
+if (auditAllAccept.honored !== 3 || auditAllAccept.violations.length !== 7) {
+  console.error(`FAIL audit-conformance accept-all loader should honor only the 3 accept cases (clean + env-claims + requires-claims) and fail 7 refuse-cases: honored=${auditAllAccept.honored} violations=${auditAllAccept.violations.length}\n${JSON.stringify(auditAllAccept.violations, null, 2)}`)
   process.exit(1)
 }
 const auditNoName = await auditConformance({ loader: `${process.execPath} test/fixtures/audit/loader-no-name.mjs {packs}` })
-if (auditNoName.honored !== 0 || auditNoName.violations.length !== 9) {
-  console.error(`FAIL audit-conformance silent-refuser should fail all 9 (refusals must NAME the pack): honored=${auditNoName.honored}\n${JSON.stringify(auditNoName.violations, null, 2)}`)
+if (auditNoName.honored !== 0 || auditNoName.violations.length !== 10) {
+  console.error(`FAIL audit-conformance silent-refuser should fail all 10 (refusals must NAME the pack): honored=${auditNoName.honored}\n${JSON.stringify(auditNoName.violations, null, 2)}`)
   process.exit(1)
 }
 
@@ -178,15 +178,15 @@ if (auditNoName.honored !== 0 || auditNoName.violations.length !== 9) {
 // named instead of passing quietly. Both directions, per the house rule. ---
 const claimsLoader = `${process.execPath} test/fixtures/audit/loader-claims.mjs {packs}`
 const auditClaimsGood = await auditConformance({ loader: claimsLoader, claims: true })
-if (auditClaimsGood.caseCount !== 9 || auditClaimsGood.honored !== 9 || auditClaimsGood.violations.length) {
-  console.error(`FAIL audit-conformance --claims: an env-echoing loader should honor all 9 cases\ngot: honored=${auditClaimsGood.honored}/${auditClaimsGood.caseCount}\n${JSON.stringify(auditClaimsGood.violations, null, 2)}`)
+if (auditClaimsGood.caseCount !== 10 || auditClaimsGood.honored !== 10 || auditClaimsGood.violations.length) {
+  console.error(`FAIL audit-conformance --claims: an env-echoing loader should honor all 10 cases\ngot: honored=${auditClaimsGood.honored}/${auditClaimsGood.caseCount}\n${JSON.stringify(auditClaimsGood.violations, null, 2)}`)
   process.exit(1)
 }
 // The default leg still passes for the same loader (the echo is simply not
 // required without --claims) - so the two legs are independent.
 const auditClaimsDefault = await auditConformance({ loader: claimsLoader })
-if (auditClaimsDefault.honored !== 9) {
-  console.error(`FAIL audit-conformance default leg should still honor the env-echoing loader 9/9: honored=${auditClaimsDefault.honored}\n${JSON.stringify(auditClaimsDefault.violations, null, 2)}`)
+if (auditClaimsDefault.honored !== 10) {
+  console.error(`FAIL audit-conformance default leg should still honor the env-echoing loader 10/10: honored=${auditClaimsDefault.honored}\n${JSON.stringify(auditClaimsDefault.violations, null, 2)}`)
   process.exit(1)
 }
 // The teeth: an accept-everything loader passes the default audit's accept
@@ -202,6 +202,25 @@ const auditClaimsRefuse = await auditConformance({ loader: `${process.execPath} 
 const refuseEnv = auditClaimsRefuse.violations.find(v => v.pack === 'env-claims')
 if (!(refuseEnv && /spec-allowed `env` block/.test(refuseEnv.message))) {
   console.error(`FAIL audit-conformance --claims must name a loader that refuses the env block:\n${JSON.stringify(auditClaimsRefuse.violations, null, 2)}`)
+  process.exit(1)
+}
+
+// --- SPEC v1.3.0: the requires-claims leg. The bundled requires-claims case
+// proves a conforming loader does not REFUSE a pack that declares the
+// host-owned `requires` relevance key. An accept-everything loader honors it
+// (it is an accept case), but a loader that refuses it is named as the
+// spec'd-key refusal. The SKIP behavior itself is host-owned and graded by
+// the host's own suite (crashtest's test/pack-relevance.test.js). ---
+const auditRequiresRefuse = await auditConformance({ loader: `${process.execPath} test/fixtures/audit/loader-no-name.mjs {packs}` })
+const refuseRequires = auditRequiresRefuse.violations.find(v => v.pack === 'requires-claims')
+if (!(refuseRequires && /requires-claims/.test(refuseRequires.pack))) {
+  console.error(`FAIL audit-conformance must name a loader that refuses the spec-allowed requires key:\n${JSON.stringify(auditRequiresRefuse.violations, null, 2)}`)
+  process.exit(1)
+}
+// The conforming loader (our own CLI) must ACCEPT the requires-claims bundle:
+// a pack carrying the spec'd key is never a refusal.
+if (!auditGood.violations.every(v => v.pack !== 'requires-claims')) {
+  console.error(`FAIL the conforming loader must accept the requires-claims bundle:\n${JSON.stringify(auditGood.violations, null, 2)}`)
   process.exit(1)
 }
 
@@ -240,13 +259,13 @@ if (!(edgeSpin.violations.length === 1 && edgeSpin.violations[0].norm === 'entry
 // specific path lives in runCapped; the contract lives here. ---
 const auditFlood = await auditConformance({ loader: `${process.execPath} test/fixtures/audit/loader-flood.mjs {packs}`, auditTimeoutMs: 5000 })
 const floodUnobservable = v => v.message.includes('audit buffer') || v.message.includes('audit timeout')
-if (!(auditFlood.violations.length === 9 && auditFlood.violations.every(floodUnobservable) && auditFlood.violations.some(v => v.message.includes('audit buffer') || v.message.includes('audit timeout')))) {
-  console.error(`FAIL audit flood loader must grade nothing on all 9 cases (cap or timeout, both honest):\n${JSON.stringify(auditFlood.violations, null, 2)}`)
+if (!(auditFlood.violations.length === 10 && auditFlood.violations.every(floodUnobservable) && auditFlood.violations.some(v => v.message.includes('audit buffer') || v.message.includes('audit timeout')))) {
+  console.error(`FAIL audit flood loader must grade nothing on all 10 cases (cap or timeout, both honest):\n${JSON.stringify(auditFlood.violations, null, 2)}`)
   process.exit(1)
 }
 const auditHung = await auditConformance({ loader: "sleep 9999 # {packs}", auditTimeoutMs: 400 })
-if (!(auditHung.violations.length === 9 && auditHung.violations.every(v => v.message.includes('audit timeout')))) {
-  console.error(`FAIL audit hung loader should fail all 9 cases with the timeout named:\n${JSON.stringify(auditHung.violations, null, 2)}`)
+if (!(auditHung.violations.length === 10 && auditHung.violations.every(v => v.message.includes('audit timeout')))) {
+  console.error(`FAIL audit hung loader should fail all 10 cases with the timeout named:\n${JSON.stringify(auditHung.violations, null, 2)}`)
   process.exit(1)
 }
 
@@ -446,4 +465,4 @@ for (const deep of [false, true]) {
 rmSync(contRoot, { recursive: true, force: true })
 mark('entry containment: assert done')
 
-console.log(`packstruct self-test: good pack clean, bad pack caught (${bad.violations.length} violations), wire subcommand OK, deep pass/bad both ways (${deepGood.idsCensused} ids censused good-side, ${deepBad.violations.length} deep violations bad-side), --against both ways (${libGood.libraryIds} seeded clean, ${libBad.violations.filter(v => v.norm === 'id-library-collision').length} library collisions), local lane (${localOnGood.localChecked} opt-in pack clean, ${localViol.length} lane-tagged refusal both ways), usage lanes (${hintCases.length} wrong-arg hints, unknown flag exit 2), audit-conformance both ways (${auditGood.honored}/${auditGood.caseCount} honored by our own loader, accept-all loader ${auditAllAccept.violations.length} audit failures, silent refuser ${auditNoName.violations.length}), edge probe isolation (exit-hijack and spin-lock refuse honestly, wire exit 1), audit caps (output flood ${auditFlood.violations.length}/8, hung loader ${auditHung.violations.length}/8), new scaffold (lint-clean by construction, refusals named both ways), version truth (${versionTruth.length} living surfaces == ${rootPkg.version}), armed-coverage + implements warning both ways - PASS`)
+console.log(`packstruct self-test: good pack clean, bad pack caught (${bad.violations.length} violations), wire subcommand OK, deep pass/bad both ways (${deepGood.idsCensused} ids censused good-side, ${deepBad.violations.length} deep violations bad-side), --against both ways (${libGood.libraryIds} seeded clean, ${libBad.violations.filter(v => v.norm === 'id-library-collision').length} library collisions), local lane (${localOnGood.localChecked} opt-in pack clean, ${localViol.length} lane-tagged refusal both ways), usage lanes (${hintCases.length} wrong-arg hints, unknown flag exit 2), audit-conformance both ways (${auditGood.honored}/${auditGood.caseCount} honored by our own loader, accept-all loader ${auditAllAccept.violations.length} audit failures, silent refuser ${auditNoName.violations.length}), edge probe isolation (exit-hijack and spin-lock refuse honestly, wire exit 1), audit caps (output flood ${auditFlood.violations.length}/10, hung loader ${auditHung.violations.length}/10), new scaffold (lint-clean by construction, refusals named both ways), version truth (${versionTruth.length} living surfaces == ${rootPkg.version}), armed-coverage + implements warning both ways - PASS`)
