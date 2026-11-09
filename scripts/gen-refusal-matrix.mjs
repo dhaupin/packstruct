@@ -57,6 +57,13 @@ const BATTERY = [
   { id: 'armedByKey-ok', mutate: { armedByKey: 'wp-money' }, expect: { refused: false } },
   { id: 'unknown-key-allowed', mutate: { snapshot: 'host-owned extra' }, expect: { refused: false } },
   { id: 'host-owned-env-allowed', mutate: { env: { kv: {} } }, expect: { refused: false } },
+  // SPEC v1.3.0: the host-owned `requires` relevance key. Shape-checked only
+  // (kebab-case tokens, non-empty, unique) - the vocabulary is host-owned.
+  { id: 'requires-ok', mutate: { requires: ['wordpress', 'd1'] }, expect: { refused: false } },
+  { id: 'requires-not-array', mutate: { requires: 'wordpress' }, expect: { refused: true, norms: ['requires'] } },
+  { id: 'requires-bad-token', mutate: { requires: ['WordPress'] }, expect: { refused: true, norms: ['requires'] } },
+  { id: 'requires-empty-token', mutate: { requires: [''] }, expect: { refused: true, norms: ['requires'] } },
+  { id: 'requires-duplicate', mutate: { requires: ['d1', 'd1'] }, expect: { refused: true, norms: ['requires'] } },
   { id: 'manifest-invalid-json', malformed: true, expect: { refused: true, norms: ['manifest-invalid'] } },
   { id: 'manifest-missing', noManifest: true, expect: { refused: true, norms: ['manifest-missing'] } },
 ]

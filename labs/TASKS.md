@@ -68,3 +68,19 @@ The memory standard [memstruct](https://github.com/dhaupin/memstruct) was minted
 - **A sync pack is graded by `memstruct audit-merge`**, not by any packstruct lane - the packstruct harness proves the manifest, memstruct proves the merge. Recorded in the `sync` page's "How a sync pack is graded".
 - **Receipts:** `npm run check` green (frontmatter 19 pages, docs links/style, jekyll, language 36 files, action pins 14 refs, prestruct pins, legal, refusal matrix 18 rows, lint:packs, conform:packs 9/9, conform:claims 9/9); `npm test` green (50 + 11 tests).
 - **No version bump yet** (Unreleased; the profiles are a spec + docs + web surface, and the release ladder is tag-driven).
+
+---
+
+### 2026-11-03 - session: packstruct adopts the relevance row (SPEC v1.3.0, from crashtest#104)
+
+The ignore/relevance mechanism shipped in crashtest's loader (a pack declares `requires` - the host-owned capability tokens it needs from a run root; the run root declares `provides`/`ignore`; the loader skips an unmet pack BEFORE import, so the pack costs the run nothing). Engine-first: crashtest#104 is the receipt, and packstruct formalizes it. One additive row, no `schemaVersion` move, no change to a host that declares nothing.
+
+- **SPEC v1.3.0 (section 2).** `requires` joins the manifest table AND the host-owned acknowledged keys: an OPTIONAL array of kebab-case capability tokens, vocabulary host-owned and free-form (the spec never forks a shared capability list).
+- **SPEC v1.3.0 (section 4).** The lifecycle norm: a conforming loader whose run root declares a non-empty `provides` MUST skip, before import, any pack whose `requires` is not a subset of `provides` (and any pack named in an explicit `ignore` deny-list, which wins); the skip is reportable, and a run root declaring neither is byte-identical to before. Named the honest inverse of a `.packignore` deny-list: it fails CLOSED (a new pack self-skips) and travels WITH the pack (a manifest field, so lint sees it).
+- **SPEC section 8 row 9** with the engine receipt (crashtest's `src/packs/relevance.js` + skip wiring in `loader.js`/`cli.js`/`plans.js`; six shipped packs carrying `requires`; `test/pack-relevance.test.js`). Section 10's "what does the manifest see?" list gains `requires`.
+- **Linter (`src/lint.mjs`).** `requires` is shape-checked as a REFUSAL: array of unique kebab-case tokens; a malformed shape refuses `[requires]`. The tokens carry no meaning in the linter.
+- **Conformance (`src/audit.mjs` + `conformance/cases/requires-claims/`).** A new accept case: a pack declaring the spec'd `requires` key must never be REFUSED. The bundle is now 10 cases, 3 accept. The SKIP behavior is host-owned (a run root's `provides`/`ignore` are the host's channel), so it is graded by crashtest's own suite - the harness only proves the key is tolerated.
+- **Refusal matrix (`scripts/gen-refusal-matrix.mjs` + golden).** Five new rows (`requires-ok`, `requires-not-array`, `requires-bad-token`, `requires-empty-token`, `requires-duplicate`) observed from BOTH validators: packstruct and crashtest agree on all five. Matrix 18 -> 23 rows; `labs/refusal-matrix.golden.json` gains the crashtest column observations.
+- **Surfaces moved in the same change:** CHANGELOG (Unreleased), README gate line, docs `spec`/`conformance`/`linter`/`what`/`packs`/`extend`, AGENTS.md gate line, `test/fixtures/good` demo pack carries a `requires` row (the additive key costs a conforming host nothing).
+- **Receipts:** `npm test` green (50 + 11 tests); `npm run check` green (FRONTMATTER 19, DOCS LINKS, DOCS STYLE, JEKYLL FILTERS, LANGUAGE 36 files, ACTION PINS 14 refs/5 workflows, PRESTRUCT PINS, LEGAL PAGES, refusal matrix 23 rows all honest + golden agrees, lint:packs deep, conform:packs 10/10, conform:claims 10/10).
+- **No version bump yet** (Unreleased; a spec revision is decoupled from the tool semver per section 6, and the release ladder is tag-driven).

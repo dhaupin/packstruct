@@ -334,6 +334,131 @@
       "honest": true
     },
     {
+      "id": "requires-ok",
+      "manifest": {
+        "schemaVersion": 1,
+        "name": "shape-pack",
+        "version": "1.0.0",
+        "entry": "probes-entry.js",
+        "description": "battery base - clean otherwise",
+        "requires": [
+          "wordpress",
+          "d1"
+        ]
+      },
+      "packstruct": {
+        "refused": false,
+        "norms": []
+      },
+      "expected": {
+        "refused": false
+      },
+      "honest": true
+    },
+    {
+      "id": "requires-not-array",
+      "manifest": {
+        "schemaVersion": 1,
+        "name": "shape-pack",
+        "version": "1.0.0",
+        "entry": "probes-entry.js",
+        "description": "battery base - clean otherwise",
+        "requires": "wordpress"
+      },
+      "packstruct": {
+        "refused": true,
+        "norms": [
+          "requires"
+        ]
+      },
+      "expected": {
+        "refused": true,
+        "norms": [
+          "requires"
+        ]
+      },
+      "honest": true
+    },
+    {
+      "id": "requires-bad-token",
+      "manifest": {
+        "schemaVersion": 1,
+        "name": "shape-pack",
+        "version": "1.0.0",
+        "entry": "probes-entry.js",
+        "description": "battery base - clean otherwise",
+        "requires": [
+          "WordPress"
+        ]
+      },
+      "packstruct": {
+        "refused": true,
+        "norms": [
+          "requires"
+        ]
+      },
+      "expected": {
+        "refused": true,
+        "norms": [
+          "requires"
+        ]
+      },
+      "honest": true
+    },
+    {
+      "id": "requires-empty-token",
+      "manifest": {
+        "schemaVersion": 1,
+        "name": "shape-pack",
+        "version": "1.0.0",
+        "entry": "probes-entry.js",
+        "description": "battery base - clean otherwise",
+        "requires": [
+          ""
+        ]
+      },
+      "packstruct": {
+        "refused": true,
+        "norms": [
+          "requires"
+        ]
+      },
+      "expected": {
+        "refused": true,
+        "norms": [
+          "requires"
+        ]
+      },
+      "honest": true
+    },
+    {
+      "id": "requires-duplicate",
+      "manifest": {
+        "schemaVersion": 1,
+        "name": "shape-pack",
+        "version": "1.0.0",
+        "entry": "probes-entry.js",
+        "description": "battery base - clean otherwise",
+        "requires": [
+          "d1",
+          "d1"
+        ]
+      },
+      "packstruct": {
+        "refused": true,
+        "norms": [
+          "requires"
+        ]
+      },
+      "expected": {
+        "refused": true,
+        "norms": [
+          "requires"
+        ]
+      },
+      "honest": true
+    },
+    {
       "id": "manifest-invalid-json",
       "manifest": "(malformed JSON)",
       "packstruct": {

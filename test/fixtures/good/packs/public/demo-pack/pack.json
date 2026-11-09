@@ -5,5 +5,6 @@
   "version": "0.1.0",
   "entry": "entry.mjs",
   "implements": "packstruct@1",
-  "armedCoverage": "entry.mjs"
+  "armedCoverage": "entry.mjs",
+  "requires": ["wordpress"]
 }

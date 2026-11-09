@@ -17,7 +17,7 @@ packstruct is two artifacts: the normative SPEC that defines a `/packs` director
 
 ## The manifest (pack.json, v1)
 
-A pack is a directory under `packs/public/<name>/` carrying a frozen `pack.json`: `schemaVersion: 1`, a kebab-case `name` matching its directory, a dotted `version`, a one-line `description`, a relative `entry` that must exist, and an optional `armedByKey`. Every field is checked, and every refusal names the field it refused.
+A pack is a directory under `packs/public/<name>/` carrying a frozen `pack.json`: `schemaVersion: 1`, a kebab-case `name` matching its directory, a dotted `version`, a one-line `description`, a relative `entry` that must exist, an optional `armedByKey`, and an optional `requires` (the capability tokens the pack needs from its run root). Every field is checked, and every refusal names the field it refused.
 
 ## The profiles
 

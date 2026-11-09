@@ -128,6 +128,20 @@ function manifestViolations(packDir, name) {
   if (m.armedByKey !== undefined && typeof m.armedByKey !== 'string') {
     violations.push({ pack: name, norm: 'armedByKey', message: `armedByKey, when present, must be a string (got ${typeof m.armedByKey})` })
   }
+  // requires (SPEC v1.3.0 section 2): OPTIONAL array of host-owned capability
+  // tokens the pack needs from a run root (e.g. ["wordpress"]). Shape-checked
+  // only - the VOCABULARY is host-owned and free-form (the spec never forks a
+  // shared fact), so the lint validates kebab-case tokens, non-empty and
+  // unique, and never assigns them meaning. The engine receipt is crashtest's
+  // loader (src/packs/relevance.js), which skips a pack whose requires the
+  // target does not provide.
+  if (m.requires !== undefined) {
+    if (!Array.isArray(m.requires) || m.requires.some((t) => typeof t !== 'string' || !/^[a-z0-9][a-z0-9-]*$/.test(t))) {
+      violations.push({ pack: name, norm: 'requires', message: `requires, when present, must be an array of kebab-case capability tokens (got ${JSON.stringify(m.requires)})` })
+    } else if (new Set(m.requires).size !== m.requires.length) {
+      violations.push({ pack: name, norm: 'requires', message: `requires lists a token twice (got ${JSON.stringify(m.requires)})` })
+    }
+  }
   // implements (SPEC v1.1 section 2): OPTIONAL host-owned acknowledgement of
   // the spec the pack builds against, formatted `packstruct@<MAJOR>` or an
   // exact `packstruct@1.0.0`. FORMAT ONLY, and format drift is a WARNING,
