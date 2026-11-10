@@ -46,4 +46,6 @@ docs/vendor/
 docs/_site/
 docs/.jekyll-cache/
 docs/.jekyll-metadata
+docs/pagefind/
+docs/pagefind*
 docs/Gemfile.lock
