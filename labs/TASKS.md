@@ -84,3 +84,15 @@ The ignore/relevance mechanism shipped in crashtest's loader (a pack declares `r
 - **Surfaces moved in the same change:** CHANGELOG (Unreleased), README gate line, docs `spec`/`conformance`/`linter`/`what`/`packs`/`extend`, AGENTS.md gate line, `test/fixtures/good` demo pack carries a `requires` row (the additive key costs a conforming host nothing).
 - **Receipts:** `npm test` green (50 + 11 tests); `npm run check` green (FRONTMATTER 19, DOCS LINKS, DOCS STYLE, JEKYLL FILTERS, LANGUAGE 36 files, ACTION PINS 14 refs/5 workflows, PRESTRUCT PINS, LEGAL PAGES, refusal matrix 23 rows all honest + golden agrees, lint:packs deep, conform:packs 10/10, conform:claims 10/10).
 - **No version bump yet** (Unreleased; a spec revision is decoupled from the tool semver per section 6, and the release ladder is tag-driven).
+
+---
+
+### 2026-11-10 - session: the staging-ff-sync vendored (the promote drift, fixed for good)
+
+The railyard recon found packstruct's `main` **3 commits ahead of `staging`** (`e502808` PR #88 merge + `c215820` promote, both on main only). Root cause: packstruct promotes by merge commit, which by design puts a commit on `main` that `staging` lacks, and packstruct was the one merge-commit promoter that carried no `staging-ff-sync.yml` - the family's required sync step. monoforge, gistory, coreforge, memstruct, and gamestruct all have it.
+
+- **The drift, repaired.** `staging` was a strict ancestor of `main`, so the fix was a clean fast-forward: ref PATCH `staging` -> `c215820`, `force:false` (non-destructive by construction). `main == staging` again.
+- **The recurrence, prevented.** Vendored `.github/workflows/staging-ff-sync.yml` **verbatim from the canon** (coreforge/monoforge variant, hyphen voice to match packstruct's workflows). No `uses:` steps, so no Action pins to add. The job is a fast-forward-only refspec, so a genuine divergence fails the job loudly instead of rewriting history. PR #90 -> `staging` (`e198707`) -> promote -> `main` (`b1e22f6`).
+- **Proof the fix bites.** The promote to `main` (`b1e22f6`) fired the new workflow: `Sync staging to main: completed success`, and `main == staging == b1e22f6` (0/0) after. The first promote under the new workflow is the receipt.
+- **Receipts:** `npm run check` green (ACTION PINS 14 refs/6 workflows - the new workflow adds no pins; refusal matrix 23 rows; conform 10/10 + claims 10/10). CI green on PR #90 (test + corpus + crashtest).
+- **No version bump** (Unreleased; a CI workflow is not a released surface, and the release ladder is tag-driven).
