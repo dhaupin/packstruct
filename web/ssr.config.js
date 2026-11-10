@@ -6,6 +6,7 @@
 export default {
   siteUrl:  'https://packstruct.creadev.org',
   siteName: 'Packstruct',
+  breadcrumb: true,
   author:   'dhaupin',
   tagline:  'One /packs system, many hosts.',
   ogImage:  {
