@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### 2026-11-10 - light mode by default (web + docs)
+
+Owner directive: the family defaults to light. The product sites and docs sites shipped dark-first (a persisted `light` was the opt-in); now light is the first paint and a persisted `dark` theme is the opt-in. Shape: `<html>` pins `data-theme="light"`, the pre-paint bootstrap applies only a persisted `dark`, and the `theme-color` meta flips to the light paper. The CSS token blocks are untouched (the light block is already the second half of one set), so no palette, toggle handler, or gate changed.
+
+- `web/index.html` - `<html data-theme="light">`; bootstrap applies a persisted `dark`; `theme-color` light (`#f0f6f3`).
+- `docs/_layouts/default.html` - `<html data-theme="light">`; bootstrap inverted; `color-scheme` `light dark`.
+- `web/public/site.webmanifest` - PWA `theme_color`/`background_color` -> light (`#f0f6f3`).
+- Receipts: `npm test` 11/11; `npm run check` green; docs-lint clean.
+
+
+### 2026-11-03 - breadcrumbs on (engine + this site)
+
+Google Search Console showed the family's properties under a breadcrumbs enhancement with 0 results. Recon split the fleet: the docs sites run freestruct (auto BreadcrumbList since 1.1.0); the product sites run prestruct, whose `buildJsonLd()` is site-wide by contract and could never emit a per-route trail. prestruct gained engine-level `breadcrumb: true` (injectMeta owns the route path), and this repo turned the discovery surface on in its configs.
+
+- `docs/freestruct.config.yml` - `breadcrumb: true` (freestruct has carried auto BreadcrumbList since 1.1.0; every pinned version here has it).
+- `web/ssr.config.js` - `breadcrumb: true` (the trail lands when the prestruct engine feature ships in the next cut; inert-but-safe on the current pin).
+- Receipts: docs config validates against the pinned engine; docs sync:check PASS where generated.
+- No version bump; a discovery-surface opt-in.
+
+
 ### Added
 
 - **The `requires` relevance key and the skip-before-import lifecycle norm (SPEC v1.3.0).** One additive row: the host-owned manifest key `requires` (an array of kebab-case capability tokens a pack needs from its run root, e.g. `"requires": ["wordpress"]`) plus the lifecycle norm that gives it meaning. A conforming loader whose run root declares a non-empty `provides` MUST skip, before import, any pack whose `requires` is not a subset of `provides` (and any pack named in an explicit `ignore` deny-list, which wins); the skip is reportable, and a run root declaring neither is byte-identical to before. The mechanism is deliberately the honest inverse of a `.packignore` deny-list: it fails CLOSED (a newly shipped pack naming an unmet capability skips itself, with no per-run-root upkeep) and travels WITH the pack (a manifest field, so lint sees it). The vocabulary is host-owned and free-form - the spec never forks a shared capability list; `packstruct lint` shape-checks the tokens (kebab-case, non-empty, unique) and assigns them no meaning. `spec/SPEC.md` sections 2 (table + acknowledged keys), 4 (the norm), 8 (row 9), and 10 carry the row; a new `requires-claims` conformance case proves a conforming loader does not REFUSE a pack that declares the key (the `audit-conformance` bundle is now 10 cases, 3 accept); five new refusal-matrix rows pin the shape rules both ways (packstruct + crashtest agree on all five). Engine receipt: crashtest's loader `src/packs/relevance.js` (dhaupin/crashtest#104). No `schemaVersion` move; no change to a host that declares nothing.
