@@ -9,7 +9,7 @@
 # pretending to search.
 ---
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,7 +23,7 @@
     <meta property="og:type" content="article">
     <meta property="og:site_name" content="Packstruct Docs">
     <link rel="icon" type="image/svg+xml" href="/packstruct/icon.svg">
-    <meta name="color-scheme" content="dark light">
+    <meta name="color-scheme" content="light dark">
     <style>
         :root {
             --paper: #0b1418; --surface: #0f1d22; --raised: #14262d;
@@ -170,13 +170,12 @@
         }
     </style>
     <script>
-        // Theme bootstrap (before first paint): the default tokens are dark,
-        // so only a persisted light theme needs flipping. Keep the key and
+        // Theme bootstrap (before first paint): the default tokens are light,
+        // so only a persisted dark theme needs flipping. Keep the key and
         // hex values in sync with the toggle handler below.
         try {
-            if (localStorage.getItem('packstruct-theme') === 'light') {
-                document.documentElement.dataset.theme = 'light';
-            }
+            document.documentElement.dataset.theme =
+                localStorage.getItem('packstruct-theme') === 'dark' ? 'dark' : 'light';
         } catch (e) {}
     </script>
 </head>
