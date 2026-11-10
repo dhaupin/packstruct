@@ -96,3 +96,6 @@ The railyard recon found packstruct's `main` **3 commits ahead of `staging`** (`
 - **Proof the fix bites.** The promote to `main` (`b1e22f6`) fired the new workflow: `Sync staging to main: completed success`, and `main == staging == b1e22f6` (0/0) after. The first promote under the new workflow is the receipt.
 - **Receipts:** `npm run check` green (ACTION PINS 14 refs/6 workflows - the new workflow adds no pins; refusal matrix 23 rows; conform 10/10 + claims 10/10). CI green on PR #90 (test + corpus + crashtest).
 - **No version bump** (Unreleased; a CI workflow is not a released surface, and the release ladder is tag-driven).
+
+
+- **The .gitignore docs block carries the in-tree Jekyll + pagefind products (2026-11-10 sweep, coreforge#48).** Propagated from the coreforge adopter sweep (dhaupin/coreforge#52): a local `npm run docs` / `bundle exec jekyll build` + pagefind run drops its products beside the source, and the belt-and-suspenders block named only some of them. It now carries `docs/.jekyll-cache/`, `docs/.jekyll-metadata`, `docs/pagefind/`, and `docs/pagefind*`, so a local build leaves no untracked noise. No version bump.
