@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### 2026-11-12 - the island sees the whole family (interop)
+
+The `/status` family island hand-types its sibling set (`web/src/components/FamilyStatusIsland.jsx`), and the set had drifted: this site listed six members, missing `gamestruct` and `memstruct` - both of which already serve `/status.json` on the family-status@1 dialect. So this page could not render them at all. The island now lists every other family member, and `web/public/_headers` `connect-src` gains the two origins (the reader half: CSP governs `fetch()` before CORS, so an origin the island fetches but the CSP omits is a dark row). The reader-clause guard stays green - it pins the island's `origin:` rows to the served CSP so the two cannot drift silently again.
+
+Found in the family release-readiness pass; the full session (the CSP sweep, the vuln/pack pass, and the railyard ledger drifts) is receipted in the parent (`dhaupin/railyard`, `CHANGELOG.md` + `labs/TASKS.md`). No version bump.
+
+
 ### 2026-11-11 - the mobile nav fits the viewport
 
 Owner report (mobile-first): the header overflowed the phone screen and the burger - the only menu control below 640px - sat off-screen. Measured at 390px (headless probe): `document.scrollWidth` 431 vs `clientWidth` 375, the burger at x=397..431. The right cluster (GitHub icon + paint-scheme select + theme switch + burger) needs ~200px against ~144px free after the wordmark, so the row could not shrink.
