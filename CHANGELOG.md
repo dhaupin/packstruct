@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.1.2] - 2026-11-13
+
 ### 2026-11-13 - the /web family matrix (React 19 + Vite 8, prestruct ^1.5.0)
 
 The landing site moves onto the matrix prestruct 1.5.0 published: `react`/`react-dom` `^18.3.1 -> ^19.3.1`, `vite` `^5.4.0 -> ^8.3.7`, `@vitejs/plugin-react` `^4.3.1 -> ^6.3.0`, `prestruct` `^1.3.0 -> ^1.5.0`. The site bakes 14/14 pages with a clean audit on the new matrix.
@@ -14,6 +16,12 @@ The landing site moves onto the matrix prestruct 1.5.0 published: `react`/`react
 - **The web lane declares a Node floor** (`web/package.json` `engines.node >=20.19`, vite 8's floor). The repo's own battery still runs on Node 18/20; only the site build needs the newer floor.
 
 No version bump; the repo's own landing site, not the shipped surface.
+
+### Fixed (2026-11-13)
+
+- **The packs now ride the published tarball (poststruct#79).** `package.json` `files` listed `bin/`, `src/`, `spec/`, `profiles/`, `conformance/`, `LICENSE` but not `packs/`, so `npm pack` shipped zero pack bytes and `npm i packstruct` (and a `github:` dependency, which honours `files` too) installed a tree with no `node_modules/packstruct/packs/`. The family arms every verdict by an EXACT npm pin, so the `packstruct-lint-shapes` pack (hostile-manifest wire truths: a malformed `pack.json` never crashes the CLI, entry path traversal is contained) was committed and green yet undeliverable.
+  - `packs/` joins the whitelist, so a consumer arms `node_modules/packstruct/packs/public/packstruct-lint-shapes` from the pin. `tests/distribution.test.cjs` pins the contract: `files` carries `packs/` and every committed pack dir is delivered.
+  - The publish lane's verify job passes `--allowed "packs/"` (the family default forbids `packs/` in the served-tarball scan, so without the flag the ladder would refuse the new bytes by prefix); `tests/release-verify.test.cjs` invokes the same ladder with `--allow packs/`, the flag the publish lane passes.
 
 ## [1.1.1] - 2026-11-12
 

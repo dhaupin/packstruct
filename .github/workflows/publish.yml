@@ -196,5 +196,5 @@ jobs:
           V="$(node -p "require('./package.json').version")"
           EXPECTED_EXPORTS="$(node -p "Object.keys(require('./package.json').exports).join(',')")"
           PK_PROBE="const p=require('packstruct');if(typeof p.lintPacks!=='function')process.exit(1)"
-          node scripts/verify-release.cjs --npm --version "$V" --exports "$EXPECTED_EXPORTS" --probe "$PK_PROBE"
+          node scripts/verify-release.cjs --npm --version "$V" --exports "$EXPECTED_EXPORTS" --probe "$PK_PROBE" --allowed "packs/"
           node scripts/verify-release.cjs --gh --tag "v$V" --asset "packstruct-$V.tgz"
