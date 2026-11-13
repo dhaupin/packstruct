@@ -166,3 +166,14 @@ Unblocked by prestruct 1.5.0 (it widened its peer ceilings `react`/`react-dom` `
 - **web/vite.config.js.** `manualChunks` is a FUNCTION (the object form vite <=7 accepted is rejected by rolldown); `minify: 'esbuild'` dropped (esbuild unbundled, oxc default).
 - **Proof.** The site bakes 14/14 pages, audit 0 failures, on the new matrix; the repo's own battery + `check` stay green.
 - **No version bump** (the repo's own landing site, not the shipped surface; the crashtest `deps: web toolchain` precedent).
+
+---
+
+### 2026-11-13 - session: the v1.1.2 pack-distribution fix (poststruct#79)
+
+Owner directive: "some might be missing their `/packs/public` that should be bundled with the release... make sure all repos ship their default `/packs/public` includes."
+
+- **The gap (measured).** `package.json` `files` listed `bin/`, `src/`, `spec/`, `profiles/`, `conformance/`, `LICENSE` but not `packs/`. npm honours `files`, so `npm pack --dry-run` listed zero pack bytes and `npm i packstruct` installed a tree with no `node_modules/packstruct/packs/` - the `packstruct-lint-shapes` pack was committed and green yet undeliverable, while the family arms every verdict by an EXACT npm pin. This is the family law poststruct#79 named; packstruct was one of four publishing repos that still violated it (with eyestruct, freestruct, prestruct).
+- **The fix (the poststruct#79 shape).** `packs/` joins the `files` whitelist. The publish lane's verify job passes `--allowed "packs/"` - the family-default forbidden scan refuses `packs/` by prefix, so the flag de-asserts exactly that drift. `tests/distribution.test.cjs` pins the two halves (`files` carries `packs/`, every committed pack dir is delivered) and joins the root `test` script; `tests/release-verify.test.cjs` invokes the same ladder with `--allow packs/`.
+- **The cut (1.1.1 -> 1.1.2, patch).** A new version is the only way a fixed `files` reaches npm, and v1.1.1 was already released (tag + npm latest + GH release, 2026-11-13). The version-truth surfaces moved in the same commit: `package.json`, `web/package.json`, `web/VERSION`, `web/package-lock.json`, the README H1, the `docs/index.md` npm line, and the refusal matrix (`node scripts/gen-refusal-matrix.mjs`, its tool version derives from root `package.json`). `## [Unreleased]` is cut to `## [1.1.2] - 2026-11-13` (the /web matrix entries fold under it, verbatim) with a fresh `[Unreleased]` on top. Adds the v1.1.2 release post and its index row.
+- **No tag yet** - the tag is the owner gate (the ladder publishes on `v*`).
