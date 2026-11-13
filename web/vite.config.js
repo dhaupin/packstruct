@@ -5,12 +5,14 @@ export default defineConfig({
   plugins: [react()],
   build: {
     outDir: 'dist',
-    minify: 'esbuild',
     cssCodeSplit: true,
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor': ['react', 'react-dom', 'react-router-dom'],
+        // Separate vendor chunk for better caching. vite 8 is rolldown-based:
+        // manualChunks must be a FUNCTION (the object form vite <=7 accepted is
+        // rejected), and minify defaults to oxc (esbuild is unbundled).
+        manualChunks(id) {
+          if (id.replace(/\\/g, '/').includes('node_modules/react')) return 'vendor'
         },
       },
     },

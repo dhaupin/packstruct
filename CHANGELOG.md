@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### 2026-11-13 - the /web family matrix (React 19 + Vite 8, prestruct ^1.5.0)
+
+The landing site moves onto the matrix prestruct 1.5.0 published: `react`/`react-dom` `^18.3.1 -> ^19.3.1`, `vite` `^5.4.0 -> ^8.3.7`, `@vitejs/plugin-react` `^4.3.1 -> ^6.3.0`, `prestruct` `^1.3.0 -> ^1.5.0`. The site bakes 14/14 pages with a clean audit on the new matrix.
+
+- **vite 8 is rolldown-based.** `web/vite.config.js` carries `manualChunks` as a FUNCTION (the object form vite <=7 accepted is rejected) and drops `minify: 'esbuild'` (esbuild is unbundled; oxc is the default).
+- **The web lane declares a Node floor** (`web/package.json` `engines.node >=20.19`, vite 8's floor). The repo's own battery still runs on Node 18/20; only the site build needs the newer floor.
+
+No version bump; the repo's own landing site, not the shipped surface.
+
 ## [1.1.1] - 2026-11-12
 
 ### 2026-11-12 - the Dependabot flow lands (railyard#31)
@@ -25,7 +34,6 @@ Owner report (mobile-first): the header overflowed the phone screen and the burg
 
 - `web/src/styles.css` (the 640px block) - the badge (decorative) hides first, the gaps tighten (`.nav-inner` 22->8px, `.nav-right` 8->4px), and the wordmark may shrink (`.brand { min-width: 0; overflow: hidden; white-space: nowrap }`) so the row always fits; the burger can never land off-screen. Every control is kept.
 - Receipts: rebuilt web dist probed at 320/360/375/390/414px - no horizontal overflow at any width, burger on-screen, all controls present; `npm run check` green.
-
 ### 2026-11-10 - light mode by default (web + docs)
 
 Owner directive: the family defaults to light. The product sites and docs sites shipped dark-first (a persisted `light` was the opt-in); now light is the first paint and a persisted `dark` theme is the opt-in. Shape: `<html>` pins `data-theme="light"`, the pre-paint bootstrap applies only a persisted `dark`, and the `theme-color` meta flips to the light paper. The CSS token blocks are untouched (the light block is already the second half of one set), so no palette, toggle handler, or gate changed.
