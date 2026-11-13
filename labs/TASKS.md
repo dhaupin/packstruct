@@ -148,3 +148,12 @@ The family release-readiness pass (owner-driven) swept all eight island sites. O
 - **Shape (receipt).** `dhaupin/creadev` PR #38 (`fca49c6`); the family-wide rollout is tracked on `dhaupin/railyard#31`.
 - **Guard.** railyard's `scripts/check-dependabot.cjs` (the shape) + `scripts/check-dependabot.test.cjs` (it bites), wired into railyard CI.
 - **No version bump.**
+
+### 2026-11-12 - session: the v1.1.1 cut
+
+The family release-readiness pass (owner-driven). This repo's cut:
+
+- **Version.** `1.1.0 -> 1.1.1` (package.json + `web/package.json` + the README H1). A patch: the `requires` relevance key + skip norm (SPEC v1.3.0), the `memory`/`sync` profiles (SPEC v1.2.0), the release-ladder verify race fix, the `--deep` record-id census fix.
+- **Changelog.** `## [Unreleased]` cut to `## [1.1.1] - 2026-11-12`; entries stay verbatim.
+- **Announcement.** `docs/discussions/announcing-v1.1.1.md` + the index row.
+- **Release.** Branch -> PR -> `staging` -> PR -> `main`, then the `v1.1.1` tag drives the OIDC ladder.
