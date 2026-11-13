@@ -33,3 +33,4 @@ Prose on these pages flows - paragraphs keep their natural length, and nothing i
 | [Announcing packstruct v0.9.0](/discussions/announcing-v0.9.0) | 0.9.0 | 2026-10-24 on npm |
 | [Announcing packstruct v1.1.0](/discussions/announcing-v1.1.0) | 1.1.0 | staged for the v1.1.0 tag |
 | [Announcing packstruct v1.0.0](/discussions/announcing-v1.0.0) | 1.0.0 | 2026-10-25 on npm (governed ladder, provenance) |
+| [Announcing packstruct v1.1.1](/discussions/announcing-v1.1.1) | 1.1.1 | staged for the v1.1.1 tag |
