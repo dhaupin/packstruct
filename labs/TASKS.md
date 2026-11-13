@@ -157,3 +157,12 @@ The family release-readiness pass (owner-driven). This repo's cut:
 - **Changelog.** `## [Unreleased]` cut to `## [1.1.1] - 2026-11-12`; entries stay verbatim.
 - **Announcement.** `docs/discussions/announcing-v1.1.1.md` + the index row.
 - **Release.** Branch -> PR -> `staging` -> PR -> `main`, then the `v1.1.1` tag drives the OIDC ladder.
+
+### 2026-11-13 - session: the /web family matrix (React 19 + Vite 8, prestruct ^1.5.0)
+
+Unblocked by prestruct 1.5.0 (it widened its peer ceilings `react`/`react-dom` `>=18 <20`, `vite` `>=5 <9` after the example-lane bake proved React 19 + vite 8). This repo's own landing site moves onto the matrix.
+
+- **web/package.json.** `react`/`react-dom` `-> ^19.3.1`, `vite` `-> ^8.3.7`, `@vitejs/plugin-react` `-> ^6.3.0`, `prestruct` `-> ^1.5.0`; `engines.node >=20.19` (vite 8's floor).
+- **web/vite.config.js.** `manualChunks` is a FUNCTION (the object form vite <=7 accepted is rejected by rolldown); `minify: 'esbuild'` dropped (esbuild unbundled, oxc default).
+- **Proof.** The site bakes 14/14 pages, audit 0 failures, on the new matrix; the repo's own battery + `check` stay green.
+- **No version bump** (the repo's own landing site, not the shipped surface; the crashtest `deps: web toolchain` precedent).
