@@ -23,7 +23,7 @@ npx packstruct lint packs/ --json   # machine-readable
 
 The v1 manifest is the formalized reality of crashtest's production packs: `schemaVersion: 1`, kebab-case name matching its directory, dotted version, one-line description, relative `entry` that **must exist**, optional `armedByKey`.
 
-Published on npm as [`packstruct@1.1.1`](https://www.npmjs.com/package/packstruct) (zero dependencies; `npx` fetches it straight from that page).
+Published on npm as [`packstruct@1.1.2`](https://www.npmjs.com/package/packstruct) (zero dependencies; `npx` fetches it straight from that page).
 
 <div class="crosslinks">
 <p><strong>More in these docs:</strong>

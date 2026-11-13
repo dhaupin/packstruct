@@ -11,6 +11,12 @@
 //   a NAMED skip - the leg asserts "no silent skip", not "always network".
 // Case 2 (negative, fully offline): a doctored tarball carrying a file under
 //   a forbidden prefix (labs/) is refused BY NAME, before any install.
+//
+// packstruct specifics: the tarball SHIPS packs/ (package.json files carries
+// `packs/`; the packstruct-lint-shapes pack rides the published tarball by
+// design, poststruct#79), so the ladder is invoked with `--allow packs/` - the
+// same flag the publish lane's verify job passes. The default forbidden scan
+// would otherwise refuse every pack file by prefix.
 
 const test = require('node:test')
 const assert = require('node:assert/strict')
@@ -44,7 +50,7 @@ function packEnv() {
 test('the pack ladder verifies real npm pack output (contents + identity + bin)', () => {
   const work = fs.mkdtempSync(path.join(os.tmpdir(), 'release-verify-'))
   const tgz = packTree(work)
-  const r = spawnSync('node', [script, '--pack', tgz, '--version', pkg.version, '--exports', exportsKeys], { cwd: root, encoding: 'utf8', timeout: 300000 })
+  const r = spawnSync('node', [script, '--pack', tgz, '--version', pkg.version, '--exports', exportsKeys, '--allow', 'packs/'], { cwd: root, encoding: 'utf8', timeout: 300000 })
   const out = `${r.stdout}\n${r.stderr}`
   assert.equal(r.status, 0, `pack ladder failed (${r.status}):\n${out}`)
   assert.ok(out.includes('PASS forbidden scan'), 'forbidden scan never ran')
@@ -168,7 +174,7 @@ test('the pack ladder survives a phone npm whose --dry-run --json probe is empty
     '',
   ].join('\n'))
   fs.chmodSync(shim, 0o755)
-  const r = spawnSync('node', [script, '--pack', tgz, '--version', pkg.version, '--exports', exportsKeys, ], {
+  const r = spawnSync('node', [script, '--pack', tgz, '--version', pkg.version, '--exports', exportsKeys, '--allow', 'packs/'], {
     cwd: root, encoding: 'utf8', timeout: 300000,
     env: { ...process.env, PATH: `${bin}:${process.env.PATH}` },
   })

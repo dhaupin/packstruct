@@ -1,4 +1,4 @@
-# packstruct 1.1.1
+# packstruct 1.1.2
 
 The shared `/packs` spec. **One manifest + entry + lifecycle contract, many hosts**: [crashtest](https://github.com/dhaupin/crashtest) (scenario), [poststruct](https://github.com/dhaupin/poststruct) (check), plus two profiles bound to the host-owned [memstruct](https://github.com/dhaupin/memstruct) standard - [`memory`](profiles/memory.md) (vant's markdown store) and [`sync`](profiles/sync.md) (gistory's merge).
 
