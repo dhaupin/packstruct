@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### 2026-11-13 - the release posts were invisible to the SEO pipeline (permalink shape)
+
+Every `docs/discussions/announcing-vX.Y.Z.md` carried a dotted, slashless permalink (`permalink: /discussions/announcing-v1.0.0`). Jekyll reads the `.0` as a file extension, so it emitted the page EXTENSIONLESS on disk; freestruct's page scanner matches only `.html`/`.htm`, so the post was invisible to the entire post-build layer - no sitemap `<loc>`, no og/canonical/JSON-LD - even though it served 200. None of the five posts was in the live sitemap. The trailing-slash form (`permalink: /discussions/announcing-v1.0.0/`) emits `<slug>/index.html` and is seen. All five posts now carry the slash, and the index's stale "staged for the tag" markers on 1.1.0/1.1.1/1.1.2 (all on npm) are corrected to their publish dates. Two biting tests in `tests/post-permalinks.test.cjs` (wired into `npm test`). Ported from eyestruct (the same bug, fixed there first).
+
+
 ## [1.1.2] - 2026-11-13
 
 ### 2026-11-13 - the /web family matrix (React 19 + Vite 8, prestruct ^1.5.0)

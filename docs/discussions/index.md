@@ -20,7 +20,7 @@ Prose on these pages flows - paragraphs keep their natural length, and nothing i
 ## The conventions
 
 - **One file per release, named after it.** `announcing-vX.Y.Z.md`, matching the npm version on the day the post is drafted. Never reuse a filename; a retried release folds its delta into the same post.
-- **Frontmatter.** The four fields every docs page gates on (`permalink`, `layout`, `title`, `description`) plus `version`. For this repo the permalink is `/discussions/announcing-vX.Y.Z` (the docs site prefixes `/packstruct`).
+- **Frontmatter.** The four fields every docs page gates on (`permalink`, `layout`, `title`, `description`) plus `version`. For this repo the permalink is `/discussions/announcing-vX.Y.Z/` (the docs site prefixes `/packstruct`) - the trailing slash matters: a dotted, slashless slug makes Jekyll emit an extensionless file that freestruct's scanner never sees, so the page drops out of the sitemap and the whole head seam. Every post carries the slash.
 - **The file IS the post.** No wrapper prose, no nested copy block: below the frontmatter the file carries the announcement body itself. To publish, copy the raw markdown into the Discussions announcement, stripping only the frontmatter lines.
 - **Voice and facts.** Same rules as the rest of the docs: dry hyphen voice, no marketing language, every number verified against the CLI, a committed receipt, or the npm registry before it lands. If you cannot run it, do not write it.
 - **Timing.** Draft the post against the released version, not the dev tree: cite what shipped in the npm tarball and keep in-tree-only work out of it. A post describing a version that is not on npm yet is fiction by promotion.
@@ -30,8 +30,8 @@ Prose on these pages flows - paragraphs keep their natural length, and nothing i
 
 | post | version | live |
 |---|---|---|
-| [Announcing packstruct v1.1.2](/discussions/announcing-v1.1.2) | 1.1.2 | staged for the v1.1.2 tag |
-| [Announcing packstruct v0.9.0](/discussions/announcing-v0.9.0) | 0.9.0 | 2026-10-24 on npm |
-| [Announcing packstruct v1.1.0](/discussions/announcing-v1.1.0) | 1.1.0 | staged for the v1.1.0 tag |
-| [Announcing packstruct v1.0.0](/discussions/announcing-v1.0.0) | 1.0.0 | 2026-10-25 on npm (governed ladder, provenance) |
-| [Announcing packstruct v1.1.1](/discussions/announcing-v1.1.1) | 1.1.1 | staged for the v1.1.1 tag |
+| [Announcing packstruct v1.1.2](/discussions/announcing-v1.1.2/) | 1.1.2 | 2026-11-13 on npm |
+| [Announcing packstruct v1.1.1](/discussions/announcing-v1.1.1/) | 1.1.1 | 2026-11-13 on npm |
+| [Announcing packstruct v1.1.0](/discussions/announcing-v1.1.0/) | 1.1.0 | 2026-11-06 on npm |
+| [Announcing packstruct v1.0.0](/discussions/announcing-v1.0.0/) | 1.0.0 | 2026-10-25 on npm (governed ladder, provenance) |
+| [Announcing packstruct v0.9.0](/discussions/announcing-v0.9.0/) | 0.9.0 | 2026-10-24 on npm |

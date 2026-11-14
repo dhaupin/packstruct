@@ -177,3 +177,14 @@ Owner directive: "some might be missing their `/packs/public` that should be bun
 - **The fix (the poststruct#79 shape).** `packs/` joins the `files` whitelist. The publish lane's verify job passes `--allowed "packs/"` - the family-default forbidden scan refuses `packs/` by prefix, so the flag de-asserts exactly that drift. `tests/distribution.test.cjs` pins the two halves (`files` carries `packs/`, every committed pack dir is delivered) and joins the root `test` script; `tests/release-verify.test.cjs` invokes the same ladder with `--allow packs/`.
 - **The cut (1.1.1 -> 1.1.2, patch).** A new version is the only way a fixed `files` reaches npm, and v1.1.1 was already released (tag + npm latest + GH release, 2026-11-13). The version-truth surfaces moved in the same commit: `package.json`, `web/package.json`, `web/VERSION`, `web/package-lock.json`, the README H1, the `docs/index.md` npm line, and the refusal matrix (`node scripts/gen-refusal-matrix.mjs`, its tool version derives from root `package.json`). `## [Unreleased]` is cut to `## [1.1.2] - 2026-11-13` (the /web matrix entries fold under it, verbatim) with a fresh `[Unreleased]` on top. Adds the v1.1.2 release post and its index row.
 - **No tag yet** - the tag is the owner gate (the ladder publishes on `v*`).
+
+---
+
+### 2026-11-13 (cont.) - session: the release posts were invisible to the sitemap (the permalink-shape bug, family sweep)
+
+Found in eyestruct, fixed there first, swept across the family. Same cause, same one-line fix.
+
+- **The cause.** Every `announcing-vX.Y.Z.md` carried a dotted, slashless permalink. Jekyll reads the `.0` as a file extension and emits the page extensionless; freestruct's scanner only matches `.html`/`.htm`, so the post was invisible to the whole SEO pipeline (no sitemap `<loc>`, no og/canonical) though it served 200. All five packstruct posts were missing from the live sitemap.
+- **The fix.** Trailing-slash the permalinks (`/discussions/announcing-vX.Y.Z/`) so Jekyll emits `<slug>/index.html`. The index's stale "staged for the tag" markers on 1.1.0/1.1.1/1.1.2 (all on npm: 2026-11-06, 2026-11-13, 2026-11-13) are corrected, and the rows are ordered newest first.
+- **The test that bites.** `tests/post-permalinks.test.cjs` (wired into `npm test`): every post permalink must end with the slash, and the index must list exactly the post files. Bite proven by reverting one permalink.
+- **Gates.** `npm run lint:docs` green (21 pages).

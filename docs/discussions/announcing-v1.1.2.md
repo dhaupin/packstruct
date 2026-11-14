@@ -8,7 +8,7 @@ last_modified_at: 2026-11-13
 nav_order: 12
 layout: default
 version: "1.1.2"
-permalink: /discussions/announcing-v1.1.2
+permalink: /discussions/announcing-v1.1.2/
 ---
 
 # packstruct v1.1.2
