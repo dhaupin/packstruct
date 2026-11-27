@@ -1,5 +1,8 @@
 # labs/TASKS.md
 
+**2026-11-03 - the npm parity gate earned its teeth.** The family law is "a new law ships with a test", but this gate had stopped biting: it passed if any one of several surfaces carried the npm link, so a deleted footer link went unnoticed (measured: docs layout link removed, old gate 3 pass / 0 fail). Rewritten as a predicate over an explicit REQUIRED surface list, resolving the literal URL, {{ site.npm_url }} and {{ site.title }} against docs/_config.yml, with two mutation tests proving a stripped surface and a wrong-package link are both refused. Verified both ways: clean tree green, deleted link red (2 fail). packstruct keeps its node:test files under tests/, so the gate lives there.
+
+
 Last updated: 2026-10-24 (scaffold complete at 0.9.0, folded the crashtest#19/#20 rulings; push pending crashtest#18. The proposal arc: #17 filed, #19 receipts + leans confirmed, #20 release-atomicity ruling encoded in DEPLOY.md.)
 
 - [ ] M2: conformance harness (packs a loader must pass/fail)
