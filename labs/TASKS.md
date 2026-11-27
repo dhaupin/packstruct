@@ -1,5 +1,8 @@
 # labs/TASKS.md
 
+**2026-11-03 - the npm parity gate earned its teeth.** The family law is "a new law ships with a test", but this gate had stopped biting: it passed if any one of several surfaces carried the npm link, so a deleted footer link went unnoticed (measured: docs layout link removed, old gate 3 pass / 0 fail). Rewritten as a predicate over an explicit REQUIRED surface list, resolving the literal URL, {{ site.npm_url }} and {{ site.title }} against docs/_config.yml, with two mutation tests proving a stripped surface and a wrong-package link are both refused. Verified both ways: clean tree green, deleted link red (2 fail). packstruct keeps its node:test files under tests/, so the gate lives there.
+
+
 Last updated: 2026-10-24 (scaffold complete at 0.9.0, folded the crashtest#19/#20 rulings; push pending crashtest#18. The proposal arc: #17 filed, #19 receipts + leans confirmed, #20 release-atomicity ruling encoded in DEPLOY.md.)
 
 - [ ] M2: conformance harness (packs a loader must pass/fail)
@@ -188,3 +191,14 @@ Found in eyestruct, fixed there first, swept across the family. Same cause, same
 - **The fix.** Trailing-slash the permalinks (`/discussions/announcing-vX.Y.Z/`) so Jekyll emits `<slug>/index.html`. The index's stale "staged for the tag" markers on 1.1.0/1.1.1/1.1.2 (all on npm: 2026-11-06, 2026-11-13, 2026-11-13) are corrected, and the rows are ordered newest first.
 - **The test that bites.** `tests/post-permalinks.test.cjs` (wired into `npm test`): every post permalink must end with the slash, and the index must list exactly the post files. Bite proven by reverting one permalink.
 - **Gates.** `npm run lint:docs` green (21 pages).
+
+---
+
+### 2026-11-14 - session: the npm link parity pass
+
+Every family project publishes to npm; the project's own surfaces did not always say so. This session closes that gap and holds it with a test.
+
+- **Surfaces.** The docs footer, the docs nav, and the landing nav each link the npm package where they did not before.
+- **Proof.** A new npm-parity test proves each shipped surface links the published `package.json` name, so a rename or a dropped surface reds instead of shipping a package nobody can find.
+- **Battery + lint:docs green.**
+- **No version bump.**
